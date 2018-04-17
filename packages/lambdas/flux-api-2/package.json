@@ -1,0 +1,19 @@
+{
+  "name": "flux-api-2",
+  "version": "0.1.0",
+  "description": "flux api v2",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "github.com/voteflux/api-v2"
+  },
+  "author": "Max Kaye, Flux Devs",
+  "license": "MIT",
+  "dependencies": {
+    "mongodb": "^3.0.6",
+    "ramda": "^0.25.0"
+  }
+}
