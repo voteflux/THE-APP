@@ -2,7 +2,7 @@
 
 set -e
 
-if [ ! -e flux-api-2 ]; then
+if [ ! -e lambdas ]; then
     echo "Please run this from the repository root (like ./bin/test-deploy-dev.sh)"
     exit 1
 fi
