@@ -9,7 +9,7 @@ before_script:
   - yarn global add serverless
 
 script:
-  - ./bin/test-deploy-dev.sh
+  - ./bin/travis-test-deploy-dev.sh
 
 cache:
   directories:

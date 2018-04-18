@@ -10,4 +10,4 @@ fi
 cd flux-api-2
 yarn install
 yarn test
-serverless deploy --stage dev
+sls deploy --stage dev --aws-profile default
