@@ -17,13 +17,20 @@ service: flux-api-2
 # Check out our docs for more details
 # frameworkVersion: "=X.X.X"
 
+custom:
+  platform:
+    local:
+      profile: flux-api
+    travis:
+      profile: default
+
 provider:
   name: aws
   # region: ap-southeast-2
   region: us-east-1
   runtime: nodejs8.10
   stage: ${opt:stage, 'dev'}
-  profile: flux-api
+  profile: ${self:custom.platform.${env:BUILD_PLATFORM, 'local'}.profile, 'flux-api'}
   memorySize: 256
   environment:
     MONGODB_URI: ${ssm:${self:provider.stage}MongoDbUri}

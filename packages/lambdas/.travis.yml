@@ -2,6 +2,9 @@ language: node_js
 node_js:
   - "8"
 
+env:
+  BUILD_PLATFORM=travis
+
 before_script:
   - yarn global add serverless
 
