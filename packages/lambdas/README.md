@@ -2,11 +2,14 @@
 
 repository for lambda api functions and other AWS infrastructure
 
+## Dev stuff
+
+* Use `yarn` instead of `npm`
+* Check `./bin/install-dev-env.sh` (or run that) for basic stuff
+* You'll need a `lambdas/sls-custom.yml` file to run serverless - copy over the `sls-default-custom.yml` for default stuff (note: use these files to parameterise the `serverless.yml` config, e.g. to set different aws profiles.)
+
 ## CI
 
-~~We use [lambci](https://github.com/lambci/lambci) for CI~~ template seems broken - can't get it working. Looking into other services like https://github.com/jorgebastida/gordon, https://github.com/apex/apex, or functions via netlify.
+Using Travis-CI to run tests and then deploy via `serverless`.
 
-~~Experimenting with: https://aws.amazon.com/blogs/compute/continuous-deployment-for-serverless-applications/
-Using travis-ci to mirror the repo on push to codecommit on AWS (which then triggers CI above)~~
-
-Maybe use Apex via Travis to auto-deploy?
+See `.travis.yml` and `./bin/travis-test-deploy.sh` for details.
