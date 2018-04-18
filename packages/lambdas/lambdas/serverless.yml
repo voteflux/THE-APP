@@ -17,12 +17,15 @@ service: flux-api-2
 # Check out our docs for more details
 # frameworkVersion: "=X.X.X"
 
+custom: ${file(sls-custom.yml)}
+
 provider:
   name: aws
   # region: ap-southeast-2
   region: us-east-1
   runtime: nodejs8.10
-  stage: ${opt:stage, 'dev'}
+  profile: ${self:custom.profile}
+  stage: ${opt:stage, self:custom.stage}
   memorySize: 256
   environment:
     MONGODB_URI: ${ssm:${self:provider.stage}MongoDbUri}

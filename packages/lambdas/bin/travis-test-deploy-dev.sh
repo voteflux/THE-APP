@@ -10,4 +10,6 @@ fi
 cd lambdas
 yarn install
 yarn test
+
+cp sls-default-custom.yml sls-custom.yml
 sls deploy --stage dev

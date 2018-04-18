@@ -4,3 +4,6 @@ jspm_packages
 
 # Serverless directories
 .serverless
+
+# don't include this so ppl can set whatever they like
+sls-custom.yml
