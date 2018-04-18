@@ -1,17 +1,15 @@
 language: node_js
 node_js:
-  - "8"
-
+- '8'
 env:
-  BUILD_PLATFORM=travis
-  SLS_DEBUG=*
-
+  matrix:
+  - SLS_DEBUG=*
+  global:
+    secure: BxPWXIgvk2ShvIcWr/MyEmPH73YKdGoceuQQykPyREu2NPknILWBVxTCqCq8wYfKtaXtzy4Ucv1Z1UnyxWuv7bgFJEcFU+d+/VkvEv7NWL5z+K2OFpXeDpUX+gMgHgqUAr9ubqyQD5utWTGY/9Wmo8hYYqwvMZ71E8fQ/HbwmMGxXzwQroidfvabtoM1WgW4Ba6eCKzQiXdcUJFwCp6JNLdQU54/06wE/2DXVJE0FwC5BgoOCszYbdaNBleJHKXIXtIFDP0fR9ngKZZH8xzts78su0oqr+EY57d6nnere23tMh2uRzM/ymDR6phGooIWfEOxAQJRsD5g7v0XYnulP9CgxG8qbA2EofxYggKfbcBD+163q7XTTmnpKIjGsVkoKlEc1SIRB8PApbwwZCzKQ5DMevZO8bBy95nLyOg1mNbS7DHzu8khs+CJ1Fqf3Z14zj/Nam2yElXdVpbxuW+8zNcaiVlITHzoKP9j9PNPkMhgX5pPz9UrAv1Qez5B23Jb84FysCGxLZwBPoDnhd8rLv0+ksI6Bhuo58FfCPz6tSBRDpbET1Mh72DzN2/6sXthf8xHEBlhT1irtvDOG9hkjro81/War+3Ffw3HmFyW4IjdpTa1y1356kSV0RwdsruAJvYBO6APGM9cK62ATzYx8dpaI5w38OhLdOo3rHNX55Q=
 before_script:
-  - yarn global add serverless
-
+- yarn global add serverless
 script:
-  - ./bin/travis-test-deploy-dev.sh
-
+- "./bin/travis-test-deploy-dev.sh"
 cache:
   directories:
-    - "lambdas/node_modules"
+  - lambdas/node_modules
