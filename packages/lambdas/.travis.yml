@@ -6,4 +6,8 @@ before_script:
   - yarn global add serverless
 
 script:
-  - ./test-deploy-dev.sh
+  - ./bin/test-deploy-dev.sh
+
+cache:
+  directories:
+    - "flux-api-2/node_modules"
