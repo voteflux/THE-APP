@@ -4,7 +4,8 @@
   "description": "flux api v2",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Note: no tests yet...\" && exit 0"
+    "test": "echo \"Note: no tests yet...\" && exit 0",
+    "deploy-dev": "serverless deploy --stage dev"
   },
   "repository": {
     "type": "git",
