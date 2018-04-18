@@ -57,7 +57,7 @@ const mkDbV1 = () => new Promise((res, rej) => {
         const dbv1 = {rawDb, client}
         const setCollection = (i) => { dbv1[i] = rawDb.collection(i) }
         R.map(setCollection, collections);
-        console.log(`Created dbv1 obj w keys: ${utils.j(R.keys(dbv1))}`)
+        console.info(`Created dbv1 obj w keys: ${utils.j(R.keys(dbv1))}`)
 
         return res(dbv1);
     })

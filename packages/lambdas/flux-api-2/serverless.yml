@@ -22,10 +22,11 @@ provider:
   # region: ap-southeast-2
   region: us-east-1
   runtime: nodejs8.10
-  stage: dev
+  stage: ${opt:stage, 'dev'}
   profile: flux-api
+  memorySize: 256
   environment:
-    MONGODB_URI: ${ssm:devMongoDbUri}
+    MONGODB_URI: ${ssm:${self:provider.stage}MongoDbUri}
 
 # you can overwrite defaults here
 #  stage: dev
@@ -63,8 +64,15 @@ provider:
 functions:
   hello:
     handler: handler.hello
+    events:
+      - http:
+          path: /test/hello
+          method: get
   genStatsGetinfo:
     handler: handler.genStatsGetinfo
+    timeout: 60
+    events:
+      - schedule: rate(1 minute)
 
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events

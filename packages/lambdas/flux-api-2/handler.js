@@ -16,7 +16,7 @@
 const R = require('ramda')
 
 const DB = require('./flux/db')
-const db = {};  // we will populate this obj later
+const db = {};  // we will populate this obj later via DB.init(db)
 
 const utils = require('./flux/utils')
 
@@ -32,50 +32,52 @@ const default200Response = {
 // convenience function for 200 responses
 const _r = body => ({
   statusCode: 200,
-  body: {error: false, ...body}
+  body: j({error: false, ...body})
 });
 // convenience for sz-ing json
 const j = utils.j
 
 
 
-module.exports.hello = async (event, context, callback) => {
-  callback(null, {
-    message: 'Go Serverless v1.0! Your function executed successfully!',
-    input: event,
-  });
+module.exports.hello = async (event, context) => {
+  return {message: 'Go Serverless v1.0! Your function executed successfully!'}
 };
 
 
 
-module.exports.genStatsGetinfo = async (event, context, cb) => {
-  cb(null, {result: await db.update_getinfo_stats()})
+module.exports.genStatsGetinfo = async (event, context) => {
+  return {result: await db.update_getinfo_stats()}
 }
 
 
 // wrap handlers to know about errors, do logging, etc.
-const wrapHandler = (f, fName, obj) => (event, context, callback) => {
+const wrapHandler = (f, fName, obj) => async (event, context) => {
   console.log(`Wrapping ${fName} now.`)
 
-  const w = cb => (err, resp) => {
-    console.log(`CB: ${fName} - {err: ${j(err)}, resp: ${j(resp)}`);
-
-    if (err) {
-      throw err;
-    }
-
-    return cb(null, _r(resp));
+  let resp, didError = false, err = null;
+  try {
+    await DB.init(db)  // this populates the global `db` object
+    // f is presumed to be async
+    resp = await f(event, context)
+  } catch (_err) {
+    console.error(`Function ${fName} errored: ${j(err)}`)
+    didError = true;
+    err = _err;
+  } finally {
+    await db.close()
   }
 
-  // f is presumed to be async
-  DB.init(db)
-    .then(() => f(event, context, w(callback)))
-    .then(() => console.log(R.keys(db)))
-    .then(() => db.close())
-    .catch(err => {
-      console.error(`Function ${fName} errored: ${j(err)}`);
-      throw err;
-    });
+  console.log(`Got Response from: ${fName} \n- err: ${j(err)}, \n- resp: ${j(resp)}`);
+
+  if (didError) {
+    console.log(`Throwing... Error:\n${j(err)}`);
+    throw err;
+  }
+  if (resp.statusCode === undefined) {
+    return _r(resp);
+  } else {
+    return resp;
+  }
 }
 
 // Last part of file - wrap all handlers to automatically JSON.stringify responses
