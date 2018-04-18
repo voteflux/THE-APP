@@ -8,22 +8,15 @@ if [ ! -e lambdas ]; then
     exit 1
 fi
 
-if [ -e ~/.aws/credentials ]; then
-    echo "ERROR: AWS credentials file exists - we're probably not on Travis, right? Exiting to be safe..."
-    echo "Printing non-secret parts of credentials file..."
-    cat ~/.aws/credentials | cut -d ' ' -f 1
-    exit 1
-else
-    set +x
 
-    # this feels so unsafe...
-    mkdir -p ~/.aws
-    echo "[default]" >> ~/.aws/credentials
-    echo "aws_access_key_id = $AWS_ACCESS_KEY_ID" >> ~/.aws/credentials
-    echo "aws_secret_access_key = $AWS_SECRET_ACCESS_KEY" >> ~/.aws/credentials
+# this feels so unsafe...
+set +x
+mkdir -p ~/.aws
+echo "[default]" >> ~/.aws/credentials
+echo "aws_access_key_id = $AWS_ACCESS_KEY_ID" >> ~/.aws/credentials
+echo "aws_secret_access_key = $AWS_SECRET_ACCESS_KEY" >> ~/.aws/credentials
+set -x
 
-    set -x
-fi
 
 cd lambdas
 yarn install
