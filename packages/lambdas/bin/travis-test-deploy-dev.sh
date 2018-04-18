@@ -10,7 +10,8 @@ fi
 
 if [ -e ~/.aws/credentials ]; then
     echo "ERROR: AWS credentials file exists - we're probably not on Travis, right? Exiting to be safe..."
-    ls ~/.aws
+    echo "Printing non-secret parts of credentials file..."
+    cat ~/.aws/credentials | cut -d ' ' -f 1
     exit 1
 else
     set +x
