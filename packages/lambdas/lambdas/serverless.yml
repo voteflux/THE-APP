@@ -23,7 +23,6 @@ provider:
   region: us-east-1
   runtime: nodejs8.10
   stage: ${opt:stage, 'dev'}
-  profile: flux-api
   memorySize: 256
   environment:
     MONGODB_URI: ${ssm:${self:provider.stage}MongoDbUri}

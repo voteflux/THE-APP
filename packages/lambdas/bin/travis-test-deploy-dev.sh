@@ -7,7 +7,7 @@ if [ ! -e flux-api-2 ]; then
     exit 1
 fi
 
-cd flux-api-2
+cd lambdas
 yarn install
 yarn test
-sls deploy --stage dev --aws-profile default
+sls deploy --stage dev

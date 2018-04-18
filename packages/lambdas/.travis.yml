@@ -4,6 +4,7 @@ node_js:
 
 env:
   BUILD_PLATFORM=travis
+  SLS_DEBUG=*
 
 before_script:
   - yarn global add serverless
@@ -13,4 +14,4 @@ script:
 
 cache:
   directories:
-    - "flux-api-2/node_modules"
+    - "lambdas/node_modules"
