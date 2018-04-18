@@ -10,6 +10,7 @@ fi
 
 if [ -e ~/.aws/credentials ]; then
     echo "ERROR: AWS credentials file exists - we're probably not on Travis, right? Exiting to be safe..."
+    ls ~/.aws
     exit 1
 else
     set +x
