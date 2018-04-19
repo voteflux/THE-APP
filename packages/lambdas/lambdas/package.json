@@ -16,5 +16,8 @@
   "dependencies": {
     "mongodb": "^3.0.6",
     "ramda": "^0.25.0"
+  },
+  "devDependencies": {
+    "serverless-domain-manager": "^2.3.6"
   }
 }

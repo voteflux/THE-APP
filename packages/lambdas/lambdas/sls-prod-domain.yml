@@ -1,0 +1,6 @@
+domainName: api.flux.party
+basePath: ''
+# note - this is the cert to use - it works for all api domains
+certificateName: api.flux.party
+createRoute53Record: true
+endpointType: 'regional'

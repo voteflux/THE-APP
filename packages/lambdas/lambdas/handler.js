@@ -50,19 +50,24 @@ module.exports.genStatsGetinfo = async (event, context) => {
 }
 
 
+module.exports.genStatsPublic = async (event, context) => {
+  return {result: await db.update_public_stats()}
+}
+
+
 // wrap handlers to know about errors, do logging, etc.
 const wrapHandler = (f, fName, obj) => async (event, context) => {
   console.log(`Wrapping ${fName} now.`)
 
-  let resp, didError = false, err = null;
+  let resp, didError = false, err = null
   try {
     await DB.init(db)  // this populates the global `db` object
     // f is presumed to be async
     resp = await f(event, context)
   } catch (_err) {
-    console.error(`Function ${fName} errored: ${j(err)}`)
-    didError = true;
-    err = _err;
+    err = _err
+    didError = true
+    console.error(`Function ${fName} errored: ${err}`)
   } finally {
     await db.close()
   }
@@ -70,8 +75,8 @@ const wrapHandler = (f, fName, obj) => async (event, context) => {
   console.log(`Got Response from: ${fName} \n- err: ${j(err)}, \n- resp: ${j(resp)}`);
 
   if (didError) {
-    console.log(`Throwing... Error:\n${j(err)}`);
-    throw err;
+    console.log(`Throwing... Error:\n${j(err)}`)
+    throw err
   }
   if (resp.statusCode === undefined) {
     return _r(resp);

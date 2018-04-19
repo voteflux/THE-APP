@@ -16,8 +16,8 @@ const MongoClient = require('mongodb').MongoClient;
 const utils = require('./utils')
 
 
-const mongoUrl = process.env.MONGODB_URI
-const dbName = R.last(mongoUrl.split('/'))
+const mongoUrl = process.env.MONGODB_URI || "mongodb://localhost:27017/flux"
+// const dbName = R.last(mongoUrl.split('/'))
 let dbv1 = {};
 
 
@@ -29,18 +29,29 @@ const GETINFO_ID = 1
 
 
 // Helpers for queries - able to be composed with R.merge
+const _rgx = (r) => ({'$regex': r})
+const _exists = {'$exists': true}
+const _notExists = {'$exists': false}
 const _onRoll = {onAECRoll: true}
 const _stateConsent = {state_consent: true}
 const _userInState = s => {
-    regexDict = {'$regex': utils.state_regex(s)};
-    if (s == 'nsw')
-        regexDict['$not'] = utils.state_regex('act')
+    rgxPC = _rgx(utils.state_regex(s))
+    if (s == 'weirdstate') {
+        return {
+            '$nor': R.concat(
+                R.map(ss => ({address: _rgx(utils.state_regex(ss))}), utils.all_states),
+                R.map(ss => ({addr_postcode: _rgx(utils.state_regex(ss))}), utils.all_states),
+            )
+        }
+    }
     return {
-        '$or': [ {address: regexDict}, {addr_postcode: regexDict} ]
+        [s == 'nostate' ? '$and' : '$or']: [ {address: rgxPC, addr_postcode: _notExists}, {addr_postcode: rgxPC} ]
     }
 }
 const _deetsValid = {detailsValid: true}
-const _lastValidatedExists = {lastValidated: {'$exists': true}}
+const _lastValidatedExists = {lastValidated: _exists}
+const _volunteer = {volunteer: true}
+const _needsValidating = {needsValidating: true}
 
 
 const mkDbV1 = () => new Promise((res, rej) => {
@@ -50,7 +61,7 @@ const mkDbV1 = () => new Promise((res, rej) => {
             return rej(err);
         }
 
-        const rawDb = client.db(dbName);
+        const rawDb = client.db();
 
         collections = require('./dbV1Collections')
 
@@ -70,25 +81,43 @@ const get_version = async () => {
 }
 
 
-const queryByState = async (qGen) => await Promise.all(R.map(s => {
-        return dbv1.users.count(qGen(s)).then(n => [s, n])
-    }, utils.all_states)).then(R.fromPairs);
+/* GENERALISED DB CALLS */
 
 
-const n_members_on_roll = async () => await dbv1.users.count(_onRoll)
+const count_members = (...conds) => dbv1.users.count(conds.length == 0 ? {} : {'$and': conds})
 
-const n_members_raw = async () => await dbv1.users.count({})
+const find_members = (...conds) => dbv1.users.find(conds.length == 0 ? {} : {'$and': conds})
+
+const queryByState = async (dbFunc, qGen) =>
+    await Promise.all(
+        R.map(
+            (s) => dbFunc(qGen(s)).then(n => [s, n]),
+            utils.all_states
+        )
+    ).then(R.fromPairs);
+
+const countByState = async (qGen) => await queryByState((q) => dbv1.users.count(q), qGen)
+
+const findByState = async (qGen) => await queryByState((q) => dbv1.users.find(q), qGen)
+
+
+/* SPECIFIC DB CALLS */
+
+// Member Calls
 
 const n_members_by_state = async () =>
-    await queryByState(s => ({'$and': [_onRoll, _stateConsent, _userInState(s)]}))
+    await countByState(s => ({'$and': [_onRoll, _stateConsent, _userInState(s)]}))
+
+const n_members_by_state_raw = async (...conds) =>
+    await countByState(s => ({'$and': [...conds, _userInState(s)]}))
 
 const n_members_validated_with_last_validated = async () =>
-    await dbv1.users.count({detailsValid: true, lastValidated: {'$exists': true}})
+    await count_members(_deetsValid, _lastValidatedExists)
 
 const n_members_validated = n_members_validated_with_last_validated
 
 const n_members_validated_state = async () =>
-    await queryByState(s => ({'$and': [
+    await countByState(s => ({'$and': [
         _deetsValid,
         _lastValidatedExists,
         _stateConsent,
@@ -96,50 +125,86 @@ const n_members_validated_state = async () =>
     ]}))
 
 const most_recent_signup = async () =>
-    (await dbv1.users.find({}).sort([['timestamp', -1]]).limit(1).toArray())[0].timestamp
+    (await find_members().sort([['timestamp', -1]]).limit(1).toArray())[0].timestamp
 
 const count_double_checked = async () =>
-    await dbv1.users.count({needsValidating: false, doubleCheckedValidation: true, detailsValid: true})
+    await count_members({doubleCheckedValidation: true}, _needsValidating, _deetsValid, _onRoll)
 
 const count_double_check_queue = async () =>
-    await dbv1.users.count({needsValidating: false, doubleCheckedValidation: true, detailsValid: true})
+    await count_members({doubleCheckedValidation: false}, _needsValidating, _deetsValid, _onRoll)
 
 const count_validation_queue = async () =>
-    await dbv1.users.count({needsValidating: true})
+    await count_members(_onRoll, _needsValidating)
 
 const count_validation_queue_state = async () =>
-    await queryByState(s => ({
+    await countByState(s => ({
         '$and': [
             {needsValidating: true},
             _stateConsent,
+            _onRoll,
             _userInState(s)
         ]
     }))
 
-const n_volunteers = () => dbv1.users.count({volunteer: true})
+const count_volunteers = () => count_members(_volunteer)
+
+
+/* STATS */
 
 
 const update_getinfo_stats = async () => {
     getinfo = {
-        'id': GETINFO_ID,  //  getinfo ID
-        'n_members': await n_members_on_roll(),
-        'n_members_state': await n_members_by_state(),
-        'n_members_raw': await n_members_raw(),
-        'n_members_validated': await n_members_validated_with_last_validated(),
-        'n_members_validated_state': await n_members_validated_state(),
-        'last_member_signup': await most_recent_signup(),
-        'double_checked': await count_double_checked(),
-        'double_check_queue': await count_double_check_queue(),
-        'validation_queue': await count_validation_queue(),
-        'validation_queue_state': await count_validation_queue_state(),
-        'db_v': await get_version(),
-        'last_run': Math.round(Date.now()/1000),
-        'n_volunteers': await n_volunteers(),
+        id: GETINFO_ID,  //  getinfo ID
+        n_members: await count_members(_onRoll),
+        n_members_w_state_consent: await count_members(_onRoll, _stateConsent),
+        n_members_state: await n_members_by_state(),
+        n_members_state_raw: await n_members_by_state_raw(),
+        n_members_raw: await count_members(),
+        n_members_validated: await n_members_validated_with_last_validated(),
+        n_members_validated_state: await n_members_validated_state(),
+        last_member_signup: await most_recent_signup(),
+        double_checked: await count_double_checked(),
+        double_check_queue: await count_double_check_queue(),
+        validation_queue: await count_validation_queue(),
+        validation_queue_state: await count_validation_queue_state(),
+        db_v: await get_version(),
+        last_run: Math.round(Date.now()/1000),
+        n_volunteers: await count_volunteers(),
     }
-    console.log(await dbv1.public_stats.findOne({id: GETINFO_ID}))
     await dbv1.public_stats.update({id: GETINFO_ID}, {'$set': getinfo}, {upsert: true})
     return getinfo
 }
+
+const update_public_stats = async () => {
+    const stats = {id: PUB_STATS_ID}
+
+    const all_members = await find_members(_onRoll).toArray()
+    console.log(`Public Stats generator got ${all_members.length} members`)
+
+    stats.signup_times = R.compose(R.map(t => t | 0), R.map(R.prop('timestamp')), R.filter(m => m.timestamp !== undefined))(all_members)
+
+    stats.dob_years = R.compose(R.countBy(R.prop('dobYear')), R.filter(m => m.dobYear !== undefined))(all_members)
+
+    const pcs = R.compose(R.map(utils.extractPostCode), R.filter(m => m.address || m.addr_postcode))(all_members)
+    stats.postcodes = R.countBy(R.identity, pcs);
+
+    stats.states = R.compose(R.countBy(R.identity), R.map(utils.stateFromPC))(pcs)
+
+    R.log = o => {
+        console.log(o);
+        return o;
+    }
+    stats.state_dob_years = R.compose(R.map(R.countBy(R.identity)), R.map(R.map(R.last)), R.groupBy(R.head), R.map(m => [utils.extractState(m), m.dobYear || "1066"]))(all_members)
+
+    stats.state_signup_times = R.compose(R.map(R.map(R.last)), R.groupBy(R.head), R.map(m => [utils.extractState(m), (m.timestamp || 0) | 0]))(all_members)
+
+    stats.last_run = (Date.now()/1000) | 0
+    console.log(stats)
+    return stats
+}
+
+
+/* MODULE EXPORTS */
 
 
 // set exports + db object
@@ -147,12 +212,12 @@ module.exports = {
     init: async (dbObj) => {
         const dbMethods = {
             get_version,
-            n_members_raw,
-            n_members_on_roll,
+            count_members,
             n_members_by_state,
             n_members_validated,
             n_members_validated_state,
             update_getinfo_stats,
+            update_public_stats,
         }
         R.mapObjIndexed((f, fName) => { dbObj[fName] = f }, dbMethods);
 

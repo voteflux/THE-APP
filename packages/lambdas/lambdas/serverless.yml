@@ -13,11 +13,17 @@
 
 service: flux-api-2
 
+plugins:
+  - serverless-domain-manager
+
 # You can pin your service to only deploy with a specific Serverless version
 # Check out our docs for more details
 # frameworkVersion: "=X.X.X"
 
-custom: ${file(sls-custom.yml)}
+custom:
+  profile: ${file(sls-custom.yml):profile}
+  stage: ${file(sls-custom.yml):stage}
+  customDomain: ${file(sls-${self:provider.stage}-domain.yml)}
 
 provider:
   name: aws
@@ -26,7 +32,7 @@ provider:
   runtime: nodejs8.10
   profile: ${self:custom.profile}
   stage: ${opt:stage, self:custom.stage}
-  memorySize: 256
+  memorySize: 128
   environment:
     MONGODB_URI: ${ssm:${self:provider.stage}MongoDbUri}
 
@@ -72,6 +78,11 @@ functions:
           method: get
   genStatsGetinfo:
     handler: handler.genStatsGetinfo
+    timeout: 60
+    events:
+      - schedule: rate(1 minute)
+  genStatsPublic:
+    handler: handler.genStatsPublic
     timeout: 60
     events:
       - schedule: rate(1 minute)
