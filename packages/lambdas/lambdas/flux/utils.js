@@ -28,7 +28,7 @@ this.state_regex = s => {
 }
 
 
-this.stateFromPC = pc => {
+this.stateFromPC = (pc = "xxxx") => {
     const lookup = {
         '0': 'nt',
         '3': 'vic',
@@ -51,7 +51,7 @@ this.stateFromPC = pc => {
 this.extractPostCode = m => {
     if (m.addr_postcode)
        return m.addr_postcode
-    return R.last(m.address.toString().match(/[0-9]{4}/g))
+    return R.last(m.address.toString().match(/[0-9]{4}/g) || [])
 }
 
 this.extractState = m => this.stateFromPC(this.extractPostCode(m))

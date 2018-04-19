@@ -10,6 +10,10 @@
 
 
 const R = require('ramda')
+R.log = o => {
+    console.log(o);
+    return o;
+}
 const MongoClient = require('mongodb').MongoClient;
 
 
@@ -178,22 +182,18 @@ const update_getinfo_stats = async () => {
 const update_public_stats = async () => {
     const stats = {id: PUB_STATS_ID}
 
-    const all_members = await find_members(_onRoll).toArray()
+    const all_members = await find_members(_onRoll).project({timestamp: 1, address: 1, addr_postcode: 1, dobYear: 1}).toArray()
     console.log(`Public Stats generator got ${all_members.length} members`)
 
-    stats.signup_times = R.compose(R.map(t => t | 0), R.map(R.prop('timestamp')), R.filter(m => m.timestamp !== undefined))(all_members)
+    stats.signup_times = R.compose(R.sort, R.map(t => t | 0), R.map(R.prop('timestamp')), R.filter(m => m.timestamp !== undefined))(all_members)
 
     stats.dob_years = R.compose(R.countBy(R.prop('dobYear')), R.filter(m => m.dobYear !== undefined))(all_members)
 
-    const pcs = R.compose(R.map(utils.extractPostCode), R.filter(m => m.address || m.addr_postcode))(all_members)
+    const pcs = R.compose(R.filter(R.compose(R.not, R.isNil)), R.map(utils.extractPostCode))(all_members)
     stats.postcodes = R.countBy(R.identity, pcs);
 
     stats.states = R.compose(R.countBy(R.identity), R.map(utils.stateFromPC))(pcs)
 
-    R.log = o => {
-        console.log(o);
-        return o;
-    }
     stats.state_dob_years = R.compose(R.map(R.countBy(R.identity)), R.map(R.map(R.last)), R.groupBy(R.head), R.map(m => [utils.extractState(m), m.dobYear || "1066"]))(all_members)
 
     stats.state_signup_times = R.compose(R.map(R.map(R.last)), R.groupBy(R.head), R.map(m => [utils.extractState(m), (m.timestamp || 0) | 0]))(all_members)
