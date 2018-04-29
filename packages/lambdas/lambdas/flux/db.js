@@ -35,6 +35,8 @@ const GETINFO_ID = 1
 // Helpers for queries - able to be composed with R.merge
 const _rgx = (r) => ({'$regex': r})
 const _exists = {'$exists': true}
+const _set = s => ({'$set': s})
+const _upsert = {'upsert': true}
 const _notExists = {'$exists': false}
 const _onRoll = {onAECRoll: true}
 const _stateConsent = {state_consent: true}
@@ -175,7 +177,7 @@ const update_getinfo_stats = async () => {
         last_run: Math.round(Date.now()/1000),
         n_volunteers: await count_volunteers(),
     }
-    await dbv1.public_stats.update({id: GETINFO_ID}, {'$set': getinfo}, {upsert: true})
+    await dbv1.public_stats.update({id: GETINFO_ID}, _set(getinfo), _upsert)
     return getinfo
 }
 
@@ -199,7 +201,7 @@ const update_public_stats = async () => {
     stats.state_signup_times = R.compose(R.map(R.map(R.last)), R.groupBy(R.head), R.map(m => [utils.extractState(m), (m.timestamp || 0) | 0]))(all_members)
 
     stats.last_run = (Date.now()/1000) | 0
-    console.log(stats)
+    await dbv1.public_stats.update({id: PUB_STATS_ID}, _set(stats), _upsert)
     return stats
 }
 

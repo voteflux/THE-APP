@@ -86,6 +86,12 @@ functions:
     timeout: 60
     events:
       - schedule: rate(1 minute)
+  # getStats:
+  #   handler: handler.getStats
+  #   events:
+  #     - http:
+  #       path: /stats/{id}
+  #       method: get
 
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
