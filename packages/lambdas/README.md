@@ -1,4 +1,4 @@
-# api-v2
+# Flux api-v2
 
 repository for lambda api functions and other AWS infrastructure
 
@@ -15,6 +15,8 @@ All lambda functions should live in `./lambdas`.
 The routing for these functions is defined in `serverless.yml`.
 
 For UI stuff please see [voteflux/member-ui-v2](https://github.com/voteflux/member-ui-v2)
+
+**All handlers should be written either for the NodeJSv8 lambda runtime, or the Python3.6 runtime**. Python handlers (if they exist) live in `./py-lambdas`. Currently this isn't being used, though we might implement some python lambdas in the future. Note: this will require a new serverless config and might complicate custom domains. For the moment use NodeJS - Python is a possibility later on. Due to [cold start](https://theburningmonk.com/2017/06/aws-lambda-compare-coldstart-time-with-different-languages-memory-and-code-sizes/) times we should avoid using C# and Java lambdas
 
 ## Deployment details
 
