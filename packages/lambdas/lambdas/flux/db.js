@@ -198,7 +198,7 @@ const update_public_stats = async () => {
 
     stats.state_dob_years = R.compose(R.map(R.countBy(R.identity)), R.map(R.map(R.last)), R.groupBy(R.head), R.map(m => [utils.extractState(m), m.dobYear || "1066"]))(all_members)
 
-    stats.state_signup_times = R.compose(R.map(R.map(R.last)), R.groupBy(R.head), R.map(m => [utils.extractState(m), (m.timestamp || 0) | 0]))(all_members)
+    stats.state_signup_times = R.compose(R.map(R.sort((a,b) => a - b)), R.map(R.map(R.last)), R.groupBy(R.head), R.map(m => [utils.extractState(m), (m.timestamp || 0) | 0]))(all_members)
 
     stats.last_run = (Date.now()/1000) | 0
     await dbv1.public_stats.update({id: PUB_STATS_ID}, _set(stats), _upsert)
