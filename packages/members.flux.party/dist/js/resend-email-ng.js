@@ -44,7 +44,7 @@ app.controller('FluxController', function($scope, $log, $rootScope, $http, $wind
 
     flux.setMsg = function(msg) {
         flux.msg = msg;
-        if (Toastify && msg.length > 0) {
+        if (typeof Toastify !== "undefined" && msg.length > 0) {
             Toastify({
                 text: msg,
                 duration: 3500,
@@ -58,7 +58,7 @@ app.controller('FluxController', function($scope, $log, $rootScope, $http, $wind
 
     flux.setErr = function(err) {
         flux.errorMsg = err;
-        if (Toastify && err.length > 0) {
+        if (typeof Toastify !== "undefined" && err.length > 0) {
             Toastify({
                 text: err,
                 duration: 3500,

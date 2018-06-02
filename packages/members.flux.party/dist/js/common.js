@@ -72,10 +72,11 @@ function saveMemberSecretOnFluxDomains() {
                 document.body.appendChild(ifrm);
             }
         }
-        if (!__DEBUG_COMMON__ && !__DEV_COMMON__) {
+        if (!__DEBUG_COMMON__ && !__DEV_COMMON__ && localStorage.getItem('lastSavedS') !== s) {
             sendSToUrlAsHashParam("https://voteflux.org/_record_login_param.html")
             sendSToUrlAsHashParam("https://flux.party/_record_login_param.html")
             sendSToUrlAsHashParam("https://members.flux.party/_record_login_param.html")
+            localStorage.setItem('lastSavedS', s);
         }
     }
 }
