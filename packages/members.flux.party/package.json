@@ -9,5 +9,8 @@
   "private": true,
   "scripts": {
     "build": "echo 'nothing to do'"
+  },
+  "dependencies": {
+    "webpack": "^4.10.2"
   }
 }
