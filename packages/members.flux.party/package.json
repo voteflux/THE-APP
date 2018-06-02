@@ -1,0 +1,13 @@
+{
+  "name": "members.flux.party",
+  "version": "0.1.0",
+  "description": "static html file for current flux member ui",
+  "main": "index.js",
+  "repository": "git@github.com:voteflux/members.flux.party.git",
+  "author": "Max Kaye <m@xk.io>",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "build": "echo 'nothing to do'"
+  }
+}
