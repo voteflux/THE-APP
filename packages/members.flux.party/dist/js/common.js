@@ -79,7 +79,7 @@ function saveMemberSecretOnFluxDomains() {
         }
     }
 }
-document.addEventListener("load", saveMemberSecretOnFluxDomains);
+window.addEventListener("load", saveMemberSecretOnFluxDomains);
 
 
 function flux_api(path, useDebug){

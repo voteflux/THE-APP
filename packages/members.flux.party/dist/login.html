@@ -12,31 +12,33 @@
     <link rel="stylesheet" href="/css/spinners.css">
 
 </head>
-<body ng-controller="FluxController as flux" >
-    <div class="container p3 center">
+<body>
+    <div id="angularContainer" ng-controller="FluxController as flux">
+        <div class="container p3 center">
 
-        <img src="/img/flux-logo.svg" alt="Flux Logo" class="logo" />
-        <h2>Member Login</h2>
-        <h4>Enter your email address and we'll send you a secure link that you can use to access your membership details.</h4>
+            <img src="/img/flux-logo.svg" alt="Flux Logo" class="logo" />
+            <h2>Member Login</h2>
+            <h4>Enter your email address and we'll send you a secure link that you can use to access your membership details.</h4>
 
-        <form ng-submit="flux.resendEmail()">
-            <input class="block field m2 mx-auto" type="email" ng-model="flux.email" placeholder="Enter your email">
-            <submit class="btn btn-primary m1" ng-click="flux.resendEmail()">Send me the link!</submit>
-        </form>
+            <form ng-submit="flux.resendEmail()">
+                <input class="block field m2 mx-auto" type="email" ng-model="flux.email" placeholder="Enter your email">
+                <submit class="btn btn-primary m1" ng-click="flux.resendEmail()">Send me the link!</submit>
+            </form>
 
-        <div ng-show="flux.errorMsg">
-            <h4 class="red">{{flux.errorMsg}}</h4>
+            <div ng-cloak ng-show="flux.errorMsg">
+                <h4 class="red">{{flux.errorMsg}}</h4>
+            </div>
+
+            <div ng-cloak ng-show="flux.msg">
+                <h4>{{flux.msg}}</h4>
+            </div>
+
+            <p class="m2">Not a member yet? <br/><a href="https://voteflux.org/signup/" class="btn btn-outline">Sign up now!</a></p>
+
         </div>
-
-        <div ng-show="flux.msg">
-            <h4>{{flux.msg}}</h4>
+        <div class="footer-img">
+            <img src="/img/footer.svg"  />
         </div>
-
-        <p class="m2">Not a member yet? <br/><a href="https://voteflux.org/signup/" class="btn btn-outline">Sign up now!</a></p>
-
-    </div>
-    <div class="footer-img">
-        <img src="/img/footer.svg"  />
     </div>
 
     <script src="/js/angular.min.js"></script>
