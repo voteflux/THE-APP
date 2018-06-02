@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="fluxMembersApp">
+<head>
+    <meta charset="UTF-8">
+    <title>Flux - IICCOT Soft Launch</title>
+    <!-- vendor -->
+    <link rel='stylesheet' href='/css/basscss.min.css'>
+
+    <link rel="stylesheet" href="/css/members.css">
+    <link rel="stylesheet" href="/css/spinners.css">
+</head>
+<body ng-controller="FluxController as flux" class="p4">
+
+    <div ng-show="flux.showMain">
+        <h2>IfICouldChangeOneThing.com Soft Launch</h2>
+        <h4>Enter email here to participate in the soft launch</h4>
+
+        <form ng-submit="flux.emailMe()">
+            <input class="block field m1 col-6" type="text" ng-model="flux.email" placeholder="Enter your email (same as flux registration email)">
+            <submit class="btn btn-primary rounded m1" ng-click="flux.emailMe()">I want to Participate in Soft Launch</submit>
+        </form>
+    </div>
+    <div ng-show="!flux.showMain" class="ng-cloak">
+        <h2>IfICouldChangeOneThing.com Soft Launch; Thanks, check your email for the link.</h2>
+    </div>
+
+
+    <div ng-show="flux.errorMsg">
+        <h4 class="red">{{flux.errorMsg}}</h4>
+    </div>
+
+    <div ng-show="flux.msg">
+        <h4 class="p3 bg-green white rounded">{{flux.msg}}</h4>
+    </div>
+
+    <div>
+        <p>Note: if you get a message about 'email not found', the email needs to be identical to the one you used to sign
+            up to Flux originally. Try searching your inbox for 'Flux Membership Robot' to quickly get to the confirmation
+            email sent on registration. You do need to be a member for this to work.</p>
+    </div>
+
+
+    <script src="/js/angular.min.js"></script>
+    <script src="/js/lodash.min.js"></script>
+    <script src="/js/qrcode.js"></script>
+    <script src="/js/common.js"></script>
+    <script src="/js/soft-launch-iiccot.js?n=0000001"></script>
+</body>
+</html>

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="fluxMembersApp">
+<head>
+    <meta charset="UTF-8">
+    <title>Flux - Volunteer</title>
+    <!-- vendor -->
+    <link rel='stylesheet' href='/css/basscss.min.css'>
+
+    <link rel="stylesheet" href="/css/members.css">
+    <link rel="stylesheet" href="/css/spinners.css">
+</head>
+<body ng-controller="FluxController as flux" class="p4">
+
+    <div ng-show="flux.showMain">
+        <h2>Want to help volunteer? Please enter your email below!</h2>
+        <h4>(You can also update this later on your membership details page)</h4>
+
+        <form ng-submit="flux.becomeVolunteer()">
+            <input class="block field m1 col-6" type="text" ng-model="flux.email" placeholder="Enter your email (same as flux registration email)">
+            <submit class="btn btn-primary rounded m1" ng-click="flux.becomeVolunteer()">I want to volunteer!</submit>
+        </form>
+    </div>
+    <div ng-show="!flux.showMain" class="ng-cloak">
+        <h2>Thanks, your email was automatically added as a volunteer.</h2>
+    </div>
+
+
+    <div ng-show="flux.errorMsg">
+        <h4 class="red">{{flux.errorMsg}}</h4>
+    </div>
+
+    <div ng-show="flux.msg">
+        <h4>Wooo! We've sent you an email with more instructions (this will only happen once).</h4><br>
+        <h4>{{flux.msg}}</h4>
+    </div>
+
+    <div>
+        <p>Note: if you get a message about 'email not found', the email needs to be identical to the one you used to sign
+            up to Flux originally. Try searching your inbox for 'Flux Membership Robot' to quickly get to the confirmation
+            email sent on registration. You do need to be a member for this to work. You can also sign up directly to the
+            mailing list <a href="http://eepurl.com/b09A1L">here</a>.</p>
+    </div>
+
+
+    <script src="/js/angular.min.js"></script>
+    <script src="/js/lodash.min.js"></script>
+    <script src="/js/qrcode.js"></script>
+    <script src="/js/common.js"></script>
+    <script src="/js/volunteer-ng.js?n=0000003"></script>
+</body>
+</html>

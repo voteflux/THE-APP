@@ -1,0 +1,504 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="fluxMembersApp">
+<head>
+    <meta charset="UTF-8">
+    <title>Flux Membership Admin</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link type="text/css" rel='stylesheet' href="/css/members.css">
+    <link type="text/css" rel='stylesheet' href="/css/basscss.min.css">
+    <link type="text/css" rel='stylesheet' href="/css/tachyons.css">
+</head>
+<body ng-controller="FluxController as flux">
+
+<header ng-class="{'bg-black': flux.isProd(), 'bg-dark-red': !flux.isProd()}" class="top-bar fixed w-100">
+    <center>
+
+        <div class="fl white ph2">
+            <h2 class="pb0 fl">Flux Admin<span ng-if="!flux.isProd()"> DEBUG</span></h2>
+            <small class="left-0 bottom-0 absolute">Logged in as: {{ flux.renderLoggedInName() }}</small>
+        </div>
+        <ul class="mb0">
+            <li ng-click="flux.setTab('search-members')">Search Members</li>
+            <li ng-click="flux.setTab('party-matters')">Party Matters</li>
+        </ul>
+
+    </center>
+
+</header>
+
+<div id="tabs-and-container" class="pt5">
+    <section ng-show="flux.errorMsg" class="fixed mt5 w-100">
+        <div class="inner p1 m1 bg-red white rounded h3">
+            <div class="dib">
+                {{ flux.errorMsg }}
+            </div>
+
+            <div ng-click="flux.errorMsg = ''" class="dib h1 bold pointer absolute top-0 right-0 mr3">
+                &times;
+            </div>
+        </div>
+    </section>
+
+    <section id="search-members" ng-show="flux.isTab('search-members')">
+
+        <div>
+
+
+            <div class="clearfix flex">
+                <div class="col m2">
+                    <h3>Search Flux Members</h3>
+
+                    <p>
+                        <select id="search-what" ng-model="flux.searchWhat">
+                            <option value="name">Name</option>
+                            <option value="email">Email</option>
+                            <option value="address">Address</option>
+                            <option value="postcode">Postcode</option>
+                        </select>
+                        <label for="search-what">Search what field?</label>
+                    </p>
+
+
+                </div>
+
+                <div class="col m2">
+                    <h3>Filters:</h3>
+
+                    <form ng-submit="flux.search()" class="p2">
+                        <label for="fieldContains">Field contains:</label>
+                        <input id='fieldContains' type="text" ng-model="flux.fieldContains" class="field"><br>
+                    </form>
+
+                    <p>
+                        <button class="btn btn-outline" ng-click="flux.search()">Search</button>
+                    </p>
+                    <p ng-show="flux.searching">Searching... please be patient.</p>
+
+                </div>
+
+                <div class="col m2">
+                    <h3>Pages:</h3>
+                    <p>Page {{ flux.page + 1 }} of {{ flux.totalPages }}</p>
+                    <p>
+                        <button class="btn btn-outline p1" ng-click="flux.prevPage()">Previous</button>
+                        <button class="btn btn-outline p1" ng-click="flux.nextPage()">Next</button>
+                    </p>
+                </div>
+
+
+            </div>
+        </div>
+        <hr>
+
+
+        <table>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Contact</th>
+                <th>Address</th>
+                <th>Mark</th>
+                <th>Modify</th>
+            </tr>
+            <tr ng-repeat="m in flux.members">
+                <td>{{m.name}}</td>
+                <td><input type="text" width="50" disabled value="{{m.email}}"></td>
+                <td>{{m.contact_number}}</td>
+                <td><textarea rows="2" cols="20">{{m.address}}</textarea></td>
+                <td>
+                    <button ng-show="m.reliable || m.reliable === undefined" class="btn btn-primary bg-red white"
+                            ng-click="flux.markUnreliable(m)">Mark Member Unreliable
+                    </button>
+                    <button ng-show="m.reliable === false" class="btn btn-primary bg-green white"
+                            ng-click="flux.markReliable(m)">Mark Member Reliable
+                    </button>
+                </td>
+                <td>
+                    <button class="btn btn-primary bg-purple white" ng-click="flux.doModifyUser(m)">Modify</button>
+                </td>
+            </tr>
+        </table>
+
+
+    </section>
+
+
+    <section id="modify-user" ng-show="flux.isTab('modify-user')" class="p3">
+        <div class="clearfix">
+            <div class="m3">
+                <h2>Modify User: {{ flux.um.user.email }}</h2>
+
+
+                <h3>Roles:</h3>
+
+                <pre>{{ flux.umRenderRoles() }}</pre>
+
+                <h4>Give Role:</h4>
+
+                <select ng-model="flux.um.giveRole">
+                    <option value="">--- Make a choice below ---</option>
+                    <option value="validator">Validator (membership deets)</option>
+                    <option value="comms">Comms (emails and member contact)</option>
+                    <option value="organiser">Organiser (required for all branches)</option>
+                    <option ng-repeat="juri in flux.juris track by $index" value="organiser:{{juri}}">
+                        organiser:{{juri}}
+                    </option>
+                    <option value="rego_officer">Rego Officer (required for all branches)</option>
+                    <option ng-repeat="juri in flux.juris track by $index" value="rego_officer:{{juri}}">
+                        rego_officer:{{juri}}
+                    </option>
+                </select>
+
+                <h4>Notes:</h4>
+                <ul>
+                    <li><strong>Organisers</strong> need both `organiser` and `organiser:/some/juri`</li>
+                    <li>Validators are able to use the **old** validation platform (DEPRECATED)</li>
+
+                </ul>
+
+                <hr>
+
+                {{ flux.um.msg }}
+
+                <hr>
+
+                <button class="btn btn-primary" ng-click="flux.umGiveRole()">Give Role</button>
+                <button class="btn btn-outline bg-red white" ng-click="flux.umRevokeRoles()">Revoke All Roles</button>
+
+                <hr>
+            </div>
+        </div>
+    </section>
+
+
+    <section id="party-matters" ng-show="flux.isTab('party-matters')" class="p3">
+        <div>
+            <div class="clearfix">
+                <div class="mt3 mb3">
+                    <h2>Contents</h2>
+                    <ul>
+                        <li><a href="#regoList">Party Registration List Generation</a></li>
+                        <li><a href="#regoListGet">Party Registration List Download</a></li>
+                        <li><a href="#regoListWarn">Warn Users of impending AEC validation</a></li>
+                        <li><a href="#partyList">Dump a party list</a></li>
+                        <li><a href="#partyListCalling">Dump a party list for calling</a></li>
+                    </ul>
+                </div>
+
+                <hr>
+
+                <div class="mt3 mb3" id="regoList">
+                    <h2>Party Registration List Gen</h2>
+
+                    <jurisdiction-selector ng-model="flux.rego.jurisdiction"></jurisdiction-selector>
+
+                    <br><br>
+
+                    <label for="commitResults" class="red">Commit List? (Permanent)</label>
+                    <input type="checkbox" id="commitResults" ng-model="flux.rego.commit_results" value="false"/>
+
+                    <br><br>
+
+                    <label for="nMembers">Number of members needed</label>
+                    <input type="number" id="nMembers" ng-model="flux.rego.n_required_members" value="550"/>
+
+                    <br><br>
+
+                    <label for="revalidation">Are you revalidating? (Not registering for the first time)</label>
+                    <input type="checkbox" id="revalidation" ng-model="flux.rego.revalidation" value="false"/>
+
+                    <br><br>
+
+                    <label for="random">Select random members (default is recent)</label>
+                    <input type="checkbox" id="random" ng-model="flux.rego.do_random" value="false"/>
+
+                    <br><br>
+
+                    <label class="red" for="invalid">Allow Invalid Members (SHOULD USUALLY BE FALSE)</label>
+                    <input type="checkbox" id="invalid" ng-model="flux.rego.allow_invalid" value="false"/>
+
+                    <br><br>
+
+                    <button class="btn btn-primary" ng-click="flux.doRego()">Run Rego List Generation Now</button>
+
+                    <br><br>
+
+                    <div class="p3 rounded border" readonly ng-show="flux.regoResp">
+                        {{ flux.regoResp }}
+                    </div>
+
+                </div>
+
+                <hr>
+
+                <div class="mt3 mb3" id="regoListGet">
+                    <h2>Get most recent party rego list for jurisdiction</h2>
+
+                    <!--<label for="jurisdictionGet">Jurisdiction:</label>-->
+                    <!--<select id="jurisdictionGet" ng-model="flux.regoGet.jurisdiction">-->
+                    <!--<option value="/AUS">/AUS</option>-->
+                    <!--<option value="/AUS/WA">/AUS/WA</option>-->
+                    <!--<option value="/AUS/QLD">/AUS/QLD</option>-->
+                    <!--<option value="/AUS/ACT">/AUS/ACT</option>-->
+                    <!--<option value="/AUS/NT">/AUS/NT</option>-->
+                    <!--<option value="/AUS/NSW">/AUS/NSW</option>-->
+                    <!--<option value="/AUS/TAS">/AUS/TAS</option>-->
+                    <!--<option value="/AUS/VIC">/AUS/VIC</option>-->
+                    <!--<option value="/AUS/SA">/AUS/SA</option>-->
+                    <!--</select>-->
+
+                    <jursidcition-selector ng-model="flux.regoGet.jurisdiction"></jursidcition-selector>
+
+                    <br><br>
+
+                    <button class="btn btn-primary" ng-click="flux.doRegoGet()">Get Rego List</button>
+
+                    <br><br>
+
+                    <div class="p3 rounded border" readonly ng-show="flux.regoGetResp">
+                        <pre>{{ flux.regoGetResp }}</pre>
+                    </div>
+
+                </div>
+
+                <hr>
+
+                <div class="mt3 mb3" id="regoListWarn">
+                    <h2>Warn members of impending registration</h2>
+
+                    <h4>Custom Message (email and SMS):</h4>
+
+                    <div class="mv2">
+                        <h5>How do you want to choose members to send to?</h5>
+
+                        <label>
+                            <input type="radio" value="jurisdiction" name="regoWarnMbrChoiceRadio" ng-model="flux.input.regoWarn.memberSelection">
+                            By Jurisdiction
+                        </label><br>
+
+                        <label>
+                            <input type="radio" value="memberIDs" name="regoWarnMbrChoiceRadio" ng-model="flux.input.regoWarn.memberSelection">
+                            By List of Member IDs
+                        </label>
+                    </div>
+
+                    <span ng-show="flux.input.regoWarn.memberSelection == 'jurisdiction'">
+                        <jurisdiction-selector ng-model="flux.regoSend.jurisdiction"></jurisdiction-selector>
+
+                        <strong>
+                            Note: this will send to THE MOST RECENT batch in a given jurisdiction unless 'send to all'
+                            is checked.
+                        </strong>
+                    </span>
+
+                    <span ng-show="flux.input.regoWarn.memberSelection == 'memberIDs'">
+                        <h5>Paste Member IDs below (one per line)</h5>
+                        <p>Example of ID: 57384dc8200cb2000394d028</p>
+                        <textarea cols="40" ng-model="flux.input.regoWarn.member_ids">
+
+                        </textarea>
+                    </span>
+
+                    <span ng-show="flux.input.regoWarn.memberSelection === undefined">
+                        <h5 class="red">Select a way to contact members</h5>
+                    </span>
+
+                    <br><br>
+
+                    <h5>Logic flow</h5>
+
+                    <ul>
+                        <li>If test message: just send that as sms</li>
+                        <li>If email_only disable sms</li>
+                        <li>If sending to rego list do that (regardless of invalid)</li>
+                        <ul>
+                            <li>If sending to all:</li>
+                            <ul>
+                                <li>Filter out invalid members</li>
+                                <li>send email and/or sms</li>
+                            </ul>
+                        </ul>
+                        <li>If sending to member IDs do that</li>
+                    </ul>
+
+                    <br><br>
+
+                    Suggested template:
+                    <p class="p1 m1 rounded border">
+                        Subject: Flux Membership Audit
+                        <br><br>
+                        Every 3 years the AEC is required to ensure Flux is still an
+                        eligible political party.
+                        You're on the list of members we've provided to the AEC to prove this.
+                        This means you may be contacted by the AEC in the next week
+                        (either by email or phone). If you are contacted, you'll
+                        need to respond 'YES' to the question 'Are you a member
+                        of "VOTEFLUX.ORG | Upgrade Democracy!"?' (which is our
+                        full party name).
+                    </p>
+
+                    <h4>Write Message</h4>
+
+                    The full message will be everything inside this box:
+                    <p class="border rounded m3 p3" style="border-width: 4px;">
+                        Subject: <input ng-model="flux.regoSend.subject" value="" type="text" class="field"
+                                        placeholder="Flux Membership Audit (Replace This)" size="50"><br>
+                        Hi {fname},
+                        <br>
+                        <textarea ng-model="flux.regoSend.msg" class="field rounded" rows="4" cols="30">
+
+                        </textarea>
+                        <br>
+                        Thanks, and have a great week,<br>
+                        the Flux Membership Robot
+                    </p>
+
+                    <h3>Preview</h3>
+
+                    <p class="p1 rounded border" style="border-width: 4px;">
+                        Subject: {{ flux.regoSend.subject || "WARNING PLEASE INSERT SUBJECT" }}<br><br>
+
+                        Hi {fname},<br><br>
+                        {{flux.regoSend.msg}}
+                        <br><br>
+                        Thanks, and have a great week,<br>
+                        the Flux Membership Robot
+                    </p>
+
+                    Approx number of SMSs per member: {{ flux.smsPerMember() }}
+                    <br>
+                    Costing approx ${{ flux.smsCostPerMember() }} per member
+
+                    <br>
+
+                    <div class="border rounded p2">
+                        <h4>Sending Options</h4>
+                        <p class="p1 m1 rounded border">
+                            Fill in both of these to send exactly 1 test sms
+                            <br>
+                            <label>SEND TEST MSG</label>
+                            <input type="checkbox" value="false" class="field" ng-model="flux.regoSend.send_test">
+                            <br>
+                            <label>Number to send test to:</label>
+                            <input type="text" class="field" ng-model="flux.regoSend.test_number">
+                            <br>
+                            If this box is checked - the only thing that will be sent is an SMS to the number provided.
+                            No mass email. No mass sms.
+                        </p>
+
+                        <p>
+                            <span class="red">Note: if this box is not checked it will send to only members on the most recent rego list.</span>
+                            <br>
+                            <label>Send to ALL members in {{ flux.regoSend.jurisdiction }}</label>
+                            <input type="checkbox" value="true" class="field" ng-model="flux.regoSend.send_to_all">
+                        <hr>
+
+                        <p>
+                            <h5>If this box is checked no messages will be sent and no confirmation asked for</h5>
+                            <label label="red">Dry Run</label>
+                            <input type="checkbox" value="true" class="field" ng-model="flux.regoSend.dry_run">
+                        </p>
+
+                        <hr>
+
+                        <label>Just email - No SMS</label>
+                        <input type="checkbox" value="true" class="field" ng-model="flux.regoSend.email_only">
+
+                        <hr>
+
+                        <label>Send only to members with invalid details</label>
+                        <input type="checkbox" value="true" class="field" ng-model="flux.regoSend.invalid_only">
+
+                        <hr>
+                        <span ng-show="flux.regoSend.send_test">
+                            <span ng-show="flux.regoSend.test_number">
+                                Sending 1 test sms to {{ flux.regoSend.test_number }}
+                            </span>
+                            <span ng-show="!flux.regoSend.test_number">
+                                Add test number to send to!
+                            </span>
+                        </span>
+                        <span ng-show="!flux.regoSend.send_test">
+                            Sending {{ flux.regoSend.email_only ? "just email" : "email and sms" }}
+                            to {{ flux.regoSendDescription() }}
+                        </span>
+                        <br>
+                        <h5 class="black" ng-show="flux.regoSend.dry_run">Dry Run Active</h5>
+                        <h5 class="red" ng-show="flux.regoSend.dry_run !== true">Dry Run INACTIVE - LIVE SEND</h5>
+                        <button class="btn btn-primary" ng-click="flux.doRegoSend({dryRun : flux.regoSend.dry_run})">Send Msg to
+                            {{ flux.regoSend.jurisdiction }} Now!
+                        </button>
+                        </p>
+                    </div>
+
+                    <br>
+
+                    <div class="p2 m2 border rounded" ng-show="flux.regoSendResp">
+                        <pre>{{flux.regoSendResp}}</pre>
+                    </div>
+                </div>
+
+
+                <hr>
+
+                <div class="mt3 mb3" id="partyList">
+                    <h2>Dump member lists</h2>
+
+                    <h3 class="red">NOT FOR DISTRIBUTION TO STEERCO - USE FOR REGO ONLY</h3>
+
+                    <div class="mh2">
+                        <jurisdiction-selector ng-model="flux.partyList.jurisdiction"></jurisdiction-selector>
+                        <button class="mt2 btn btn-primary" ng-click="flux.dumpMembers()">Dump Members for
+                            {{flux.partyList.jurisdiction}}
+                        </button>
+                    </div>
+
+                    <div class="p2 m2 border rounded">
+                        <label>Last updated {{ flux.partyList.updated.toISOString() }}</label>
+                        <hr>
+                        <pre class="">
+                            SERVER RESPONSE:
+
+{{flux.partyList.msg}}
+                        </pre>
+                    </div>
+                </div>
+
+                <hr>
+
+                <div class="mt3 mb3" id="partyListCalling">
+                    <h2>Dump member lists for calling (organisers)</h2>
+
+                    <h3 class="green">Able to be distributed to steerco</h3>
+
+                    <div class="mh2">
+                        <jurisdiction-selector ng-model="flux.partyListCalling.juri"></jurisdiction-selector>
+                        <button class="mt2 btn btn-primary" ng-click="flux.dumpMembersCalling()">Dump Members for
+                            {{flux.partyListCalling.juri}}
+                        </button>
+                    </div>
+
+                    <div class="p2 m2 border rounded">
+                        <label>Last updated {{ flux.partyListCalling.updated.toISOString() }}</label>
+                        <hr>
+                        <pre class="">
+                            SERVER RESPONSE:
+
+{{flux.partyListCalling.msg}}
+                        </pre>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+</div>
+
+<script src="/js/angular.min.js"></script>
+<script src="/js/common.js"></script>
+<script src="/js/lodash.min.js"></script>
+<script src="/js/ng-admin.js"></script>
+
+</body>
+</html>

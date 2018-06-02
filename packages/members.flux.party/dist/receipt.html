@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="fluxMembersApp">
+<head>
+    <meta charset="UTF-8">
+    <title>Flux - Receipt Generator</title>
+    <!-- vendor -->
+    <link rel='stylesheet' href='/css/basscss.min.css'>
+
+    <style>
+        table, th, td {
+            border: 1px solid black;
+        }
+        th {
+            background-color: #aaa;
+        }
+    </style>
+
+</head>
+<body ng-controller="ReceiptController as receipt" class="m3">
+
+
+    <div ng-show="show_form">
+        <button class="btn btn-outline" ng-click="show_form=false;">hide</button><br>
+        <input type="text" ng-model="amount"><br>
+        <input type="text" ng-model="donation_date"><br>
+        <input type="text" ng-model="issue_date"><br>
+        <input type="text" ng-model="receipt_number"><br>
+        <input type="text" ng-model="contact_l1"><br>
+        <input type="text" ng-model="contact_l2"><br>
+        <input type="text" ng-model="contact_l3"><br>
+        <input type="text" ng-model="email"><br>
+    </div>
+
+    <div style="width:600px">
+    <h2 class="right">Flux Donation Receipt/Tax Invoice</h2>
+
+        <p class="right" style="width:300px; font-size:16px;">
+            VOTEFLUX.ORG | Upgrade Democracy!<br>
+email: leadership@voteflux.org<br>
+web: https://voteflux.org
+        </p>
+
+    <table style="border-size:1px">
+        <tr><th>Donation Information</th><th></th></tr>
+        <tr>
+            <td>Total Amount</td>
+            <td>$ {{amount}}</td>
+        </tr>
+        <tr>
+            <td>Donation Date</td>
+            <td>{{donation_date}}</td>
+        </tr>
+        <tr>
+            <td>Issue Date</td>
+            <td>{{issue_date}}</td>
+        </tr>
+        <tr>
+            <td>Receipt Number</td>
+            <td>{{receipt_number}}</td>
+        </tr>
+        <tr>
+            <th>Contact Details</th><th></th>
+        </tr>
+        <tr>
+            <td>
+                {{contact_l1}}<br>
+                {{contact_l2}}<br>
+                {{contact_l3}}<br>
+                {{email}}
+            </td>
+            <td></td>
+        </tr>
+    </table>
+
+    <p>
+        <small>
+            As at the date of this receipt/tax invoice, the first $1,500 of contributions by an individual to a political party in a financial year are tax deductible. You should, however, confirm this when submitting your next income tax return.
+        </small>
+    </p>
+    </div>
+
+    <script src="/js/angular.min.js"></script>
+    <script src="/js/lodash.min.js"></script>
+    <script src="/js/common.js"></script>
+    <script src="/js/receipt-ng.js"></script>
+</body>
+</html>

@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="fluxMembersApp">
+<head>
+    <meta charset="UTF-8">
+    <title>Flux - Membership</title>
+    <!-- vendor -->
+    <link rel='stylesheet' href='/css/basscss.min.css'>
+
+    <link rel="stylesheet" href="/css/members.css">
+    <link rel="stylesheet" href="/css/spinners.css">
+</head>
+<body ng-controller="FluxController as flux">
+
+
+    <div class="">
+        <div class="clearfix flex">
+            <div class="col-6">
+
+                <div id="set-member-details">
+                    <div id='sldkfj' style="height: 400px;"></div>
+
+                    <div id="deets"></div>
+
+                    <div ng-show="flux.showMemberSubmit" class="mb1">
+                        <input type="button" class="btn bg-red p2 m2 rounded" value="INVALID" ng-click="flux.reportMemberInvalid()">
+                        <input type="button" class="btn bg-green p2 m2 rounded" value="VALID" ng-click="flux.reportMemberValid()">
+                        <button class="btn bg-blue rounded p2 m2" ng-click="flux.nextMember()">NEXT</button>
+                    </div>
+
+                    <div ng-show="flux.showMemberSubmit" class="mb1">
+                        <input type="button" class="btn bg-yellow p2 m2 rounded" value="VALID FEDERAL" ng-click="flux.reportMemberValidFederal()">
+                        <input type="button" class="btn bg-yellow p2 m2 rounded" value="VALID STATE" ng-click="flux.reportMemberValidState()">
+                    </div>
+
+                    <div ng-show="!flux.showMemberSubmit">
+                        <h3>Saving...</h3>
+                    </div>
+
+                    <div ng-show="flux.errorMsg">
+                        <h4 class="red">{{flux.errorMsg}}</h4>
+                    </div>
+
+                    <div ng-show="flux.showMsg">
+                        <h4>{{flux.msg}}</h4>
+                    </div>
+
+
+                    <h1 id="deets-old">Flux Membership Details <span ng-show="flux.doubleChecking">Double Checking</span></h1>
+
+                        <div ng-show="flux.errorMsg.length > 0" class="p2 bg-red rounded">
+                            <h2 class="white">{{flux.errorMsg}}</h2>
+                        </div>
+                    <h1 ng-show="flux.showLoading">LOADING....</h1>
+                    <form class="sm-col-12">
+                        First Names: <input  type="text" ng-model="flux.fname" class=" col-8 mb1 field"><br>
+                        Surname: <input type="text"  ng-model="flux.sname" class=" col-8 mb1 field"><br>
+                        Contact: <input type="text"  ng-model="flux.contact_number" class=" col-8 mb1 field"><br>
+                        <div ng-if="flux.fOldAddr">
+                            Address: <textarea  ng-model="flux.address" class=" col-8 mb1 field"></textarea><br>
+                        </div>
+                        <div ng-if="!flux.fOldAddr">
+                            Postcode: <strong>{{ flux.user.addr_postcode }}</strong> <br>
+                            Suburb: <strong>{{ flux.user.addr_suburb }}</strong> <br>
+                            Street: <strong>{{ flux.user.addr_street }}</strong>
+                        </div>
+                        Email: <input type="text"  ng-model="flux.email" class=" col-8 mb1 field"><br>
+                        <a class="btn bg-blue m1 rounded" href="" ng-click="flux.getUser(flux.adminSecret, flux.memberSecret)">Refresh User</a>
+
+                    </form>
+                </div>
+            </div>
+            <div class="col-6">
+                <h2 class="center">Electoral Roll</h2>
+
+                <iframe name="oevf" src="https://check.aec.gov.au/" style="width: 100%; min-height: 2000px;" onload="location.href='#deets'"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/angular.min.js"></script>
+    <script src="/js/lodash.min.js"></script>
+    <script src="/js/common.js"></script>
+    <script src="/js/validate-members-ng.js?0000006"></script>
+</body>
+</html>

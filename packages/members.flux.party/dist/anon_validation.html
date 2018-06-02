@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="fluxMembersApp">
+<head>
+    <meta charset="UTF-8">
+    <title>Flux - Magic Validation</title>
+    <!-- vendor -->
+    <link rel='stylesheet' href='/css/basscss.min.css'>
+
+    <link rel="stylesheet" href="/css/members.css">
+    <link rel="stylesheet" href="/css/spinners.css">
+</head>
+<body ng-controller="FluxController as flux">
+
+
+    <div ng-show="flux.showLoading" class="absolute bg-white block col-12" style="height: 100%;">
+        <h1 ng-show="flux.showLoading" class="block px2 center">Loading...</h1>
+        <div class="sk-folding-cube">
+            <div class="sk-cube1 sk-cube"></div>
+            <div class="sk-cube2 sk-cube"></div>
+            <div class="sk-cube4 sk-cube"></div>
+            <div class="sk-cube3 sk-cube"></div>
+        </div>
+    </div>
+
+
+        <div class="clearfix" style="min-height: 200px;">
+            <h3 ng-show="flux.error" class="m2 p2 rounded bg-red white">A (probably) non-fatal error has occured: {{flux.error}}</h3>
+            <h2 class="m2 p2 rounded bg-green white">Validation queue: {{flux.stats.toValidate}} / {{flux.stats.totalMembers}}. Validations so far: {{flux.stats.totalValidations}}</h2>
+            <h1 class="m1 p1 rounded bg-white black">{{ flux.currentSession.status }}</h1>
+            <h2 ng-if="flux.sessions[flux.curSocN].validMsg && flux.sessions[flux.curSocN].goodResponse" class="green">{{ flux.sessions[flux.curSocN].validMsg }}</h2>
+            <h2 ng-if="flux.sessions[flux.curSocN].validMsg && !flux.sessions[flux.curSocN].goodResponse" class="red">{{ flux.sessions[flux.curSocN].validMsg }}</h2>
+
+            <h1 ng-if="flux.sessions[flux.curSocN].errorMsg" class="white bg-red rounded p3 m2">Error: {{flux.sessions[flux.curSocN].errorMsg}}</h1>
+
+            <!--<h1 class="white bg-red rounded p3 m2">Notice 8/8/17: We seem to be getting a lot of false negative "CAPTCHA incorrect messages"; will investigate over the next few days. For now this page will only run 1 session simultaneously.</h1>-->
+
+            <div ng-show="!flux.sessions[flux.curSocN].disableCaptcha" class="m3 block">
+                <img ng-src="{{ flux.sessions[flux.curSocN].imageUrl }}">
+                <form ng-submit="flux.submitCaptcha()">
+                    <strong>NB:</strong> input is not case sensitive. <br>
+                    <input autofocus id='captchaInput' class='field' type="text" placeholder="captcha" ng-model="flux.sessions[flux.curSocN].captcha" ng-enabled="{{ !flux.sessions[flux.curSocN].disableCaptcha }}">
+                </form>
+            </div>
+
+            <div class="m3">
+                <ul>
+                    <li ng-repeat="logMsg in flux.log track by $index">{{logMsg}}</li>
+                </ul>
+            </div>
+
+            <p class="m3 p3">
+                Note, sometimes the server gets overloaded (it's fairly intensive on the server-side) so if it doesn't work give it a few minutes or come back later. If it's really broken please email leadership@voteflux.org.
+            </p>
+
+            <p class="m3 p3 white bg-green">
+                Wondering what this does? By filling in the CAPTCHA you're interfacing with the AEC electoral roll data.
+                Our server pre-fills the form, then you essentially fill in the last bit and press 'go'.
+                This let's us automate this process as much as possible. It's easily 10x faster than manually copy and pasting
+                details into the AEC website (which is what other parties do). What used to take a week (yes, really) can now be done in mere hours.
+            </p>
+
+            <div class="m1 p1 bg-blue white rounded">
+                <h4 ng-click="flux.showAdvanced = !flux.showAdvanced">Show/Hide Advanced Notes</h4>
+                <div class="m1 p1" ng-show="flux.showAdvanced">
+                    <h5>Advanced notes:</h5>
+                    <ul>
+                        <li>Set the 'nSessions' param to an integer to use that many sessions (default: 2). This can increase the number of validations you can perform per minute provided the server is not overloaded and you're internet connection is fine. If you see the red star (loading icon) instead of a CAPTCHA often increasing nSessions might help.</li>
+                        <li>This micro app uses websockets for all the CAPTCHA stuff, and refreshes via api.voteflux.org/getinfo every 10 seconds for the other stats</li>
+                        <li>Set the 'state' param to one of nsw,vic,qld,sa,tas,nt,act,wa to validate only that state.</li>
+                        <li>Set the 'debug' param to anything to use local dev.</li>
+                        <li>Set the 'prod' param to anything to use production.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+    <script src="/js/angular.min.js"></script>
+    <script src="/js/lodash.min.js"></script>
+    <script src="/js/qrcode.js"></script>
+    <script src="/js/common.js"></script>
+    <script src="/js/vendor/socket.io-1.4.5.js"></script>
+
+    <script type="text/javascript">
+        var app = angular.module('fluxMembersApp', []);
+        app.controller('FluxController', function($scope, $log, $rootScope, $http, $window){
+            const flux = this;
+            flux.nSessions = getParam('nSessions') ? parseInt(getParam('nSessions')) : 2;
+            flux.currentSocket = null;
+            flux.currentSession = null;
+            flux.log = [];
+            flux.sessions = [];
+            flux.sockets = [];
+            flux.curSocN = 0;
+            flux.error = '';
+            flux.getinfo = {};
+            flux.stats = {toValidate: 0, totalMembers: 0, totalValidations: 0}
+
+            flux.state = null;
+            if (getParam('state') !== undefined)
+                flux.state = getParam('state')
+
+            flux.doGetInfo = function() {
+                $http.get(flux_api('getinfo'))
+                    .then(function(resp) {
+                        flux.getinfo = resp.data;
+
+                        if (flux.state) {
+                            flux.stats.toValidate = flux.getinfo['validation_queue_state'][flux.state];
+                            flux.stats.totalMembers = flux.getinfo['n_members_state'][flux.state];
+                            flux.stats.totalValidations = flux.getinfo['n_members_validated_state'][flux.state];
+                        } else {
+                            flux.stats.toValidate = flux.getinfo['validation_queue'];
+                            flux.stats.totalMembers = flux.getinfo['n_members'];
+                            flux.stats.totalValidations = flux.getinfo['n_members_validated'];
+                        }
+
+                        console.log(flux.getinfo)
+                    })
+                    .catch(flux.handleHttpError);
+            }
+            flux.doGetInfo();
+            setInterval(flux.doGetInfo, 10000);  // no point going faster than once per 10s
+
+            flux.handleHttpError = function(err) {
+                flux.error = err;
+                console.log(err);
+            }
+
+            flux.setInit = function(sess){
+                sess.disableCaptcha = true;
+                sess.imageUrl = '';
+                sess.captcha = '';
+                sess.errorMsg = '';
+                sess.validMsg = null;
+            }
+
+            flux.reset = function(soc){
+                flux.sendInit(soc);
+                console.log('reset');
+                flux.errorMsg = '';
+                $scope.$apply();
+            }
+
+            flux.newSocket = function(){
+                return new WebSocket(flux_api('ws_validation').replace('http', 'ws'));
+            }
+
+
+            var sendJson = function(data, soc){
+                soc.send(jsonDumps(data));
+            }
+
+            flux.sendInit = function(soc){
+                var toSend = {method: 'begin'};
+                if (getParam('s') !== undefined)
+                    toSend.s = getParam('s')
+                if (getParam('state') !== undefined)
+                    toSend.state = getParam('state')
+                console.log(toSend);
+                sendJson(toSend, soc);
+            }
+
+            _.forEach(_.range(flux.nSessions), function(i){
+                flux.sockets[i] = flux.newSocket();
+                flux.sessions[i] = {};
+                var mysession = flux.sessions[i];
+                flux.setInit(mysession);
+                var soc = flux.sockets[i];
+
+                var socketHandlers = {
+                    finish: function(data){
+                        flux.log.unshift(data['success'] === true ? "User was valid!" : data['captcha_incorrect'] === true ? "CAPTCHA Wrong" : "User wasn't valid :(");
+                        mysession.goodResponse = data['success'] === true;
+                        flux.reset(soc);
+                        console.log('Finished', mysession.goodResponse);
+                    },
+                    'deliver_session': function(data){
+                        flux.setInit(mysession);
+                        mysession.session = data.session;
+                        mysession.imageUrl = flux_api('au/captcha_img/' + mysession.session);
+                        mysession.status = 'Session initiated, captcha loading';
+                        mysession.disableCaptcha = false;
+                        $scope.$apply();
+                        var captchaInput = document.getElementById("captchaInput");
+                        captchaInput.focus();
+                        console.log('deliver_session', mysession);
+
+                        mysession.image = new Image();
+                        mysession.image.src = mysession.imageUrl;
+                    },
+                    'handle_error': function(data){
+                        mysession.errorMsg = data.msg;
+                        flux.log.unshift(data.msg);
+                    }
+                }
+
+                soc.onopen = function(){
+                    console.log('opened');
+                    flux.sendInit(soc);
+                }
+
+                soc.onmessage = function(evt){
+                    console.log(evt);
+                    var msg = JSON.parse(evt.data);
+                    if (msg.status == 'error')
+                        socketHandlers['handle_error'](msg);
+                    else
+                        socketHandlers[msg.method](msg);
+                    $scope.$apply();
+                }
+
+                soc.onclose = function(){
+                    console.log('sock closed');
+                    flux.status = 'Connection lost, resetting... in 0.5 seconds';
+                    setTimeout(function(){ location.reload(); }, 500);
+                }
+
+                mysession.status = "Session started... waiting for server (can take 5-10 seconds)";
+            });
+            flux.currentSocket = flux.sockets[0];
+            flux.currentSession = flux.sessions[0];
+
+
+            flux.showLoading = false;
+
+            flux.submitCaptcha = function(){
+                var toSend = jsonDumps({method: 'captcha_answer', captcha: flux.currentSession.captcha, session: flux.currentSession.session});
+                console.log('Sending...', flux.curSockN, toSend);
+                flux.currentSocket.send(toSend, flux.currentSocket);
+                flux.currentSession.status = 'Submitted captcha. Waiting for response...';
+                flux.currentSession.disableCaptcha = true;
+                flux.currentSession.imageUrl = 'data:image/gif;base64,R0lGODlhEAAQAMQAAORHHOVSKudfOulrSOp3WOyDZu6QdvCchPGolfO0o/XBs/fNwfjZ0frl3/zy7////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAkAABAALAAAAAAQABAAAAVVICSOZGlCQAosJ6mu7fiyZeKqNKToQGDsM8hBADgUXoGAiqhSvp5QAnQKGIgUhwFUYLCVDFCrKUE1lBavAViFIDlTImbKC5Gm2hB0SlBCBMQiB0UjIQA7'; // found here https://css-tricks.com/data-uris/
+
+                var next = (flux.curSocN + 1) % flux.nSessions;
+                flux.currentSocket = flux.sockets[next];
+                flux.currentSession = flux.sessions[next];
+                flux.curSocN = next;
+            }
+        });
+    </script>
+</body>
+</html>

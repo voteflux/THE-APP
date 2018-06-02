@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="fluxImportApp">
+<head>
+    <meta charset="UTF-8">
+    <title>Flux - Email Members</title>
+    <!-- vendor -->
+    <link rel='stylesheet' href='/css/basscss.min.css'>
+</head>
+<body ng-controller="FluxController as flux">
+
+
+    <div class="container">
+        <div class="clearfix">
+            <div class="m3">
+                <h3>Email Members</h3>
+            </div>
+            <div class="m2">
+                <button class='btn btn-primary p1 m1' ng-click='flux.emailValid()' ng-disabled="flux.emailValidMembersButtonLocked">Email Valid Members</button>
+                <button class='btn btn-primary p1 m1' ng-click="flux.unlockEmailValid()" ng-disabled="flux.clickedUnlockValid">Unlock Email Valid Members</button>
+            </div>
+            <div class="m2">
+                <button class='btn btn-primary p1 m1' ng-click='flux.emailInvalid()' ng-disabled="flux.emailInvalidMembersButtonLocked">Email Invalid Members</button>
+                <button class='btn btn-primary p1 m1' ng-click="flux.unlockEmailInvalid()" ng-disabled="flux.clickedUnlockInvalid">Unlock Email Invalid Members</button>
+            </div>
+            <div class="m2">
+                <button class='btn btn-primary p1 m1' ng-click='flux.emailBadDob()' ng-disabled="flux.emailBadDobButtonLocked">Email Bad Dob Members</button>
+                <button class='btn btn-primary p1 m1' ng-click="flux.unlockEmailBadDob()" ng-disabled="flux.clickedUnlockBadDob">Unlock Email Bad Dob Members</button>
+            </div>
+            <div ng-show="flux.errorMsg.length > 0" class="h3 white bg-red p2 rounded">
+                {{flux.errorMsg}}
+            </div>
+            <div ng-show="flux.msg.length > 0" class="h3">
+                {{flux.msg}}
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/angular.min.js"></script>
+    <script src="/js/lodash.min.js"></script>
+    <script src="/js/common.js"></script>
+    <script src="/js/email-members-ng.js?0000002"></script>
+</body>
+</html>

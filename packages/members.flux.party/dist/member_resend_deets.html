@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="fluxMembersApp">
+<head>
+    <meta charset="UTF-8">
+    <title>Flux - Resend Member Details</title>
+    <!-- vendor -->
+    <link rel='stylesheet' href='/css/basscss.min.css'>
+
+    <link rel="stylesheet" href="/css/members.css">
+    <link rel="stylesheet" href="/css/spinners.css">
+</head>
+<body ng-controller="FluxController as flux" class="p4">
+
+    <h2>Resend Membership Details</h2>
+    <h4>This will send you a link so you can edit/update your membership details.</h4>
+
+    <form ng-submit="flux.resendEmail()">
+        <input class="block field m1 col-6" type="text" ng-model="flux.email" placeholder="Enter your email (same as flux registration email)">
+        <submit class="btn btn-primary rounded m1" ng-click="flux.resendEmail()">Send me the link!</submit>
+    </form>
+
+    <div ng-show="flux.errorMsg">
+        <h4 class="red">{{flux.errorMsg}}</h4>
+    </div>
+
+    <div ng-show="flux.msg">
+        <h4>{{flux.msg}}</h4>
+    </div>
+
+
+    <script src="/js/angular.min.js"></script>
+    <script src="/js/lodash.min.js"></script>
+    <script src="/js/qrcode.js"></script>
+    <script src="/js/common.js"></script>
+    <script src="/js/resend-email-ng.js?n=0000001"></script>
+</body>
+</html>

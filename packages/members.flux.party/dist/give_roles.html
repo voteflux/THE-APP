@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="fluxRoles">
+<head>
+    <meta charset="UTF-8">
+    <title>Flux - Give Roles</title>
+    <!-- vendor -->
+    <link rel='stylesheet' href='/css/basscss.min.css'>
+
+    <link rel="stylesheet" href="/css/members.css">
+    <link rel="stylesheet" href="/css/spinners.css">
+</head>
+<body>
+
+    <div ng-controller="RoleCont as role">
+        <input type="text" width='200px' placeholder="Email of user" ng-model="role.email" class="field block"><br>
+        <input type="text" placeholder="Role to give them (eg admin)" ng-model="role.role" class="field block"><br>
+        <button ng-click="role.give()" class="btn btn-primary block">Give them that thar role</button><br>
+        <textarea ng-model="role.response" placeholder="Any responses will go here.">
+        </textarea>
+    </div>
+
+    <script src="/js/angular.min.js"></script>
+    <script src="/js/lodash.min.js"></script>
+    <script src="/js/FileSaver.min.js"></script>
+    <script src="/js/common.js"></script>
+
+    <script type="text/javascript">
+        var app = angular.module('fluxRoles', []);
+        app.controller('RoleCont', function($scope, $log, $rootScope, $http, $window){
+            var role = this;
+            var s = getAuthToken();
+
+            var output_handler = handle_output_model_decorator(role, 'response');
+
+            role.give = function(){
+                $http.post(flux_api('give_role'), {'s': s, 'role': role.role, 'email': role.email})
+                    .then(output_handler, output_handler);
+            }
+        });
+    </script>
+</body>
+</html>

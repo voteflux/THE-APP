@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="fluxMembersApp">
+<head>
+    <meta charset="UTF-8">
+    <title>Flux Membership</title>
+
+    <link type="text/css" rel='stylesheet' href="/css/basscss.min.css">
+    <link type="text/css" rel='stylesheet' href="/css/members.css">
+</head>
+<body ng-controller="FluxController as flux">
+
+<header class="top-bar">
+    <center>
+
+        <div class="left white px2 absolute">
+            <h2>Flux Member Dash</h2>
+        </div>
+        <ul>
+            <li ng-click="flux.setTab('')" ng-show="flux.isMember">Community</li>
+            <li ng-click="flux.setTab('')" ng-show="flux.isMember">My Details</li>
+            <li ng-click="flux.setTab('')" ng-show="flux.isMember">Branches</li>
+            <li ng-click="flux.setTab('')" ng-show="flux.isMember">Elections</li>
+            <li ng-click="flux.setTab('')" ng-show="flux.isAdmin">Search Members</li>
+            <li ng-click="flux.setTab('')" ng-show="flux.isAdmin">Party Admin</li>
+            <li ng-click="flux.setTab('')" ng-show="flux.isSuperAdmin">Permissions</li>
+        </ul>
+
+    </center>
+
+</header>
+
+<section ng-show="flux.errorMsg" class="bg-red white rounded p1 m1 h3">
+    {{ flux.errorMsg }}
+</section>
+
+<section id="loading" ng-show="flux.isTab('loading')" class="clearfix flex m3 p2">
+    <h1 ng-show="flux.loggedIn">Loading...</h1>
+
+    <div ng-show="!flux.loggedIn">
+        <div ng-show="!flux.loginEmailSent">
+            <h1>You're not logged in. Please enter your email address to be sent a login link:</h1>
+            <input type="text" class="field" model="flux.loginEmail">
+            <button class="btn btn-primary" ng-click="flux.sendLoginEmail()">Get Login Email</button>
+        </div>
+        <div ng-show="flux.loginEmailSent">
+            <h1>Please check your inbox for the login link.</h1>
+            <h2 class="rounded bg-red white p2 m2" ng-show="flux.loginError">{{flux.loginError}}</h2>
+        </div>
+    </div>
+</section>
+
+<section id="search-members" ng-show="flux.isTab('search-members')">
+
+    <div>
+
+
+        <div class="clearfix flex">
+            <div class="col m2">
+                <h3>Search Flux Members</h3>
+
+                <p>
+                    <select id="search-what" ng-model="flux.searchWhat">
+                        <option value="name">Name</option>
+                        <option value="email">Email</option>
+                        <option value="address">Address</option>
+                        <option value="postcode">Postcode</option>
+                    </select>
+                    <label for="search-what">Search what field?</label>
+                </p>
+
+
+            </div>
+
+            <div class="col m2">
+                <h3>Filters:</h3>
+
+                <form ng-submit="flux.search()" class="p2">
+                    <label for="fieldContains">Field contains:</label>
+                    <input id='fieldContains' type="text" ng-model="flux.fieldContains" class="field"><br>
+                </form>
+
+                <p>
+                    <button class="btn btn-outline" ng-click="flux.search()">Search</button>
+                </p>
+                <p ng-show="flux.searching">Searching... please be patient.</p>
+
+            </div>
+
+            <div class="col m2">
+                <h3>Pages:</h3>
+                <p>Page {{ flux.page + 1 }} of {{ flux.totalPages }}</p>
+                <p>
+                    <button class="btn btn-outline p1" ng-click="flux.prevPage()">Previous</button>
+                    <button class="btn btn-outline p1" ng-click="flux.nextPage()">Next</button>
+                </p>
+            </div>
+
+
+        </div>
+    </div>
+    <hr>
+
+
+    <table>
+        <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Contact</th>
+            <th>Address</th>
+            <th>Mark</th>
+        </tr>
+        <tr ng-repeat="m in flux.members">
+            <td>{{m.name}}</td>
+            <td><input type="text" width="50" disabled value="{{m.email}}"></td>
+            <td>{{m.contact_number}}</td>
+            <td><textarea rows="2" cols="20">{{m.address}}</textarea></td>
+            <td>
+                <button ng-show="m.reliable || m.reliable === undefined" class="btn btn-primary bg-red white"
+                        ng-click="flux.markUnreliable(m)">Mark Member Unreliable
+                </button>
+                <button ng-show="m.reliable === false" class="btn btn-primary bg-green white"
+                        ng-click="flux.markReliable(m)">Mark Member Reliable
+                </button>
+            </td>
+        </tr>
+    </table>
+
+
+</section>
+
+<section id="party-matters" ng-show="flux.isTab('party-matters')" class="p3">
+    <div>
+        <div class="clearfix">
+            <div class="mt3 mb3">
+                <h2>Contents</h2>
+                <ul>
+                    <li><a href="#regoList">Party Registration List Generation</a></li>
+                    <li><a href="#regoListGet">Party Registration List Download</a></li>
+                    <li><a href="#regoListWarn">Warn Users of impending AEC validation</a></li>
+                </ul>
+            </div>
+
+            <hr>
+
+            <div class="mt3 mb3" id="regoList">
+                <h2>Party Registration List Gen</h2>
+
+                <label for="jurisdiction">Jurisdiction:</label>
+                <select id="jurisdiction" ng-model="flux.rego.jurisdiction">
+                    <option value="/AUS">/AUS</option>
+                    <option value="/AUS/WA">/AUS/WA</option>
+                    <option value="/AUS/QLD">/AUS/QLD</option>
+                    <option value="/AUS/ACT">/AUS/ACT</option>
+                    <option value="/AUS/NT">/AUS/NT</option>
+                    <option value="/AUS/NSW">/AUS/NSW</option>
+                    <option value="/AUS/TAS">/AUS/TAS</option>
+                    <option value="/AUS/VIC">/AUS/VIC</option>
+                    <option value="/AUS/SA">/AUS/SA</option>
+                </select>
+
+                <br><br>
+
+                <label for="commitResults" class="red">Commit List? (Permanent)</label>
+                <input type="checkbox" id="commitResults" ng-model="flux.rego.commit_results" value="false"/>
+
+                <br><br>
+
+                <label for="nMembers">Number of members needed</label>
+                <input type="number" id="nMembers" ng-model="flux.rego.n_required_members" value="550"/>
+
+                <br><br>
+
+                <label for="revalidation">Are you revalidating? (Not registering for the first time)</label>
+                <input type="checkbox" id="revalidation" ng-model="flux.rego.revalidation" value="false"/>
+
+                <br><br>
+
+                <label for="random">Select random members (default is recent)</label>
+                <input type="checkbox" id="random" ng-model="flux.rego.do_random" value="false"/>
+
+                <br><br>
+
+                <label class="red" for="invalid">Allow Invalid Members (SHOULD USUALLY BE FALSE)</label>
+                <input type="checkbox" id="invalid" ng-model="flux.rego.allow_invalid" value="false"/>
+
+                <br><br>
+
+                <button class="btn btn-primary" ng-click="flux.doRego()">Run Rego List Generation Now</button>
+
+                <br><br>
+
+                <div class="p3 rounded border" readonly ng-show="flux.regoResp">
+                    {{ flux.regoResp }}
+                </div>
+
+            </div>
+
+            <hr>
+
+            <div class="mt3 mb3" id="regoListGet">
+                <h2>Get most recent party rego list for jurisdiction</h2>
+
+                <label for="jurisdictionGet">Jurisdiction:</label>
+                <select id="jurisdictionGet" ng-model="flux.regoGet.jurisdiction">
+                    <option value="/AUS">/AUS</option>
+                    <option value="/AUS/WA">/AUS/WA</option>
+                    <option value="/AUS/QLD">/AUS/QLD</option>
+                    <option value="/AUS/ACT">/AUS/ACT</option>
+                    <option value="/AUS/NT">/AUS/NT</option>
+                    <option value="/AUS/NSW">/AUS/NSW</option>
+                    <option value="/AUS/TAS">/AUS/TAS</option>
+                    <option value="/AUS/VIC">/AUS/VIC</option>
+                    <option value="/AUS/SA">/AUS/SA</option>
+                </select>
+
+                <br><br>
+
+                <button class="btn btn-primary" ng-click="flux.doRegoGet()">Get Rego List</button>
+
+                <br><br>
+
+                <div class="p3 rounded border" readonly ng-show="flux.regoGetResp">
+                    <pre>{{ flux.regoGetResp }}</pre>
+                </div>
+
+            </div>
+
+            <hr>
+
+            <div class="mt3 mb3" id="regoListWarn">
+                <h2>Warn members of impending AEC registration</h2>
+
+                <h4>Custom Message (email and SMS):</h4>
+
+                <label for="jurisdictionSend">Jurisdiction:</label>
+                <select id="jurisdictionSend" ng-model="flux.regoSend.jurisdiction">
+                    <option value="/AUS">/AUS</option>
+                    <option value="/AUS/WA">/AUS/WA</option>
+                    <option value="/AUS/QLD">/AUS/QLD</option>
+                    <option value="/AUS/ACT">/AUS/ACT</option>
+                    <option value="/AUS/NT">/AUS/NT</option>
+                    <option value="/AUS/NSW">/AUS/NSW</option>
+                    <option value="/AUS/TAS">/AUS/TAS</option>
+                    <option value="/AUS/VIC">/AUS/VIC</option>
+                    <option value="/AUS/SA">/AUS/SA</option>
+                </select>
+
+                <br><br>
+
+                <strong>Note: this will send to THE MOST RECENT batch in a given jurisdiction.</strong>
+
+                <br><br>
+
+                Suggested template:
+                <p>
+                    Every 3 years the AEC is required to ensure Flux is still an
+                    eligible political party.
+                    You're on the list of members we've provided to the AEC to prove this.
+                    This means you may be contacted by the AEC in the next week
+                    (either by email or phone). If you are contacted, you'll
+                    need to respond 'YES' to the question 'Are you a member
+                    of "VOTEFLUX.ORG | Upgrade Democracy!"?' (which is our
+                    full party name).
+                </p>
+
+                The full message will be everything inside this box:
+                <p class="border rounded m3 p3">
+                    Subject: Flux Membership Audit<br>
+                    Hi {fname},
+                    <br>
+                    <textarea ng-model="flux.regoSend.msg">
+
+                    </textarea>
+                    <br>
+                    Thanks, and have a great week,<br>
+                    the Flux Membership Robot
+                </p>
+
+                <br>
+
+                <button class="btn btn-primary" ng-click="flux.doRegoSend()">Send Msg Now!</button>
+
+                <br>
+
+                <div class="p2 m2 border rounded" ng-show="flux.regoSendResp">
+                    <pre>{{flux.regoSendResp}}</pre>
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+</section>
+
+<script src="/js/angular.min.js"></script>
+<script src="/js/common.js"></script>
+<script src="/js/lodash.min.js"></script>
+<script src="/js/ng-member.js"></script>
+
+</body>
+</html>

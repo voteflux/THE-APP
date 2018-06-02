@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="fluxMembersApp">
+<head>
+    <meta charset="UTF-8">
+    <title>Flux - Receipt Generator</title>
+    <!-- vendor -->
+    <link rel='stylesheet' href='/css/basscss.min.css'>
+
+    <style>
+        table, th, td {
+            border: 1px solid black;
+        }
+        th {
+            background-color: #aaa;
+        }
+    </style>
+
+</head>
+<body ng-controller="NewMemberController as nm" class="m3">
+
+
+    <div>
+        <input class="field" type="text" ng-model="nm.user.fname">fname<br>
+        <input class="field" type="text" ng-model="nm.user.mnames">mnames<br>
+        <input class="field" type="text" ng-model="nm.user.sname">sname<br>
+        <input class="field" type="text" ng-model="nm.user.addr_country">country<br>
+        <input class="field" type="text" ng-model="nm.user.addr_postcode">postcode<br>
+        <input class="field" type="text" ng-model="nm.user.addr_suburb">suburb<br>
+        <input class="field" type="text" ng-model="nm.user.addr_street">street<br>
+        <input class="field" type="text" ng-model="nm.user.dobday">day<br>
+        <input class="field" type="text" ng-model="nm.user.dobmonth">month<br>
+        <input class="field" type="text" ng-model="nm.user.dobyear">year<br>
+        <input class="field" type="text" ng-model="nm.user.contact_number">number<br>
+        <input class="field" type="text" ng-model="nm.user.email">email<br>
+        <input class="field" type="text" ng-model="nm.user.referral">referral<br>
+        <input class="field" type="text" ng-model="nm.user.comment">comment<br>
+        <button class="btn btn-outline" ng-click="nm.submit_member()">Submit</button>
+    </div>
+
+    <code ng-model="nm.response">
+        {{nm.response}}
+    </code>
+
+    <script src="/js/angular.min.js"></script>
+    <script src="/js/lodash.min.js"></script>
+    <script src="/js/common.js"></script>
+    <script type="text/javascript">
+        var app = angular.module('fluxMembersApp', []);
+        app.controller('NewMemberController', function($scope, $log, $rootScope, $http, $window){
+            var nm = this;
+
+            nm.response = "No response yet";
+            nm.user = {};
+
+            nm.submit_member = function(){
+                nm.user.dob = new Date();
+                nm.user.dob.setUTCDate(nm.user.dobDay);
+                nm.user.dob.setUTCFullYear(nm.user.dobYear);
+                nm.user.dob.setUTCMonth(nm.user.dobMonth - 1);
+                nm.user.dob.setUTCHours(0);
+                $http.post(flux_api('register/all_at_once'), nm.user).then(nm.handle_response, nm.handle_response);
+            }
+            nm.handle_response = function(resp){
+                nm.response = JSON.stringify(resp);
+            }
+        });
+
+    </script>
+</body>
+</html>

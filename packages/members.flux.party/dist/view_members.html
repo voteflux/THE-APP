@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="fluxMembersApp">
+<head>
+    <meta charset="UTF-8">
+    <title>Flux - Membership</title>
+    <!-- vendor -->
+    <link rel='stylesheet' href='/css/basscss.min.css'>
+
+    <link rel="stylesheet" href="/css/members.css">
+    <link rel="stylesheet" href="/css/spinners.css">
+</head>
+<body ng-controller="FluxController as flux">
+
+    <div class="m2">
+        <div class="">
+            <div class="">
+                <div ng-show="flux.errorMsg.length > 0" class="p2 bg-red rounded">
+                    <h2 class="white">{{flux.errorMsg}}</h2>
+                </div>
+                <h1 ng-show="flux.showLoading">LOADING....</h1>
+                <h1 ng-show="!flux.showLoading">Flux Membership Search</h1>
+
+                <div class="clearfix flex">
+                    <div class="col-4 m2">
+                        <h3>Showing {{flux.nRecords}} members</h3>
+
+                        <input type="checkbox" id="showAllCheckbox" ng-model="flux.filterShowAll">
+                        <label for="showAllCheckbox">Show all members, even when large? (can slow down page A LOT)</label>
+                        <p>Currently will not render more than {{flux.renderLimit}} without ticking the above box.</p>
+
+                        <p>Apply Filters: <button class="btn btn-outline" ng-click="flux.updateRender()">Update Search Parameters</button></p>
+                        <p ng-show="flux.fUpdatingRender">Updating... please be patient.</p>
+
+                    </div>
+
+                    <div class="col-4 m2">
+                        <h3>Filters:</h3>
+
+                        <label for="nameFilter">Name contains:</label>
+                        <input id='nameFilter' type="text" ng-model="flux.filterName" class="field"><br>
+
+                        <select ng-model="flux.filterVolunteers" id="volSelect" class="field">
+                            <option value="all" selected>All</option>
+                            <option value="yes">Yes</option>
+                            <option value="no">No</option>
+                        </select>
+                        <label for="volSelect">Volunteer Status?</label>
+                        <br>
+
+                        <select ng-model="flux.filterState" id="stateSelect" class="field">
+                            <option value="all" selected>All</option>
+                            <option ng-repeat="s in ['nsw', 'qld', 'vic', 'nt', 'wa', 'sa', 'act', 'tas', 'unknown'] track by $index" value="{{s}}">{{s}}</option>
+                        </select>
+                        <label for="stateSelect">State Filter</label>
+                        <br>
+
+                        <select ng-model="flux.filterSuperVols" id="supervolSelect" class="field">
+                            <option value="all" selected>All</option>
+                            <option ng-repeat="s in ['yes', 'no'] track by $index" value="{{s}}">{{s}}</option>
+                        </select>
+                        <label for="stateSelect">SuperVol Filter</label>
+                        <br>
+
+                        <select ng-model="flux.filterHTVs" id="htvSelect" class="field">
+                            <option value="all" selected>All</option>
+                            <option ng-repeat="s in ['yes', 'no'] track by $index" value="{{s}}">{{s}}</option>
+                        </select>
+                        <label for="stateSelect">HTV Filter</label>
+                        <br>
+                    </div>
+
+                    <div class="col-4 m2">
+                        <h3>Export</h3>
+                        <button ng-click="flux.saveCSV()" class="btn btn-outline">Save CSV (filtered members only)</button><br>
+                    </div>
+
+                </div>
+
+                <hr>
+
+                <table ng-if="flux.filterName != '' || flux.filterShowAll || flux.toRender.length < flux.renderLimit">
+                    <tr>
+                        <th>Name</th><th>Email</th><th>Contact</th><th>Comment</th><th>Address</th><th>Vol</th><th>Log (debug)</th><th>Edit User</th>
+                    </tr>
+                    <tr ng-repeat="m in flux.toRender">
+                        <td>{{m.name}}</td>
+                        <td><input type="text" width="50" disabled value="{{m.email}}"></td>
+                        <td>{{m.contact_number}}</td>
+                        <td><textarea rows="3" cols="30">{{m.member_comment}}</textarea></td>
+                        <td><textarea rows="2" cols="20">{{m.address}}</textarea></td>
+                        <td>{{m.volunteer}}</td>
+                        <td><a ng-click="flux.logDeets(m)">Log</a></td>
+                        <td><a href="member_details.html?s={{m.s}}" target="_blank">Edit User</a></td>
+                    </tr>
+                </table>
+                <p ng-show="flux.filterName == ''">
+                    NB: Unless the 'show all' checkbox is ticked, when there is no name filter not all members will be shown (page becomes unresponsive).
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/angular.min.js"></script>
+    <script src="/js/lodash.min.js"></script>
+    <script src="/js/FileSaver.min.js"></script>
+    <script src="/js/common.js"></script>
+    <script src="/js/view-members-ng.js?0000018"></script>
+</body>
+</html>

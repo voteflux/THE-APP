@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="fluxImportApp">
+<head>
+    <meta charset="UTF-8">
+    <title>Flux - Membership</title>
+    <!-- vendor -->
+    <link rel='stylesheet' href='/css/basscss.min.css'>
+</head>
+<body ng-controller="FluxController as flux">
+
+
+    <div class="container">
+        <div class="clearfix">
+            <div class="m3">
+                <h3>Member Details to import, csv</h3>
+                <h5>date, name, email, address, dob, contact, onAECRoll, referrer, comment, validated</h5>
+                <textarea id="import-csv" cols="100" rows="10" class="block field" ng-model="flux.import_csv"></textarea><br>
+                <button ng-disabled="flux.disableImportButton" ng-click="flux.beginImport()" class="btn btn-primary">Import</button>
+            </div>
+            <div ng-show="flux.errorMsg.length > 0" class="h3 white bg-red p2 rounded">
+                {{flux.errorMsg}}
+            </div>
+            <div ng-show="flux.msg.length > 0" class="h3">
+                {{flux.msg}}
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/angular.min.js"></script>
+    <script src="/js/lodash.min.js"></script>
+    <script src="/js/common.js"></script>
+    <script src="/js/import-members-ng.js?0000001"></script>
+</body>
+</html>

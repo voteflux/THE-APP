@@ -1,0 +1,35 @@
+[ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
+    display: none !important;
+}
+
+body {
+    min-height: 100vh;
+    background-image: linear-gradient(to top left, #21212B 0%, #4E4277 100%);
+    color: white;
+}
+a {
+    color: #e3580d;
+}
+form input {
+    width: 14rem;
+}
+.container {
+    max-width: 34em;
+}
+.logo {
+    max-width: 40%;
+}
+.btn-primary {
+    background-color: #e3580d;
+}
+.footer-img {
+    display: flex;
+    justify-content: center;
+}
+.footer-img img {
+    position: fixed;
+    bottom: 0;
+    max-width: initial;
+    z-index: -1;
+    max-height: 15vh;
+}
