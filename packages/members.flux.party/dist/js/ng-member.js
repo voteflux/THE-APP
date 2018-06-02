@@ -43,13 +43,7 @@ app.controller('FluxController', function($scope, $log, $rootScope, $http, $wind
     //
 
     flux.api = function(path){
-        if (flux.debug){
-            return "http://localhost:5000/" + path;
-        }
-        if(window.location.hostname == "flux-api-dev.herokuapp.com") {
-            return "https://flux-api-dev.herokuapp.com/" + path;
-        }
-        return "https://api.voteflux.org/" + path;
+        return flux_api(path, flux.debug);
     };
 
     //
