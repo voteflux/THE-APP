@@ -58,9 +58,11 @@ if (hashParam('s')) {
 
 
 function saveMemberSecretOnFluxDomains() {
+    console.log("saveMemberSecretOnFluxDomains called")
     if (getAuthToken()) {
         var s = getAuthToken();
         function sendSToUrlAsHashParam(url) {
+            console.log("Sending S to localstorage at", url)
             if (s) {
                 var ifrm = document.createElement("iframe")
                 ifrm.setAttribute('src', url + "#s=" + s)
