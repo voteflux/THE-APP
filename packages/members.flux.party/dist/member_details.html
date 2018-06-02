@@ -10,7 +10,7 @@
 
 </head>
 <body ng-controller="FluxController as flux">
-    <div ng-show="flux.showLoading" class="absolute bg-white block col-12" style="height: 100%;">
+    <div ng-show="flux.showLoading" class="fixed bg-white block col-12 top-0 bottom-0 left-0 right-0" style="height: 100%;">
         <h1 ng-show="flux.showLoading" class="block px2 center">Loading...</h1>
         <div class="sk-folding-cube">
             <div class="sk-cube1 sk-cube"></div>
@@ -20,7 +20,7 @@
         </div>
     </div>
 
-    <div ng-show="flux.showLoggedOut" class="absolute bg-white block col-12 ng-cloak" style="height: 100%;">
+    <div ng-show="flux.showLoggedOut" class="fixed bg-white block col-12 ng-cloak top-0 bottom-0 left-0 right-0" style="height: 100%;">
         <div class="center">
             <h1 class="block p2 center">You are not Logged In</h1>
             <a href="/login.html" class="btn m3 btn-primary h3 center white text-decoration-none">Log In</a>
