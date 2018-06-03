@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="fluxMembersApp">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Flux - Membership</title>
+    <!-- vendor -->
+    <link rel='stylesheet' href='/css/basscss.min.css'>
+    <link rel="stylesheet" href="/css/members.css">
+    <link rel="stylesheet" href="/css/spinners.css">
+
+</head>
+
+<body ng-controller="FluxController as flux">
+    <div ng-show="flux.showLoading" class="fixed bg-white block col-12 top-0 bottom-0 left-0 right-0" style="height: 100%;">
+        <h1 ng-show="flux.showLoading" class="block px2 center">Loading...</h1>
+        <div class="sk-folding-cube">
+            <div class="sk-cube1 sk-cube"></div>
+            <div class="sk-cube2 sk-cube"></div>
+            <div class="sk-cube4 sk-cube"></div>
+            <div class="sk-cube3 sk-cube"></div>
+        </div>
+    </div>
+
+    <div ng-show="flux.showLoggedOut" class="fixed bg-white block col-12 ng-cloak top-0 bottom-0 left-0 right-0" style="height: 100%;">
+        <div class="center">
+            <h1 class="block p2 center">You are not Logged In</h1>
+            <a href="/login" class="btn m3 btn-primary h3 center white text-decoration-none">Log In</a>
+        </div>
+    </div>
+
+
+    <div class="clearfix">
+        <div class="lg-col lg-col-6 p2">
+
+            <div id="set-member-details">
+                <h1 ng-show="flux.showLoading">LOADING....</h1>
+                <h1>Flux Membership Details</h1>
+
+                <p>
+                    Logged in as: {{ flux.name || " ".join([flux.fname, flux.mnames, flux.sname]) }}
+                    <br>
+                    <input class='btn btn-outline' type='submit' value='Log Out' ng-click='flux.logout()'>
+                </p>
+
+                <div class='center'>
+                    <h4 class='center p2 border rounded'>This page is private! Please don't share your special link with anyone.</h4>
+                </div>
+
+                <div ng-show="flux.errorMsg.length > 0" class="p2 bg-red rounded">
+                    <h2 class="white">{{flux.errorMsg}}</h2>
+                </div>
+
+                <h3>Your details be filled
+                    <span class="red">and validate against the electoral roll</span> in order to be a valid member. You can check your details
+                    against the Electoral Roll at the bottom of this page.</h3>
+
+                <p>Some things to check:
+                    <br>
+                    <ul>
+                        <li>Make sure there are no typos in your name (we just copy and paste)</li>
+                        <li>Make sure
+                            <strong class='red'>only</strong> relevant middle names are included</li>
+                        <li>Make sure you include your postcode, suburb, and street matching the AEC records</li>
+                        <li>Make sure your date of birth is correct</li>
+                    </ul>
+                </p>
+
+                <h3>Your details:
+                    <span ng-show="flux.detailsValid && !flux.needsValidating" class="green">are valid!</span>
+                    <span ng-show="!flux.detailsValid && !flux.needsValidating" class="red">are invalid! Please fix below.</span>
+                    <span ng-show="flux.needsValidating" class="blue">are waiting for validation from a Flux staff member.</span>
+                </h3>
+
+                <h3 class="red" ng-show="flux.needsUpdating">
+                    Notice: Due to a database upgrade, it looks like you need up update your profile.
+                </h3>
+
+                <form class="sm-col-12">
+
+                    <h3>Name</h3>
+                    <small>Alternate remembered full name:
+                        <strong>{{ flux.name || "None" }}</strong>
+                    </small>
+                    <br>
+                    <label>First Name</label>
+                    <input required ng-model="flux.fname" type="text" id="member-fname" class="block col-12 mb1 field">
+                    <label>Middle Names</label>
+                    <input ng-model="flux.mnames" type="text" id="member-mnames" class="block col-12 mb1 field">
+                    <label>Surname Name</label>
+                    <input required ng-model="flux.sname" type="text" id="member-sname" class="block col-12 mb1 field">
+
+                    <h3>Details</h3>
+                    <strong>Please Note:</strong> These details must match those on the electoral roll.
+                    <br>
+                    <small>Alternate remembered full address:
+                        <strong>{{ flux.address || "None" }}</strong>
+                    </small>
+                    <br>
+
+                    <label>Country:</label>
+                    <select ng-model="flux.addr_country" class="field col-12 block mb1">
+                        <option selected value="au">Australia</option>
+                    </select>
+
+                    <label>Postcode: </label>
+                    <input ng-model="flux.addr_postcode" type="text" class="field block col-12 mb1" ng-change="flux.updatePostcode()">
+
+                    <label>Suburb: </label>
+                    <div class="block">
+                        <select ng-model="flux.addr_suburb" class="field inline-block col-8 mb1" ng-change="flux.updateSuburb()">
+                            <option selected ng-if="!flux.addr_suburb && flux.testPC() && !flux.loading['suburbs']" value="{{null}}">Please Choose...</option>
+                            <option selected ng-if="flux.addr_suburb && flux.testPC()" value="{{flux.addr_suburb}}">{{flux.addr_suburb}}</option>
+                            <option selected ng-if="!flux.testPC()" value="{{null}}">Check Postcode for error</option>
+                            <option selected ng-if="flux.loading['suburbs']">Loading...</option>
+                            <option ng-repeat="suburb in flux.suburbs" value="{{suburb}}">{{suburb}}</option>
+                        </select>
+                        <p class="inline-block col-3">
+                            <span ng-if="flux.loading['suburbs']">Loading...</span>
+                            <span ng-if="flux.suburbError" class="red">{{flux.suburbError}}</span>
+                        </p>
+                    </div>
+
+                    <div class="block">
+                        <div class="inline-block col-3 m0">
+                            <label>Unit and Street Number</label>
+                            <input required ng-model="flux.addr_street_no" type="text" class="field mb1 col-12" placeholder="eg: u52/170">
+                        </div>
+                        <div class="inline-block col-8">
+                            <label>Street: </label>
+                            <div class="">
+                                <select ng-model="flux.addr_street" class="field inline-block col-8 mb1">
+                                    <option selected ng-if="flux.addr_street" value="{{flux.addr_street}}">{{flux.addr_street}}</option>
+                                    <option selected ng-if="!flux.addr_street && !flux.loading['streets']" value="{{null}}">Please Choose...</option>
+                                    <option selected ng-if="!flux.testPC()" value="{{null}}">Check Postcode for error</option>
+                                    <option selected ng-if="flux.loading['streets']">Loading...</option>
+                                    <option ng-repeat="street in flux.streets" value="{{street}}">{{street}}</option>
+                                </select>
+                                <p ng-if="flux.loading['streets']" class="inline-block col-3">Loading...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <label>Are you on the Australian Electoral Roll?</label>
+                    <select class='field col-3 block' id='member-aec-roll' ng-model="flux.onAECRoll_raw">
+                        <option value="No" selected="selected">No</option>
+                        <option value="Yes">Yes</option>
+                    </select>
+
+                    <label>Your date of birth
+                        <small>(required by AEC)</small>
+                    </label>
+                    <div class="select-group">
+                        <select class='field col-3 mb1 select' id="member-dob-day" ng-model="flux.dobDay">
+                            <option value="">Day</option>
+                            <option ng-repeat="i in _.range(1, 32) track by $index" value="{{i}}">{{i}}</option>
+                        </select>
+                        <select class='field col-3 mb1 select' id="member-dob-month" ng-model="flux.dobMonth">
+                            <option value="">Month</option>
+                            <option value="1">January</option>
+                            <option value="2">February</option>
+                            <option value="3">March</option>
+                            <option value="4">April</option>
+                            <option value="5">May</option>
+                            <option value="6">June</option>
+                            <option value="7">July</option>
+                            <option value="8">August</option>
+                            <option value="9">September</option>
+                            <option value="10">October</option>
+                            <option value="11">November</option>
+                            <option value="12">December</option>
+                        </select>
+                        <select class='field col-3 mb1 select' id="member-dob-year" ng-model="flux.dobYear">
+                            <option value="">Year</option>
+                            <option ng-repeat="i in _.range(2016, 1900, -1) track by $index" value="{{i}}">{{i}}</option>
+                        </select>
+                    </div>
+
+                    <h3>Contact</h3>
+                    <label>Email:</label>
+                    <input ng-model="flux.email" type="text" id="member-email" class="block col-12 mb1 field">
+
+                    <label>You contact number</label>
+                    <input class='block col-12 mb1 field' type="text" id="member-contact-number" ng-model="flux.contact_number">
+
+                    <h3>Member Options</h3>
+
+                    <label class="block col-12 mb2">
+                        <input type="checkbox" id="opts-sms-opt-out" ng-model="flux.smsOptOut"> I'd like to
+                        <strong>not</strong> receive SMSs
+                    </label>
+
+                    <label class="block col-12 mb2">
+                        <input type="checkbox" id="signup-volunteer" ng-model="flux.volunteer"> I'm interested in volunteering
+                    </label>
+
+                    <label class="block col-12 mb2">
+                        <input type="checkbox" id="signup-htv" ng-model="flux.volhtv"> I want to volunteer on election day!
+                    </label>
+
+                    <label class="block col-12 mb2">
+                        <input type="checkbox" id="signup-super-vol" ng-model="flux.supervol"> I want to be a super volunteer! (I have more than 15 hours a week to dedicate to Flux)
+                    </label>
+
+                    <label class="block col-12 mb2">
+                        <input type="checkbox" id="signup-state-consent" ng-model="flux.state_consent"> I would like to be included in state parties.
+                    </label>
+
+                    <label class="block col-12 mb2">
+                        <input type="checkbox" id="signup-candidature-federal" ng-model="flux.candidature_federal"> I am willing to stand as a candidate at the federal level.
+                    </label>
+
+                    <label class="block col-12 mb2">
+                        <input type="checkbox" id="signup-candidature-state" ng-model="flux.candidature_state"> I am willing to stand as a candidate at the state level.
+                    </label>
+
+                    <label class="block col-12 mb2">
+                        <input type="checkbox" id="signup-candidature-local" ng-model="flux.candidature_local"> I am willing to stand as a candidate at the local level.
+                    </label>
+
+                    <div class='center p2' ng-show="flux.showMemberSubmit">
+                        <input class='btn btn-primary' type="submit" value="Update Membership Details" ng-click="flux.saveUserDetails()">
+                        <input class='btn btn-outline ml2' type='submit' value='Log Out' ng-click='flux.logout()'>
+                    </div>
+
+                    <div ng-show="!flux.showMemberSubmit">
+                        <h3>Saving...</h3>
+                    </div>
+
+                    <div ng-show="flux.errorMsg">
+                        <h4 class="red">{{flux.errorMsg}}</h4>
+                    </div>
+
+                    <div ng-show="flux.showMsg">
+                        <h4>{{flux.msg}}</h4>
+                    </div>
+
+                </form>
+            </div>
+
+            <div id="other-membership-options" class="m3 center">
+                <hr>
+                <h3>Other Membership Options</h3>
+                <a class="btn bg-red white rounded" ng-click="flux.deleteUser()">Revoke Membership</a>
+            </div>
+
+            <!-- <div id="app-login" class="m3 center">
+                    <hr>
+                    <h3>App QR Login</h3>
+                    <p>
+                        To login to the Flux app via QR code, please scan the below:
+                    </p>
+                    <div id="app-login-qr" style="max-width: 256px;" class="mx-auto"></div>
+                </div> -->
+
+        </div>
+        <div class="lg-col lg-col-6 p2">
+            <h2 class="center">Check your details against the Electoral Roll below</h2>
+
+            <iframe src="https://check.aec.gov.au/" style="width: 100%; min-height: 2000px;" onload="scroll(0,0)"></iframe>
+        </div>
+    </div>
+
+    <script src="/js/angular.min.js"></script>
+    <script src="/js/lodash.min.js"></script>
+    <script src="/js/qrcode.js"></script>
+    <script src="/js/common.js"></script>
+    <script src="/js/membership-ng.js?n=0000004"></script>
+</body>
+
+</html>

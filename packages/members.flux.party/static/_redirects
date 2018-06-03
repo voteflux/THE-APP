@@ -1,2 +1,3 @@
 /main-website   https://voteflux.org    301
 /	/login	302
+/login.html /login  301
