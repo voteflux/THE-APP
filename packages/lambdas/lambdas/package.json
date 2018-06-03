@@ -15,7 +15,8 @@
   "license": "MIT",
   "dependencies": {
     "mongodb": "^3.0.6",
-    "ramda": "^0.25.0"
+    "ramda": "^0.25.0",
+    "serverless-dynamodb-local": "^0.2.30"
   },
   "devDependencies": {
     "serverless-domain-manager": "^2.3.6"

@@ -187,7 +187,7 @@ const update_public_stats = async () => {
     const all_members = await find_members(_onRoll).project({timestamp: 1, address: 1, addr_postcode: 1, dobYear: 1}).toArray()
     console.log(`Public Stats generator got ${all_members.length} members`)
 
-    stats.signup_times = R.compose(R.sort, R.map(t => t | 0), R.map(R.prop('timestamp')), R.filter(m => m.timestamp !== undefined))(all_members)
+    stats.signup_times = R.compose(R.sort((a,b) => a - b), R.map(m => m.timestamp | 0), R.filter(m => m.timestamp !== undefined))(all_members)
 
     stats.dob_years = R.compose(R.countBy(R.prop('dobYear')), R.filter(m => m.dobYear !== undefined))(all_members)
 
