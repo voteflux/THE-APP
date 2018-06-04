@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Note: no tests yet...\" && exit 0",
-    "deploy": "AWS_PROFILE=flux-api sls deploy"
+    "deploy": "./travis-deploy.sh"
   },
   "repository": {
     "type": "git",
