@@ -188,6 +188,7 @@ const update_public_stats = async () => {
     console.log(`Public Stats generator got ${all_members.length} members`)
 
     stats.signup_times = R.compose(R.sort((a,b) => a - b), R.map(m => m.timestamp | 0), R.filter(m => m.timestamp !== undefined))(all_members)
+    console.log(`SIGNUP_TIMES: N=${stats.signup_times.length}, ${stats.signup_times.toString().slice(0,300)}`)
 
     stats.dob_years = R.compose(R.countBy(R.prop('dobYear')), R.filter(m => m.dobYear !== undefined))(all_members)
 
