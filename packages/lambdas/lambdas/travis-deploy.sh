@@ -10,7 +10,7 @@ deploy(){
     exit $!
 }
 
-
+env | grep TRAVIS
 if [ "$TRAVIS" != "true" ]; then
     deploy "$1"
 elif [ "$TRAVIS_PULL_REQUEST" != "false" ]; then
