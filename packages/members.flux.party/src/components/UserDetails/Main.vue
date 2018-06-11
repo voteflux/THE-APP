@@ -19,7 +19,7 @@
 
             <UiSection title="Your Address">
                 <h5>(must match electoral roll)</h5>
-                <AddressEditor class="" :user="user" />
+                <AddressEditor class="row" :user="user" />
             </UiSection>
 
             <UiSection title="Other Details">

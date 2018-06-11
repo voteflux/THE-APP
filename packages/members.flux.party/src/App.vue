@@ -74,6 +74,11 @@ export default /*class App extends Vue*/ {
                     }
                 })
             );
+        },
+        logout() {
+            this.$flux.auth.remove()
+            this.user = undefined
+            this.loginState = Cs.IS_NOT_LOGGED_IN
         }
     },
     created() {
@@ -85,11 +90,15 @@ export default /*class App extends Vue*/ {
         MsgBus.$on(M.GOT_USER_DETAILS, (user) => {
             this.user = user;
         });
+
+        this.$on(M.LOGOUT, this.logout)
+        MsgBus.$on(M.LOGOUT, this.logout)
     }
 };
 </script>
 
 <style lang="scss">
+// app container styling
 #app {
     font-family: "Avenir", Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
@@ -98,6 +107,8 @@ export default /*class App extends Vue*/ {
     // color: #2c3e50;
     color: #121c25;
 }
+
+// transitions - used mostly for routes
 .fade-enter-active,
 .fade-leave-active {
     transition-property: opacity;
@@ -113,16 +124,44 @@ export default /*class App extends Vue*/ {
     opacity: 0;
 }
 
+// main sitewide styling
+
 @import "tachyons";
 
+// not sure if we'll use this
+$btn-pri-color: #e3580d;
+$btn-norm-color: #ddd;
+
+.depressed-btn-shadow {
+    box-shadow: inset 0 0 0 20rem rgba(0,0,0,.125), inset 0 3px 4px 0 rgba(0,0,0,.25), 0 0 1px rgba(0,0,0,.125);
+}
+
 .btn {
-    // @extend .dn;
     @extend .pa2;
     @extend .ba;
+    // @extend .bw1;
     @extend .br2;
-    @extend .no-underline;
-    // @extend .rounded;
+    @extend .b--gray;
+    background-color: $btn-norm-color;
+    transition: box-shadow 0.3s ease-in-out;
 }
+
+.btn:active:enabled {
+    @extend .depressed-btn-shadow;
+}
+
+a.btn {
+    @extend .no-underline;
+}
+
+button {
+    @extend .btn;
+}
+
+button:hover {
+    @extend .shadow-2;
+}
+
 
 // note - but exists where a <button class="tool-btn"> in another component
 // will not inherit some of these. Workaround (as in `Editable.vue`) is to
@@ -193,10 +232,12 @@ button.tool-btn:disabled {
 
 .input {
     display: inline-block;
-    width: 100%;
-    height: 100%;
-    @extend .pa1;
+    @extend .pa2;
     @extend .ba;
+}
+
+input {
+    @extend .input;
 }
 
 .inputGroup .input {

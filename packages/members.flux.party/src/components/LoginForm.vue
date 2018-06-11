@@ -1,6 +1,6 @@
 <template>
     <div>
-        <h3>Login to Flux UI</h3>
+        <flux-logo title="Login"/>
         <div id="form-group">
 
             <div v-if="state == EMAIL_SENT">
@@ -23,7 +23,7 @@
 
                 <p class="mt4" v-if="shouldShowAdvanced()">
                     <h5>Debug only:</h5>
-                    <input v-model.trim="advSecret" placeholder="API Token" />
+                    <input v-model.trim="advSecret" placeholder="API Token" class="mr2"/>
                     <button v-on:click="advStoreSecret()">Store API Token</button>
                 </p>
             </div>

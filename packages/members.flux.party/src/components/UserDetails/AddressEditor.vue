@@ -1,17 +1,20 @@
 <template>
-    <div style="min-height: 5rem;">
-        <div v-if="state == DISPLAY" class="flex flex-row items-center">
-            <div class="w-70">
+    <div style="min-height: 6rem;" class="flex flex-row items-center">
+        <div v-if="state == DISPLAY" class="flex flex-row items-center w-100">
+            <div class="w-30 pl2 v-mid">
+                Address as on electoral roll
+            </div>
+            <div class="w-40 v-mid">
                 {{ user.addr_street_no }} {{ user.addr_street }} <br>
                 {{ user.addr_suburb }} <br>
                 {{ user.addr_postcode }}
             </div>
-            <div class="w-30">
+            <div class="w-30 v-mid">
                 <button class="tool-btn db center" v-on:click="initAddrForm()">✏️ Edit</button>
             </div>
         </div>
 
-        <div v-else>
+        <div v-else class="w-100">
             <div v-if="isLoading" class="flex justify-center">
                 Loading...
             </div>
@@ -21,7 +24,7 @@
             <div v-else class="flex felx-row items-center">
 
                 <div class="sidebtns pr2">
-                    <button class="tool-btn" v-on:click="prevFormPart()">🔙 Back</button>
+                    <button class="tool-btn f5" v-on:click="prevFormPart()">🔙 Back</button>
                 </div>
                 <div class="w-60">
                     <div v-if="state == INPUT_POSTCODE" class="flex flex-row flex-wrap items-center justify-center">
@@ -31,7 +34,7 @@
                     <div v-if="state == INPUT_SUBURB">
                         <div v-if="suburbs.length > 0">
                             <label>Suburb:</label>
-                            <select class="input w-90" v-model="newAddress.addr_suburb">
+                            <select class="input" v-model="newAddress.addr_suburb">
                                 <option v-for="suburb in suburbs" v-bind:key="suburb" :value="suburb">{{ suburb }}</option>
                             </select>
                         </div>
@@ -41,19 +44,19 @@
                     </div>
                     <div v-if="state == INPUT_STREET" class="flex flex-row flex-wrap items-center">
                         <div class="w-30-ns w-100 pr2">
-                            <label class="mr2">Street Number:</label>
-                            <input type="text" class="input w-90" v-model="newAddress.addr_street_no">
+                            <label class="mr2">Street No.:</label>
+                            <input type="text" v-model="newAddress.addr_street_no" size="10">
                         </div>
                         <div class="w-70-ns w-100">
                             <label>Street:</label>
-                            <select class="input w-90" v-model="newAddress.addr_street">
+                            <select class="input" v-model="newAddress.addr_street">
                                 <option v-for="street in streets" v-bind:key="street" :value="street">{{ street }}</option>
                             </select>
                         </div>
                     </div>
                 </div>
                 <div class="sidebtns pl2">
-                    <button class="tool-btn" v-on:click="nextFormPart()" :class="nextBtnCls()" :disabled="!canGoNext()">
+                    <button class="tool-btn f5" v-on:click="nextFormPart()" :class="nextBtnCls()" :disabled="!canGoNext()">
                         <span v-if="state == INPUT_STREET">💾 Save</span>
                         <span v-else>➡️ Next</span>
                     </button>

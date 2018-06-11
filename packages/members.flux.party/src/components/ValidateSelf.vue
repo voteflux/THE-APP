@@ -28,7 +28,7 @@
                 <Error>{{ validationReason }}</Error>
 
                 <div v-if="captchaStatus == false">
-                    <button class="db mv2 pa2" v-on:click="startAgain()">Try Again</button>
+                    <button class="btn db mv2 pa2" v-on:click="startAgain()">Try Again</button>
                 </div>
 
                 <div v-else>
@@ -40,7 +40,7 @@
 
         <div v-show="state == SOCKET_CLOSED">
             Connection lost.
-            <button class="db mv2 pa2" v-on:click="startAgain()">Reconnect</button>
+            <button class="btn db mv2 pa2" v-on:click="startAgain()">Reconnect</button>
         </div>
 
         <div v-show="state == ERROR">
@@ -48,7 +48,7 @@
                 Oh no! An error!
             </p>
             <Error v-show="err.socket.msg">{{ err.socket.msg }}</Error>
-            <button class="db mv2 pa2" v-on:click="startAgain()">Try Again?</button>
+            <button class="btn db mv2 pa2" v-on:click="startAgain()">Try Again?</button>
             <router-link :to="R.Dashboard">Back to Dashboard</router-link>
         </div>
     </UiSection>

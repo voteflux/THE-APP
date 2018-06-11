@@ -1,10 +1,6 @@
 <template>
     <div>
-        <h2 class="h2">
-            <img src="/img/flux-mark-optimised.svg" class="h-inherit dib v-mid">
-            <img src="/img/flux-text-logo.svg" class="h-50 dib v-mid ml2"> &mdash;
-            <span class="dib v-mid">Dashboard</span>
-        </h2>
+        <flux-logo title="Dashboard"/>
 
         <UiSection title="Your Summary">
             <UserSummary :user='user'></UserSummary>
@@ -21,6 +17,10 @@
             </ul>
         </ui-section>
 
+        <ui-section title="Log Out">
+            <button class="" v-on:click="MsgBus.$emit(M.LOGOUT)">Log Out Now</button>
+        </ui-section>
+
     </div>
 </template>
 
@@ -34,6 +34,8 @@ import { UiSection } from "./common";
 import Routes from "../routes"
 import Roles from "../lib/roles";
 
+import {M, MsgBus} from "../messages"
+
 export default Vue.extend({
     name: "Dashboard",
     components: { UserSummary, UiSection, OrganiserUtils },
@@ -43,7 +45,8 @@ export default Vue.extend({
     },
     data: () => ({
         Roles,
-        Routes
+        Routes,
+        M, MsgBus,
     })
 });
 </script>
