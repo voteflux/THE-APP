@@ -5,24 +5,33 @@
         <UserDetailsValid :user="user" />
 
         <div class="child-bg-alt tl">
-            <h4>Your Name <small>(must match electoral roll)</small></h4>
-            <EditableText class="row" name="First Name" :value="user.fname" :onSave="savePropFactory('fname')" type="text" />
-            <EditableText class="row" name="Middle Names" :value="user.mnames" :onSave="savePropFactory('mnames')" type="text" />
-            <EditableText class="row" name="Surname" :value="user.sname" :onSave="savePropFactory('sname')" type="text" />
+            <UiSection title="Your Name">
+                <h5>(must match electoral roll)</h5>
+                <EditableText class="row" name="First Name" :value="user.fname" :onSave="savePropFactory('fname')" type="text" />
+                <EditableText class="row" name="Middle Names" :value="user.mnames" :onSave="savePropFactory('mnames')" type="text" />
+                <EditableText class="row" name="Surname" :value="user.sname" :onSave="savePropFactory('sname')" type="text" />
+            </UiSection>
 
-            <h4>Contact Deatils</h4>
-            <EditableText class="row" name="Email" :value="user.email" :onSave="savePropFactory('email')" type="email" />
-            <EditableText class="row" name="Surname" :value="user.contact_number" :onSave="savePropFactory('contact_number')" type="tel" placeholder="+61 401 555 555" />
+            <UiSection title="Contact Details">
+                <EditableText class="row" name="Email" :value="user.email" :onSave="savePropFactory('email')" type="email" />
+                <EditableText class="row" name="Contact Number" :value="user.contact_number" :onSave="savePropFactory('contact_number')" type="tel" placeholder="+61 401 555 555" />
+            </UiSection>
 
-            <h4>Your Address <small>(must match electoral roll)</small></h4>
-            <AddressEditor class="ml2" :user="user" />
+            <UiSection title="Your Address">
+                <h5>(must match electoral roll)</h5>
+                <AddressEditor class="" :user="user" />
+            </UiSection>
 
-            <h4>Other Details</h4>
-            <EditableDate class="row" name="Date of Birth" :initDate="mkDobFromUser()" :onSave="saveDob" />
-            <EditableOpt class="row" name="I'm an Australian Voter" :value="user.onAECRoll" :onSave="savePropFactory('onAECRoll')" />
-            <EditableOpt class="row" name="I'm willing to stand as a candidate" :value="user.candidature_federal" :onSave="savePropFactory('candidature_federal')" />
-            <EditableOpt class="row" name="I'd like to volunteer" :value="user.volunteer" :onSave="savePropFactory('volunteer')" />
-            <EditableOpt class="row" name="Recieve SMSs?" trueName="None" falseName="All" :value="user.smsOptOut" :useDropdown="true" :default="false" :onSave="savePropFactory('smsOptOut')" />
+            <UiSection title="Other Details">
+                <EditableDate class="row" name="Date of Birth" :initDate="mkDobFromUser()" :onSave="saveDob" />
+                <EditableOpt class="row" name="I'm an Australian Voter" :value="user.onAECRoll" :onSave="savePropFactory('onAECRoll')" />
+            </UiSection>
+
+            <UiSection title="Membership Options">
+                <EditableOpt class="row" name="I'm willing to stand as a candidate" :value="user.candidature_federal" :onSave="savePropFactory('candidature_federal')" />
+                <EditableOpt class="row" name="I'd like to volunteer" :value="user.volunteer" :onSave="savePropFactory('volunteer')" />
+                <EditableOpt class="row" name="Recieve SMSs?" trueName="None" falseName="All" :value="user.smsOptOut" :useDropdown="true" :default="false" :onSave="savePropFactory('smsOptOut')" />
+            </UiSection>
         </div>
     </div>
 </template>
@@ -36,6 +45,7 @@ import EditableDate from './EditableDate.vue'
 import EditableOpt from './EditableOpt.vue'
 import AddressEditor from './AddressEditor.vue'
 import UserDetailsValid from "./UserDetailsValid.vue"
+import { UiSection } from '../common'
 
 import {MsgBus, M} from '../../messages'
 import { mkErrContainer } from "../../lib/errors"
@@ -52,7 +62,7 @@ const afterSave = fullUserDeetsR => {
 
 
 export default Vue.extend({
-    components: { EditableText, EditableDate, EditableOpt, AddressEditor, UserDetailsValid },
+    components: { EditableText, EditableDate, EditableOpt, AddressEditor, UserDetailsValid, UiSection },
     props: ["user"],
     data: () => ({
     }),
@@ -86,12 +96,5 @@ export default Vue.extend({
 })
 </script>
 
-<style>
-
-.child-bg-alt .row:nth-child(even) {
-    background-color: #eee;
-}
-.child-bg-alt .row:nth-child(odd) {
-    background-color: #f8f8f8;
-}
+<style scoped>
 </style>

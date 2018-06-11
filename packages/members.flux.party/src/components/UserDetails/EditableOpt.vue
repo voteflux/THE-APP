@@ -1,7 +1,7 @@
 <template>
     <Editable :name="name" :value="renderValue()" :onSave="_onSave" :onStart="_onStart" :onReset="_onReset">
         <div v-if="useDropdown === true">
-            <select v-model="newValue" class="input">
+            <select v-model="newValue" class="input mv2">
                 <option :value="true">{{ trueName }}</option>
                 <option :value="false">{{ falseName }}</option>
             </select>

@@ -1,6 +1,6 @@
 <template>
     <Editable :name="name" :value="value" :onSave="_onSave" :onStart="_onStart" :onReset="_onReset" ref="mainEdit">
-        <input class="e-edit input h-100 pb1" ref="inputfield" :type="type" :placeholder="name" v-model="newValue" v-on:keyup.enter="_onEnter()">
+        <input class="e-edit input h-100 pb1 mb1" ref="inputfield" :type="type" :placeholder="name" v-model="newValue" v-on:keyup.enter="_onEnter()" :pattern="pattern">
     </Editable>
 </template>
 
@@ -16,7 +16,8 @@ export default Vue.extend({
         value: String,
         type: String,
         placeholder: String,
-        onSave: Function
+        onSave: Function,
+        pattern: String,
     },
 
     data: () => ({

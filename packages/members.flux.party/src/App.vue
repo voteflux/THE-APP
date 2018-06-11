@@ -137,7 +137,8 @@ export default /*class App extends Vue*/ {
 .tool-btn {
     @extend .br2;
     @extend .dib;
-    @extend .pa1;
+    @extend .pv1;
+    @extend .ph3;
     @extend .mv2;
     @extend .mh1;
     @extend .shadow-1;
@@ -177,6 +178,10 @@ export default /*class App extends Vue*/ {
     @extend .pointer;
 }
 
+button.tool-btn {
+    border: none;
+}
+
 button.tool-btn:enabled {
     @extend .grow;
     @extend .pointer;
@@ -196,5 +201,13 @@ button.tool-btn:disabled {
 
 .inputGroup .input {
     width: inherit;
+}
+
+// a glass for alternating the bg colors of children a bit
+.child-bg-alt .row:nth-child(even) {
+    background-color: #eee;
+}
+.child-bg-alt .row:nth-child(odd) {
+    background-color: #f8f8f8;
 }
 </style>

@@ -1,5 +1,5 @@
 <template>
-    <div style="min-height: 4rem;">
+    <div style="min-height: 5rem;">
         <div v-if="state == DISPLAY" class="flex flex-row items-center">
             <div class="w-70">
                 {{ user.addr_street_no }} {{ user.addr_street }} <br>
@@ -7,7 +7,7 @@
                 {{ user.addr_postcode }}
             </div>
             <div class="w-30">
-                <div class="tool-btn db" v-on:click="initAddrForm()">✏️ Edit</div>
+                <button class="tool-btn db center" v-on:click="initAddrForm()">✏️ Edit</button>
             </div>
         </div>
 
@@ -20,13 +20,13 @@
             </div>
             <div v-else class="flex felx-row items-center">
 
-                <div class="sidebtns">
+                <div class="sidebtns pr2">
                     <button class="tool-btn" v-on:click="prevFormPart()">🔙 Back</button>
                 </div>
                 <div class="w-60">
-                    <div v-if="state == INPUT_POSTCODE" class="flex flex-row items-center justify-center">
+                    <div v-if="state == INPUT_POSTCODE" class="flex flex-row flex-wrap items-center justify-center">
                         <label class="mr2">Postcode:</label>
-                        <input class="mw5 input" v-model="newAddress.addr_postcode" v-on:keyup.enter="canGoNext() && nextFormPart()"/>
+                        <input class="mw5 input w-100" v-model="newAddress.addr_postcode" v-on:keyup.enter="canGoNext() && nextFormPart()" pattern="\d*" type="text" />
                     </div>
                     <div v-if="state == INPUT_SUBURB">
                         <div v-if="suburbs.length > 0">
@@ -52,7 +52,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="sidebtns">
+                <div class="sidebtns pl2">
                     <button class="tool-btn" v-on:click="nextFormPart()" :class="nextBtnCls()" :disabled="!canGoNext()">
                         <span v-if="state == INPUT_STREET">💾 Save</span>
                         <span v-else>➡️ Next</span>
@@ -234,7 +234,7 @@ export default Vue.extend({
 button {
     @extend .mv2;
     @extend .mh1;
-    @extend .f4-ns;
+    @extend .f4;
 }
 
 .sidebtns {

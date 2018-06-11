@@ -1,7 +1,7 @@
 <template>
 
     <div class="mb1 cf">
-        <div class="fl w-30">
+        <div class="fl w-30 pr2">
             {{ lVal }}
         </div>
         <div class="fl w-70">

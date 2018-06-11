@@ -20,6 +20,12 @@
                     <button v-show="state == NEED_EMAIL" v-on:click="checkEmail()">Continue</button>
                     <Loading v-show="state == SENDING_EMAIL">Sending email...</Loading>
                 </p>
+
+                <p class="mt4" v-if="shouldShowAdvanced()">
+                    <h5>Debug only:</h5>
+                    <input v-model.trim="advSecret" placeholder="API Token" />
+                    <button v-on:click="advStoreSecret()">Store API Token</button>
+                </p>
             </div>
 
         </div>
@@ -31,10 +37,10 @@ import Loading from "./Loading.vue";
 import { mkErrContainer } from "../lib/errors";
 import { Error } from "./common/";
 
-const cs = {
-    NEED_EMAIL: 1,
-    SENDING_EMAIL: 2,
-    EMAIL_SENT: 3
+enum Cs {
+    NEED_EMAIL,
+    SENDING_EMAIL,
+    EMAIL_SENT
 };
 
 export default {
@@ -45,38 +51,51 @@ export default {
             email: ""
         },
         errs: mkErrContainer(),
-        state: cs.NEED_EMAIL,
-        ...cs
+        state: Cs.NEED_EMAIL,
+        advSecret: "",
+        ...Cs
     }),
 
     methods: {
         checkEmail() {
             this.errs.email.wipe();
-            this.state = cs.SENDING_EMAIL;
+            this.state = Cs.SENDING_EMAIL;
             const _email = this.user.email;
             this.$flux.v1
                 .sendUserDetails(this.user)
                 .then(r => {
                     r.caseOf({
                         left: e => {
-                            this.state = cs.NEED_EMAIL;
+                            this.state = Cs.NEED_EMAIL;
                             this.errs.email = this.$err(e, _email);
                         },
                         right: r => {
                             if (r.sent_email) {
-                                this.state = cs.EMAIL_SENT;
+                                this.state = Cs.EMAIL_SENT;
                             } else {
-                                this.state = cs.NEED_EMAIL;
+                                this.state = Cs.NEED_EMAIL;
                                 this.errs.email = this.$err(r.reason, _email);
                             }
                         }
                     });
                 })
                 .catch(e => {
-                    this.state = cs.NEED_EMAIL;
+                    this.state = Cs.NEED_EMAIL;
                     this.errs.email = this.$err("Error talking to server...", _email);
                     this.$unknownErr(e);
                 });
+        },
+
+        advStoreSecret() {
+            localStorage.setItem('s', this.advSecret);
+            location.reload();
+        },
+
+        shouldShowAdvanced() {
+            if (location.host.includes("localhost") || location.host.includes("ngrok.io") || location.host.includes("flux-members.netlify.com")) {
+                return true;
+            }
+            return false;
         }
     }
 };
