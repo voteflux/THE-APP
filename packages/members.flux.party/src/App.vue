@@ -124,6 +124,16 @@ export default /*class App extends Vue*/ {
     // @extend .rounded;
 }
 
+// note - but exists where a <button class="tool-btn"> in another component
+// will not inherit some of these. Workaround (as in `Editable.vue`) is to
+// declare something like:
+// /*
+// button {
+//     @extend .mv2;
+//     @extend .mh1;
+//     @extend .f4;
+// }
+// */
 .tool-btn {
     @extend .br2;
     @extend .dib;
@@ -181,6 +191,7 @@ button.tool-btn:disabled {
     width: 100%;
     height: 100%;
     @extend .pa1;
+    @extend .ba;
 }
 
 .inputGroup .input {

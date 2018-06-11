@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div style="min-height: 4rem;">
         <div v-if="state == DISPLAY" class="flex flex-row items-center">
             <div class="w-70">
                 {{ user.addr_street_no }} {{ user.addr_street }} <br>
@@ -12,18 +12,21 @@
         </div>
 
         <div v-else>
-            <div v-if="isLoading">
+            <div v-if="isLoading" class="flex justify-center">
                 Loading...
+            </div>
+            <div v-else-if="state == SAVING" class="flex justify-center">
+                Saving...
             </div>
             <div v-else class="flex felx-row items-center">
 
-                <div class="w-20">
-                    <button class="tool-btn db" v-on:click="prevFormPart()">🔙 Back</button>
+                <div class="sidebtns">
+                    <button class="tool-btn" v-on:click="prevFormPart()">🔙 Back</button>
                 </div>
                 <div class="w-60">
-                    <div v-if="state == INPUT_POSTCODE">
-                        <label>Postcode:</label>
-                        <input class="input w-90" v-model="newAddress.addr_postcode" v-on:keyup.enter="canGoNext() && nextFormPart()"/>
+                    <div v-if="state == INPUT_POSTCODE" class="flex flex-row items-center justify-center">
+                        <label class="mr2">Postcode:</label>
+                        <input class="mw5 input" v-model="newAddress.addr_postcode" v-on:keyup.enter="canGoNext() && nextFormPart()"/>
                     </div>
                     <div v-if="state == INPUT_SUBURB">
                         <div v-if="suburbs.length > 0">
@@ -37,8 +40,8 @@
                         </Error>
                     </div>
                     <div v-if="state == INPUT_STREET" class="flex flex-row flex-wrap items-center">
-                        <div class="w-30-ns w-100">
-                            <label>Number:</label>
+                        <div class="w-30-ns w-100 pr2">
+                            <label class="mr2">Street Number:</label>
                             <input type="text" class="input w-90" v-model="newAddress.addr_street_no">
                         </div>
                         <div class="w-70-ns w-100">
@@ -49,8 +52,8 @@
                         </div>
                     </div>
                 </div>
-                <div class="w-20">
-                    <button class="tool-btn db" v-on:click="nextFormPart()" :class="nextBtnCls()" :disabled="!canGoNext()">
+                <div class="sidebtns">
+                    <button class="tool-btn" v-on:click="nextFormPart()" :class="nextBtnCls()" :disabled="!canGoNext()">
                         <span v-if="state == INPUT_STREET">💾 Save</span>
                         <span v-else>➡️ Next</span>
                     </button>
@@ -111,6 +114,7 @@ export default Vue.extend({
 
         initAddrForm() {
             this.state = Cs.INPUT_POSTCODE
+            this.newAddress.addr_postcode = ""
         },
 
         canGoNext() {
@@ -157,10 +161,13 @@ export default Vue.extend({
                 case Cs.INPUT_POSTCODE:
                     this.loadSuburbs(this.newAddress.addr_postcode)
                     this.state = Cs.INPUT_SUBURB
+                    this.newAddress.addr_suburb = ''
                     break
                 case Cs.INPUT_SUBURB:
                     this.loadStreets(this.newAddress.addr_postcode, this.newAddress.addr_suburb)
                     this.state = Cs.INPUT_STREET
+                    this.newAddress.addr_street = ''
+                    this.newAddress.addr_street_no = ''
                     break
                 case Cs.INPUT_STREET:
                     this.state = Cs.SAVING
@@ -215,6 +222,30 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
+@import "tachyons";
+
+// .input {
+//     display: inline-block;
+//     width: 100%;
+//     height: 100%;
+//     @extend .pa1;
+// }
+
+button {
+    @extend .mv2;
+    @extend .mh1;
+    @extend .f4-ns;
+}
+
+.sidebtns {
+    @extend .w-20;
+}
+
+.sidebtns .tool-btn {
+    @extend .center;
+    @extend .db;
+}
+
 .disabled {
     color: #777;
 }

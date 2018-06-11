@@ -26,12 +26,12 @@
         <div class="col w-30 w-25-ns flex flex-no-wrap justify-around icons">
             <!-- :click="onSave(newValue)" -->
             <div v-if="state == EDITING" class="btn-group">
-                <div class="tool-btn" v-on:click="resetNoSave()">❌</div>
-                <div class="tool-btn" v-on:click="_doSave()">💾</div>
+                <button class="tool-btn" v-on:click="resetNoSave()">❌</button>
+                <button class="tool-btn" v-on:click="_doSave()">💾</button>
             </div>
 
-            <div v-if="state == DISPLAY" v-on:click="startEdit()" class="">
-                <div class="tool-btn">✏️</div>
+            <div v-if="state == DISPLAY" class="">
+                <button v-on:click="startEdit()" class="tool-btn">✏️</button>
             </div>
 
             <div v-if="state == SAVING">
@@ -39,7 +39,7 @@
             </div>
 
             <div v-if="state == ERROR">
-                <div class="tool-btn" v-on:click="resetNoSave()">🔄</div>
+                <button class="tool-btn" v-on:click="resetNoSave()">🔄</button>
             </div>
         </div>
     </div>
@@ -105,6 +105,12 @@ export default Vue.extend({
 
 <style scoped lang="scss">
 @import "tachyons";
+
+button {
+    @extend .mv2;
+    @extend .mh1;
+    @extend .f4;
+}
 
 .editable-root {
     min-height: 2rem;
