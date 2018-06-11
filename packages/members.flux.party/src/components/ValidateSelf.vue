@@ -12,6 +12,7 @@
             <h4>Please enter the CAPTCHA below</h4>
             <img :src="captchaImg" style="min-height: 50px; min-width: 200px" class="db">
             <input ref="captcha" class="pa2 w-100 mt2" type="text" v-model="captchaAnswer" v-on:keyup.enter="submitCaptcha()" placeholder="Please enter the CAPTCHA" />
+            <button class="db pa2 mv2" v-if="captchaAnswer.length == 4" v-on:click="submitCaptcha()">Submit CAPTCHA</button>
         </div>
 
         <div v-show="state == SENT_CAPTCHA">
