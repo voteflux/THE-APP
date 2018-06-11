@@ -129,17 +129,17 @@ app.controller('FluxController', function($scope, $log, $rootScope, $http, $wind
             $http.post(flux_api('user_details'), {s: flux.memberSecret})
                 .then(function(data) {
                     // this means the details we have are valid
-                    flux.setMsg('Yup, you are! Redirecting in 1 second')
+                    flux.setMsg('Yup, you are! Redirecting in 3 second')
                     if (!getParam('nofwd')) {
                         setTimeout(function(){
-                            var memberDeetsPage = "/member_details.html"
+                            var memberDeetsPage = "/v"
                             if (location.hostname == "voteflux.org" || location.hostname.indexOf("voteflux.netlify.com") !== -1) {
                                 // we might not have the `s` param on api.voteflux.org, so let's add it
                                 location.href = "https://api.voteflux.org" + memberDeetsPage + "#s=" + flux.memberSecret
                             } else {
                                 window.location.href = memberDeetsPage
                             }
-                        }, 1000)
+                        }, 3000)
                     }
                 }).catch(function(err) {
                     // they weren't valid

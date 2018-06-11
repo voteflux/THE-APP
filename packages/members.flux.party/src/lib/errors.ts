@@ -51,7 +51,9 @@ const FluxErrHandler = {
         };
 
         Vue.prototype.$unknownErr = (e: any) => {
-            debugger;
+            // debugger;
+            console.log("Unknown error", e)
+            return Vue.prototype.$err("Unknown error", e)
         };
     }
 };

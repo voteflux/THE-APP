@@ -66,9 +66,9 @@
                 </p>
 
                 <h3>Your details:
-                    <span ng-show="flux.detailsValid && !flux.needsValidating" class="green">are valid!</span>
-                    <span ng-show="!flux.detailsValid && !flux.needsValidating" class="red">are invalid! Please fix below.</span>
-                    <span ng-show="flux.needsValidating" class="blue">are waiting for validation from a Flux staff member.</span>
+                    <span ng-show="flux.detailsValid === true" class="green">are valid!</span>
+                    <span ng-show="flux.detailsValid === flase && flux.needsValidating === false" class="red">are invalid! Please fix below.</span>
+                    <span ng-show="flux.detailsValid === false && flux.needsValidating === true" class="blue">are waiting for validation from a Flux staff member.</span>
                 </h3>
 
                 <h3 class="red" ng-show="flux.needsUpdating">

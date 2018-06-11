@@ -1,5 +1,5 @@
 <template>
-    <div id="app" class="w-100 w-80-m w-70-l center">
+    <div id="app" class="w-100 w-90-m w-80-l center mb4">
         <notifications/>
 
         <MenuBar class=""/>
@@ -9,7 +9,7 @@
         </Loading>
 
         <div v-show="loginState == IS_LOGGED_IN">
-            <transition name="fade"><router-view :auth="auth" :user="user"/></transition>
+            <transition name="fade"><router-view v-if="user" :auth="auth" :user="user" :roles="['admin']"/></transition>
         </div>
 
         <div v-show="loginState == IS_NOT_LOGGED_IN">
@@ -82,17 +82,21 @@ export default /*class App extends Vue*/ {
         MsgBus.$on(M.REFRESH_USER, () => {
             this.loadUser();
         });
+        MsgBus.$on(M.GOT_USER_DETAILS, (user) => {
+            this.user = user;
+        });
     }
 };
 </script>
 
-<style>
+<style lang="scss">
 #app {
     font-family: "Avenir", Helvetica, Arial, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-align: center;
-    color: #2c3e50;
+    // color: #2c3e50;
+    color: #121c25;
 }
 .fade-enter-active,
 .fade-leave-active {
@@ -107,5 +111,79 @@ export default /*class App extends Vue*/ {
 .fade-enter,
 .fade-leave-active {
     opacity: 0;
+}
+
+@import "tachyons";
+
+.btn {
+    // @extend .dn;
+    @extend .pa2;
+    @extend .ba;
+    @extend .br2;
+    @extend .no-underline;
+    // @extend .rounded;
+}
+
+.tool-btn {
+    @extend .br2;
+    @extend .dib;
+    @extend .pa1;
+    @extend .mv2;
+    @extend .mh1;
+    @extend .shadow-1;
+    @extend .bg-light-gray;
+    @extend .ph2;
+    @extend .f4;
+}
+
+.btn-group > .tool-btn {
+    @extend .ma0;
+    @extend .br0;
+    box-shadow: 0px 0px 0px 0px rgba( 0, 0, 0, 0.2 );
+}
+
+.btn-group > .tool-btn:first-of-type {
+    @extend .br2;
+    @extend .br--left;
+    box-shadow: -3px 2px 2px 2px rgba( 0, 0, 0, 0.2 );
+}
+.btn-group > .tool-btn:last-of-type {
+    @extend .br2;
+    @extend .br--right;
+    box-shadow: 3px 2px 2px 2px rgba( 0, 0, 0, 0.2 );
+}
+
+.btn-group {
+    @extend .mv2;
+    @extend .mh2;
+    @extend .shadow-1;
+    @extend .br2;
+    @extend .db;
+    white-space: nowrap;
+}
+
+.tool-btn:not(button) {
+    @extend .grow;
+    @extend .pointer;
+}
+
+button.tool-btn:enabled {
+    @extend .grow;
+    @extend .pointer;
+}
+
+button.tool-btn:disabled {
+
+}
+
+.input {
+    display: inline-block;
+    width: 100%;
+    height: 100%;
+    @extend .pa1;
+}
+
+.inputGroup .input {
+    width: inherit;
 }
 </style>

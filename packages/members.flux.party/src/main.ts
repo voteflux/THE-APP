@@ -28,14 +28,19 @@ Vue.use(FluxUtils);
 import VueRouter from "vue-router";
 Vue.use(VueRouter);
 
+import ToggleButton from 'vue-js-toggle-button'
+Vue.use(ToggleButton)
+
 import Dashboard from "./components/Dashboard.vue";
 import ValidateSelf from "./components/ValidateSelf.vue";
+import UserDetailsMain from "./components/UserDetails";
 
 import R from "./routes";
 
 const routes = [
     { path: R.Dashboard, component: Dashboard },
     { path: R.ValidateSelf, component: ValidateSelf },
+    { path: R.EditUserDetails, component: UserDetailsMain },
     { path: "*", redirect: "/" }
 ];
 

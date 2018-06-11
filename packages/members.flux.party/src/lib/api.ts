@@ -73,16 +73,26 @@ const FluxApi = {
             return Vue.http.post(url, data).then(mkResp, mkErr(url));
         };
 
+        const get = url => {
+            return Vue.http.get(url).then(mkResp, mkErr(url))
+        }
+
         Vue.prototype.$flux = {
             v2: {
                 checkEmailToOnboard({ email }): R<CheckEmailResp> {
                     return post(_api2("user/check_email"), { email });
+                },
+                getRoles({ s }): R<CheckEmailResp> {
+                    return post(_api2("/usr/getRoles"), { s })
                 }
             },
 
             v1: {
                 getUserDetails({ s }): R<UserV1Object> {
                     return post(_api1("user_details"), { s });
+                },
+                saveUserDetails(user): R<UserV1Object> {
+                    return post(_api1("user_details"), user);
                 },
                 sendUserDetails({ email }) {
                     return post(_api1("send_user_details"), { email });
@@ -92,6 +102,12 @@ const FluxApi = {
                 },
                 captchaImgUrl(session) {
                     return _api1("au/captcha_img/" + session);
+                },
+                getSuburbs(country, postcode) {
+                    return get(_api1(`get_suburbs/${country}/${postcode}`))
+                },
+                getStreets(country, postcode, suburb) {
+                    return get(_api1(`get_streets/${country}/${postcode}/${suburb}`))
                 }
             },
 

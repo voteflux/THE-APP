@@ -1,0 +1,221 @@
+<template>
+    <div>
+        <div v-if="state == DISPLAY" class="flex flex-row items-center">
+            <div class="w-70">
+                {{ user.addr_street_no }} {{ user.addr_street }} <br>
+                {{ user.addr_suburb }} <br>
+                {{ user.addr_postcode }}
+            </div>
+            <div class="w-30">
+                <div class="tool-btn db" v-on:click="initAddrForm()">✏️ Edit</div>
+            </div>
+        </div>
+
+        <div v-else>
+            <div v-if="isLoading">
+                Loading...
+            </div>
+            <div v-else class="flex felx-row items-center">
+
+                <div class="w-20">
+                    <button class="tool-btn db" v-on:click="prevFormPart()">🔙 Back</button>
+                </div>
+                <div class="w-60">
+                    <div v-if="state == INPUT_POSTCODE">
+                        <label>Postcode:</label>
+                        <input class="input w-90" v-model="newAddress.addr_postcode" v-on:keyup.enter="canGoNext() && nextFormPart()"/>
+                    </div>
+                    <div v-if="state == INPUT_SUBURB">
+                        <div v-if="suburbs.length > 0">
+                            <label>Suburb:</label>
+                            <select class="input w-90" v-model="newAddress.addr_suburb">
+                                <option v-for="suburb in suburbs" v-bind:key="suburb" :value="suburb">{{ suburb }}</option>
+                            </select>
+                        </div>
+                        <Error v-else>
+                            No suburbs found for {{ newAddress.addr_postcode }}
+                        </Error>
+                    </div>
+                    <div v-if="state == INPUT_STREET" class="flex flex-row flex-wrap items-center">
+                        <div class="w-30-ns w-100">
+                            <label>Number:</label>
+                            <input type="text" class="input w-90" v-model="newAddress.addr_street_no">
+                        </div>
+                        <div class="w-70-ns w-100">
+                            <label>Street:</label>
+                            <select class="input w-90" v-model="newAddress.addr_street">
+                                <option v-for="street in streets" v-bind:key="street" :value="street">{{ street }}</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="w-20">
+                    <button class="tool-btn db" v-on:click="nextFormPart()" :class="nextBtnCls()" :disabled="!canGoNext()">
+                        <span v-if="state == INPUT_STREET">💾 Save</span>
+                        <span v-else>➡️ Next</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>
+
+<script lang="ts">
+import Vue from 'vue'
+import {Error} from '../common'
+import {MsgBus, M} from '../../messages'
+
+enum Cs {
+    INPUT_COUNTRY,  // not yet used
+    INPUT_POSTCODE,
+    INPUT_SUBURB,
+    INPUT_STREET,
+    SAVING,
+    LOADING,
+    ERROR,
+    DISPLAY
+}
+
+export default Vue.extend({
+    components: {Error},
+
+    props: ["user"],
+
+    data: () => ({
+        state: Cs.DISPLAY,
+        isLoading: false,
+        newAddress: {},
+        suburbs: [],
+        streets: [],
+        ...Cs
+    }),
+
+    methods: {
+        gotError(e) {
+            this.state = Cs.ERROR
+            this.errMsg = e
+            this.isLoading = false
+        },
+
+        resetAddrForm() {
+            this.state = Cs.DISPLAY
+            this.newAddress = {
+                addr_country: "AU",
+                addr_postcode: "",
+                addr_street: "",
+                addr_street_no: "",
+                addr_suburb: ""
+            }
+            this.isLoading = false
+        },
+
+        initAddrForm() {
+            this.state = Cs.INPUT_POSTCODE
+        },
+
+        canGoNext() {
+            switch(this.state) {
+                case Cs.INPUT_POSTCODE:
+                    return /^\d{4}$/.test(this.newAddress.addr_postcode)
+                case Cs.INPUT_SUBURB:
+                    return /^.+$/.test(this.newAddress.addr_suburb)
+                case Cs.INPUT_STREET:
+                    return /^.+$/.test(this.newAddress.addr_street) && /^.+$/.test(this.newAddress.addr_street_no)
+                default:
+                    return true
+            }
+        },
+
+        loadSuburbs(postcode) {
+            this.$flux.v1.getSuburbs('au', postcode)
+                .then(r => r.caseOf({
+                    left: e => this.gotError,
+                    right: _subs => {
+                        this.suburbs = _subs.suburbs
+                        this.isLoading = false
+                    }
+                }))
+        },
+
+        loadStreets(postcode, suburb) {
+            this.$flux.v1.getStreets('au', postcode, suburb)
+                .then(r => r.caseOf({
+                    left: e => this.gotError,
+                    right: _streets => {
+                        this.streets = _streets.streets
+                        this.isLoading = false
+                    }
+                }))
+        },
+
+        nextFormPart() {
+            if ([Cs.INPUT_POSTCODE, Cs.INPUT_SUBURB].includes(this.state)) {
+                this.isLoading = true;
+            }
+
+            switch (this.state) {
+                case Cs.INPUT_POSTCODE:
+                    this.loadSuburbs(this.newAddress.addr_postcode)
+                    this.state = Cs.INPUT_SUBURB
+                    break
+                case Cs.INPUT_SUBURB:
+                    this.loadStreets(this.newAddress.addr_postcode, this.newAddress.addr_suburb)
+                    this.state = Cs.INPUT_STREET
+                    break
+                case Cs.INPUT_STREET:
+                    this.state = Cs.SAVING
+                    this.$flux.v1.saveUserDetails({...this.newAddress, s: this.$props.user.s})
+                        .then(fullUserDeetsR => {
+                            fullUserDeetsR.caseOf({
+                                left: e => { throw e },
+                                right: fullUserDeets => {
+                                    MsgBus.$emit(M.GOT_USER_DETAILS, fullUserDeets)
+                                    this.state = Cs.DISPLAY
+                                }
+                            })
+                        }).catch(e => {
+                            this.errMsg = e
+                            this.state = Cs.ERROR
+                        });
+                    break
+                default:
+                    this.resetAddrForm()
+            }
+        },
+
+        nextBtnCls() {
+            if (this.canGoNext()) {
+                return ''
+            } else {
+                return 'disabled'
+            }
+        },
+
+        prevFormPart() {
+            switch (this.state) {
+                case Cs.INPUT_POSTCODE:
+                    this.resetAddrForm()
+                    break
+                case Cs.INPUT_SUBURB:
+                    this.state = Cs.INPUT_POSTCODE
+                    break
+                case Cs.INPUT_STREET:
+                    this.state = Cs.INPUT_SUBURB
+                    break
+                default:
+                    this.resetAddrForm()
+            }
+        }
+    },
+
+    mounted() {
+        this.resetAddrForm()
+    }
+})
+</script>
+
+<style lang="scss" scoped>
+.disabled {
+    color: #777;
+}
+</style>
