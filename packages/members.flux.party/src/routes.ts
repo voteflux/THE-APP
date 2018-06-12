@@ -1,5 +1,6 @@
 export default {
-    EditUserDetails: "/editUserDetails",
+    EditUserDetails: "/membership/details",
     Dashboard: "/",
-    ValidateSelf: "/validateSelf"
+    ValidateSelf: "/membership/validation",
+    MembershipRevocation: "/membership/revoke"
 };

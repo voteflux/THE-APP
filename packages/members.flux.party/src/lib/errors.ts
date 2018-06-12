@@ -4,9 +4,10 @@ interface SError<T> {
     wipe: () => void;
 }
 
-export const emptyErr = <T>(): SError<T> =>
-    new Proxy(
-        { msg: "", sample: null, wipe: () => {} },
+export const emptyErr = <T>(): SError<T> => {
+    const _err = { msg: "", sample: null, wipe: () => {} };
+    return new Proxy(
+        _err,
         {
             get: (obj, prop) => {
                 if (prop == "wipe")
@@ -17,7 +18,8 @@ export const emptyErr = <T>(): SError<T> =>
                 return obj[prop];
             }
         }
-    );
+    )
+}
 
 export const mkErrFrom = <T>(msg, sample: T): SError<T> => {
     const e: SError<T> = emptyErr();

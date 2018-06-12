@@ -4,17 +4,21 @@
 
         <MenuBar class=""/>
 
-        <Loading v-show="loginState == IS_LOGGING_IN">
-            Checking login details...
-        </Loading>
+        <transition name="fade" mode="out-in">
+            <Loading v-if="loginState == IS_LOGGING_IN" :key="IS_LOGGING_IN">
+                Checking login details...
+            </Loading>
 
-        <div v-show="loginState == IS_LOGGED_IN">
-            <transition name="fade"><router-view v-if="user" :auth="auth" :user="user" :roles="['admin']"/></transition>
-        </div>
+            <div v-else-if="loginState == IS_LOGGED_IN" :key="IS_LOGGED_IN">
+                <transition name="fade" mode="out-in">
+                    <router-view v-if="user" :auth="auth" :user="user" :roles="['admin']"/>
+                </transition>
+            </div>
 
-        <div v-show="loginState == IS_NOT_LOGGED_IN">
-            <LoginForm/>
-        </div>
+            <div v-else-if="loginState == IS_NOT_LOGGED_IN" :key="IS_NOT_LOGGED_IN">
+                <LoginForm/>
+            </div>
+        </transition>
     </div>
 </template>
 
@@ -48,6 +52,7 @@ export default /*class App extends Vue*/ {
             this.loginState = Cs.IS_NOT_LOGGED_IN;
         },
         loadAuth() {
+            this.loginState = Cs.IS_LOGGING_IN
             this.$flux.auth.loadAuth().caseOf({
                 nothing: () => this.loginFailed(),
                 just: auth => {
@@ -85,7 +90,7 @@ export default /*class App extends Vue*/ {
         this.loadAuth();
 
         MsgBus.$on(M.REFRESH_USER, () => {
-            this.loadUser();
+            this.loadAuth();
         });
         MsgBus.$on(M.GOT_USER_DETAILS, (user) => {
             this.user = user;
@@ -159,7 +164,10 @@ button {
 }
 
 button:hover {
-    @extend .shadow-2;
+    @extend .shadow-1;
+}
+
+button:disabled:hover {
 }
 
 
@@ -180,10 +188,16 @@ button:hover {
     @extend .ph3;
     @extend .mv2;
     @extend .mh1;
-    @extend .shadow-1;
+    @extend .shadow-2;
     @extend .bg-light-gray;
     @extend .ph2;
     @extend .f4;
+    transition: transform .25s ease-out, -webkit-transform .25s ease-out, box-shadow 0.3s ease-in-out;
+    transform: translateZ(0);
+}
+
+.tool-btn:hover {
+    transform: scale(1.05);
 }
 
 .btn-group > .tool-btn {
@@ -206,14 +220,15 @@ button:hover {
 .btn-group {
     @extend .mv2;
     @extend .mh2;
-    @extend .shadow-1;
+    @extend .shadow-2;
     @extend .br2;
     @extend .db;
     white-space: nowrap;
+    transition: transform .25s ease-out, -webkit-transform .25s ease-out, box-shadow 0.3s ease-in-out;
+    transform: translateZ(0);
 }
 
 .tool-btn:not(button) {
-    @extend .grow;
     @extend .pointer;
 }
 
@@ -222,12 +237,17 @@ button.tool-btn {
 }
 
 button.tool-btn:enabled {
-    @extend .grow;
     @extend .pointer;
 }
 
 button.tool-btn:disabled {
+    transition: none;
+    transform: none;
+    box-shadow: none;
+    @extend .ba;
+}
 
+button.tool-btn:disabled:hover {
 }
 
 .input {

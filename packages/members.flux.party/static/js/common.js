@@ -48,21 +48,28 @@ function getAuthToken() {
     return undefined;
 }
 
+function saveFluxSecret(s) {
+    localStorage.setItem('s', s);
+}
+
 if (getParam('s')) {
-    localStorage.setItem('s', getParam('s'));
+    saveFluxSecret(getParam('s'));
 }
 
 if (hashParam('s')) {
-    localStorage.setItem('s', hashParam('s'));
+    saveFluxSecret(hashParam('s'));
 }
 
 
-function saveMemberSecretOnFluxDomains() {
-    console.log("saveMemberSecretOnFluxDomains called")
+function saveMemberSecretOnFluxDomains(silent) {
+    let doLog = silent === false;
+    if (__DEBUG_COMMON__ || __DEV_COMMON__) doLog = true;
+    const log = (...args) => { if (doLog) { console.log(...args) }}
+    log("saveMemberSecretOnFluxDomains called")
     if (getAuthToken()) {
         var s = getAuthToken();
-        function sendSToUrlAsHashParam(url) {
-            console.log("Sending S to localstorage at", url)
+        const sendSToUrlAsHashParam = function(url) {
+            log("Sending S to localstorage at", url)
             if (s) {
                 var ifrm = document.createElement("iframe")
                 ifrm.setAttribute('src', url + "#s=" + s)
@@ -77,6 +84,8 @@ function saveMemberSecretOnFluxDomains() {
             sendSToUrlAsHashParam("https://flux.party/_record_login_param.html")
             sendSToUrlAsHashParam("https://members.flux.party/_record_login_param.html")
             localStorage.setItem('lastSavedS', s);
+        } else {
+            log("not saving member secret")
         }
     }
 }

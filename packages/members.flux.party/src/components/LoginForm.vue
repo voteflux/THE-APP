@@ -36,6 +36,7 @@
 import Loading from "./Loading.vue";
 import { mkErrContainer } from "../lib/errors";
 import { Error } from "./common/";
+import { MsgBus, M } from '@/messages';
 
 enum Cs {
     NEED_EMAIL,
@@ -87,8 +88,8 @@ export default {
         },
 
         advStoreSecret() {
-            localStorage.setItem('s', this.advSecret);
-            location.reload();
+            this.$flux.auth.saveSecret(this.advSecret)
+            this.$nextTick(() => MsgBus.$emit(M.REFRESH_USER))
         },
 
         shouldShowAdvanced() {

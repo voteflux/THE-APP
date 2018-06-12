@@ -32,15 +32,17 @@ import ToggleButton from 'vue-js-toggle-button'
 Vue.use(ToggleButton)
 
 import Dashboard from "./components/Dashboard.vue";
-import ValidateSelf from "./components/ValidateSelf.vue";
+import UserValidation from "./components/UserValidation.vue";
 import UserDetailsMain from "./components/UserDetails";
+import UserRevocation from "./components/UserRevocation.vue";
 
 import R from "./routes";
 
 const routes = [
     { path: R.Dashboard, component: Dashboard },
-    { path: R.ValidateSelf, component: ValidateSelf },
+    { path: R.ValidateSelf, component: UserValidation },
     { path: R.EditUserDetails, component: UserDetailsMain },
+    { path: R.MembershipRevocation, component: UserRevocation },
     { path: "*", redirect: "/" }
 ];
 

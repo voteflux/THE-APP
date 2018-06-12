@@ -40,7 +40,7 @@ const mkResp = data => {
 
 const mkErr = path => err => {
     // console.log('Flux api got error', err);
-    return Either.left({ messgae: `Request error at ${path}: ${err.status}`, err });
+    return Either.left({ message: `Request error at ${path}: ${err.status}`, err });
 };
 
 const FluxApi = {
@@ -108,6 +108,9 @@ const FluxApi = {
                 },
                 getStreets(country, postcode, suburb) {
                     return get(_api1(`get_streets/${country}/${postcode}/${suburb}`))
+                },
+                revokeMembership({s}): R<void> {
+                    return post(_api1("delete_user"), {s})
                 }
             },
 
