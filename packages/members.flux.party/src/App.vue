@@ -89,8 +89,11 @@ export default /*class App extends Vue*/ {
     created() {
         this.loadAuth();
 
-        MsgBus.$on(M.REFRESH_USER, () => {
+        MsgBus.$on(M.REFRESH_AUTH, () => {
             this.loadAuth();
+        });
+        MsgBus.$on(M.REFRESH_USER, () => {
+            this.loadUser();
         });
         MsgBus.$on(M.GOT_USER_DETAILS, (user) => {
             this.user = user;

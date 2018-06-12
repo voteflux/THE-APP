@@ -89,7 +89,7 @@ export default {
 
         advStoreSecret() {
             this.$flux.auth.saveSecret(this.advSecret)
-            this.$nextTick(() => MsgBus.$emit(M.REFRESH_USER))
+            this.$nextTick(() => MsgBus.$emit(M.REFRESH_AUTH))
         },
 
         shouldShowAdvanced() {
