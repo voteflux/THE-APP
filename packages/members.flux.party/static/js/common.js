@@ -18,6 +18,12 @@ function getParam(val) {
     return result;
 }
 
+
+var __DEV_FLAG__ = !getParam('prod') && (getParam('debug') || __DEBUG_COMMON__ || __DEV_COMMON__)
+
+var USE_PROD = getParam('prod') && true
+
+
 // modified above
 function hashParam(val) {
     var result = undefined,
@@ -61,6 +67,26 @@ if (hashParam('s')) {
 }
 
 
+function sendSToUrlAsHashParam(url, s) {
+    console.log("Sending S to localstorage at", url)
+    if (s) {
+        var ifrm = document.createElement("iframe")
+        ifrm.setAttribute('src', url + "#s=" + s)
+        ifrm.style.width = '0';
+        ifrm.style.height = '0';
+        ifrm.style.border = 'none';
+        document.body.appendChild(ifrm);
+    }
+}
+
+
+function sendSToAllFluxDomains(s) {
+    sendSToUrlAsHashParam("https://voteflux.org/_record_login_param.html", s)
+    sendSToUrlAsHashParam("https://flux.party/_record_login_param.html", s)
+    sendSToUrlAsHashParam("https://members.flux.party/_record_login_param.html", s)
+}
+
+
 function saveMemberSecretOnFluxDomains(silent) {
     let doLog = silent === false;
     if (__DEBUG_COMMON__ || __DEV_COMMON__) doLog = true;
@@ -68,21 +94,8 @@ function saveMemberSecretOnFluxDomains(silent) {
     log("saveMemberSecretOnFluxDomains called")
     if (getAuthToken()) {
         var s = getAuthToken();
-        const sendSToUrlAsHashParam = function(url) {
-            log("Sending S to localstorage at", url)
-            if (s) {
-                var ifrm = document.createElement("iframe")
-                ifrm.setAttribute('src', url + "#s=" + s)
-                ifrm.style.width = '0';
-                ifrm.style.height = '0';
-                ifrm.style.border = 'none';
-                document.body.appendChild(ifrm);
-            }
-        }
-        if (!__DEBUG_COMMON__ && !__DEV_COMMON__ && localStorage.getItem('lastSavedS') !== s) {
-            sendSToUrlAsHashParam("https://voteflux.org/_record_login_param.html")
-            sendSToUrlAsHashParam("https://flux.party/_record_login_param.html")
-            sendSToUrlAsHashParam("https://members.flux.party/_record_login_param.html")
+        if ((USE_PROD || !__DEV_FLAG__) && localStorage.getItem('lastSavedS') !== s) {
+            sendSToAllFluxDomains(s)
             localStorage.setItem('lastSavedS', s);
         } else {
             log("not saving member secret")
@@ -97,10 +110,10 @@ function flux_api(path, useDebug){
     if (path.indexOf('api/v') === -1) {
         path = 'api/v0/' + path;
     }
-    if (!getParam('prod') && (getParam('debug') || __DEBUG_COMMON__ || useDebug)){
+    if (__DEV_FLAG__ || useDebug){
         return "http://localhost:5000/" + path;
     }
-    if(__DEV_COMMON__ && !getParam('prod')) {
+    if(__DEV_COMMON__ && !USE_PROD) {
         return "http://flux-api-dev.herokuapp.com/" + path;
     }
     return "https://api.voteflux.org/" + path;

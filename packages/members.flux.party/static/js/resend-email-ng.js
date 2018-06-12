@@ -143,7 +143,10 @@ app.controller('FluxController', function($scope, $log, $rootScope, $http, $wind
                     }
                 }).catch(function(err) {
                     // they weren't valid
-                    localStorage.removeItem('s')
+                    if (!(__DEV_FLAG__)) {
+                        sendSToAllFluxDomains("");
+                        localStorage.removeItem('s')
+                    }
                     flux.setMsg("Ahh looks like you're not actually logged in. Sorry for the false alarm.");
                     flux.setMsg('');
                 })

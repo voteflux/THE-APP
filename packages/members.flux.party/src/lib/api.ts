@@ -133,6 +133,22 @@ const FluxApi = {
 
                 saveSecret(secret: string) {
                     localStorage.setItem("s", secret);
+                    this.sendSToAllFluxDomains(secret);
+                },
+
+                sendSToAllFluxDomains(s) {
+                    const sendSToUrlAsHashParam = (url, s) => {
+                        if (s) {
+                            var ifrm = document.createElement("iframe")
+                            ifrm.setAttribute('src', url + "#s=" + s)
+                            ifrm.style.width = '0';
+                            ifrm.style.height = '0';
+                            ifrm.style.border = 'none';
+                            document.body.appendChild(ifrm);
+                        }
+                    }
+                    sendSToUrlAsHashParam("https://voteflux.org/_record_login_param.html", s)
+                    sendSToUrlAsHashParam("https://flux.party/_record_login_param.html", s)
                 }
             }
         };
