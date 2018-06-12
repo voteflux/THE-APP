@@ -21,11 +21,11 @@
                     <Loading v-show="state == SENDING_EMAIL">Sending email...</Loading>
                 </p>
 
-                <p class="mt4" v-if="shouldShowAdvanced()">
+                <div class="mt4" v-if="shouldShowAdvanced()">
                     <h5>Debug only:</h5>
-                    <input v-model.trim="advSecret" placeholder="API Token" class="mr2"/>
+                    <input v-model.trim="advSecret" placeholder="API Token" class="mr2" />
                     <button v-on:click="advStoreSecret()">Store API Token</button>
-                </p>
+                </div>
             </div>
 
         </div>
@@ -94,6 +94,7 @@ export default {
 
         shouldShowAdvanced() {
             if (location.host.includes("localhost") || location.host.includes("ngrok.io") || location.host.includes("flux-members.netlify.com")) {
+                console.log("showing advanced", location.host)
                 return true;
             }
             return false;
