@@ -14,7 +14,7 @@
             <ul class="ul-spaced">
                 <li><router-link :to="Routes.EditUserDetails">Change your member details or preferences</router-link></li>
                 <li><router-link :to="Routes.MembershipRevocation">Revoke your membership</router-link></li>
-                <li><a href="/anon_validation.html">Help validate other members</a></li>
+                <!-- <li><a href="/anon_validation.html">Help validate other members</a></li> -->
             </ul>
         </ui-section>
 
