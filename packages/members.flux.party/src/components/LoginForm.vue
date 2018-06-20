@@ -22,7 +22,7 @@
                 </p>
 
                 <div class="mt4" v-if="shouldShowAdvanced()">
-                    <h5>Debug only:</h5>
+                    <h5>Manual Login:</h5>
                     <input v-model.trim="advSecret" placeholder="API Token" class="mr2" />
                     <button v-on:click="advStoreSecret()">Store API Token</button>
                 </div>

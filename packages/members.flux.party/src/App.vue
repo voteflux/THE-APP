@@ -5,18 +5,21 @@
         <MenuBar class=""/>
 
         <transition name="fade" mode="out-in">
-            <Loading v-if="loginState == IS_LOGGING_IN" :key="IS_LOGGING_IN">
+            <Loading v-if="userReq.isLoading()" :key="IS_LOGGING_IN">
                 Checking login details...
             </Loading>
 
-            <div v-else-if="loginState == IS_LOGGED_IN" :key="IS_LOGGED_IN">
+            <div v-else-if="userReq.isSuccess()" :key="IS_LOGGED_IN">
                 <transition name="fade" mode="out-in">
-                    <router-view v-if="user" :auth="auth" :user="user" :roles="['admin']"/>
+                    <router-view :auth="auth" :user="userReq.unwrap()" :roles="['admin']"/>
                 </transition>
             </div>
 
-            <div v-else-if="loginState == IS_NOT_LOGGED_IN" :key="IS_NOT_LOGGED_IN">
+            <div v-else :key="IS_NOT_LOGGED_IN">
                 <LoginForm/>
+                <Error v-if="userReq.isFailed()">
+                    {{ userReq.unwrapError() }}
+                </Error>
             </div>
         </transition>
     </div>
@@ -30,6 +33,7 @@ import MenuBar from "./components/MenuBar.vue";
 import VueRouter from "vue-router";
 import { debug } from "util";
 import { M, MsgBus } from "./messages";
+import WebRequest from './lib/WebRequest'
 
 // constants - for everything w/in this components scope
 enum Cs {
@@ -42,19 +46,19 @@ enum Cs {
 export default /*class App extends Vue*/ {
     components: { LoginForm, Loading, MenuBar },
     data: () => ({
+        userReq: WebRequest.NotRequested(),
         auth: null,
-        user: null,
-        loginState: Cs.IS_LOGGING_IN,
         ...Cs
     }),
     methods: {
-        loginFailed() {
-            this.loginState = Cs.IS_NOT_LOGGED_IN;
+        loginFailed(msg?: string) {
+            this.userReq = WebRequest.Failed(`Login failed${msg ? `: ${msg}`: ''}`)
         },
         loadAuth() {
-            this.loginState = Cs.IS_LOGGING_IN
+            this.userReq = WebRequest.Loading()
+
             this.$flux.auth.loadAuth().caseOf({
-                nothing: () => this.loginFailed(),
+                nothing: () => this.loginFailed("no authentication"),
                 just: auth => {
                     this.auth = auth;
                     this.loadUser();
@@ -63,9 +67,12 @@ export default /*class App extends Vue*/ {
         },
         loadUser() {
             if (this.user) this.user.loading = true;
-            this.$flux.v1.getUserDetails(this.auth).then(r =>
-                r.caseOf({
-                    left: e => {
+            this.userReq = WebRequest.Loading()
+
+            this.$flux.v1.getUserDetails(this.auth).then(r => {
+                this.userReq = r;
+                r.do({
+                    failed: e => {
                         this.loginFailed();
                         if (e.err && e.err.status == 403) {
                             this.$flux.auth.remove();
@@ -73,17 +80,15 @@ export default /*class App extends Vue*/ {
                             this.$unknownErr(e);
                         }
                     },
-                    right: user => {
-                        this.loginState = Cs.IS_LOGGED_IN;
-                        this.user = user;
+                    success: u => {
+                        this.user = u;
                     }
                 })
-            );
+            });
         },
         logout() {
             this.$flux.auth.remove()
-            this.user = undefined
-            this.loginState = Cs.IS_NOT_LOGGED_IN
+            this.userReq = WebRequest.NotRequested()
         }
     },
     created() {
@@ -96,7 +101,8 @@ export default /*class App extends Vue*/ {
             this.loadUser();
         });
         MsgBus.$on(M.GOT_USER_DETAILS, (user) => {
-            this.user = user;
+            this.user = user
+            this.userReq = WebRequest.Success(user)
         });
 
         this.$on(M.LOGOUT, this.logout)

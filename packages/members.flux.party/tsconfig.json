@@ -7,10 +7,13 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "allowSyntheticDefaultImports": true,
+    "strictNullChecks": true,
+    "alwaysStrict": true,
     "sourceMap": true,
     "baseUrl": ".",
     "types": [
-      "node"    ],
+      "node"
+    ],
     "paths": {
       "@/*": [
         "src/*"
