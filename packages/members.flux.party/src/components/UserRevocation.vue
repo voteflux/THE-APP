@@ -85,15 +85,15 @@ export default Vue.extend({
         doRevocationFinally() {
             this.state = Cs.SAVING
             this.$flux.v1.revokeMembership(this.$props.user)
-                .then((r) => r.caseOf({
-                    left: e => {
+                .then((r) => r.do({
+                    failed: e => {
                         if (e.err.status == 403) {
                             this.err.revoke = this.$err("Unauthorized... Have you already revoked your membership?", e)
                         } else {
                             this.err.revoke = this.$unknownErr(e)
                         }
                     },
-                    right: () => this.state = Cs.DONE
+                    success: () => this.state = Cs.DONE
                 }))
         },
         cancelRevocation() {

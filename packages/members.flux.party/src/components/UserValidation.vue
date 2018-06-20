@@ -99,7 +99,7 @@ export default Vue.extend({
                     this.captchaStatus = !msg["captcha_incorrect"];
                     this.validationReason = msg.validationReason;
                     this.captchaAnswer = "";
-                    MsgBus.$emit(M.REFRESH_USER);
+                    MsgBus.$emit(M.REFRESH_USER, {silent: true});
                 },
                 deliver_session: ({ session }) => {
                     this.session = session;

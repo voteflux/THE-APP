@@ -70,6 +70,7 @@
 import Vue from 'vue'
 import {Error} from '../common'
 import {MsgBus, M} from '../../messages'
+import {reqPx} from '@/lib'
 
 enum Cs {
     INPUT_COUNTRY,  // not yet used
@@ -88,6 +89,7 @@ export default Vue.extend({
     props: ["user"],
 
     data: () => ({
+        req: reqPx(),
         state: Cs.DISPLAY,
         isLoading: false,
         newAddress: {},
@@ -135,9 +137,9 @@ export default Vue.extend({
 
         loadSuburbs(postcode) {
             this.$flux.v1.getSuburbs('au', postcode)
-                .then(r => r.caseOf({
-                    left: e => this.gotError,
-                    right: _subs => {
+                .then(r => (this.req.suburbs = r) && r.do({
+                    failed: e => this.gotError,
+                    success: _subs => {
                         this.suburbs = _subs.suburbs
                         this.isLoading = false
                     }
@@ -146,9 +148,9 @@ export default Vue.extend({
 
         loadStreets(postcode, suburb) {
             this.$flux.v1.getStreets('au', postcode, suburb)
-                .then(r => r.caseOf({
-                    left: e => this.gotError,
-                    right: _streets => {
+                .then(r => (this.req.streest = r) && r.do({
+                    failed: e => this.gotError,
+                    success: _streets => {
                         this.streets = _streets.streets
                         this.isLoading = false
                     }
@@ -175,10 +177,10 @@ export default Vue.extend({
                 case Cs.INPUT_STREET:
                     this.state = Cs.SAVING
                     this.$flux.v1.saveUserDetails({...this.newAddress, s: this.$props.user.s})
-                        .then(fullUserDeetsR => {
-                            fullUserDeetsR.caseOf({
-                                left: e => { throw e },
-                                right: fullUserDeets => {
+                        .then(r => {
+                            (this.req.fullUserDeets = r) && r.do({
+                                failed: e => { throw e },
+                                success: fullUserDeets => {
                                     MsgBus.$emit(M.GOT_USER_DETAILS, fullUserDeets)
                                     this.state = Cs.DISPLAY
                                 }

@@ -52,9 +52,9 @@ import { mkErrContainer } from "../../lib/errors"
 
 
 const afterSave = fullUserDeetsR => {
-    fullUserDeetsR.caseOf({
-        left: e => { throw e },
-        right: fullUserDeets => {
+    fullUserDeetsR.do({
+        failed: e => { throw e },
+        success: fullUserDeets => {
             MsgBus.$emit(M.GOT_USER_DETAILS, fullUserDeets)
         }
     })

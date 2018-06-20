@@ -5,20 +5,20 @@
         <MenuBar class=""/>
 
         <transition name="fade" mode="out-in">
-            <Loading v-if="userReq.isLoading()" :key="IS_LOGGING_IN">
+            <Loading v-if="req.user.isLoading()" :key="IS_LOGGING_IN">
                 Checking login details...
             </Loading>
 
-            <div v-else-if="userReq.isSuccess()" :key="IS_LOGGED_IN">
+            <div v-else-if="req.user.isSuccess()" :key="IS_LOGGED_IN">
                 <transition name="fade" mode="out-in">
-                    <router-view :auth="auth" :user="userReq.unwrap()" :roles="['admin']"/>
+                    <router-view :auth="auth" :user="req.user.unwrap()" :roles="['admin']"/>
                 </transition>
             </div>
 
             <div v-else :key="IS_NOT_LOGGED_IN">
                 <LoginForm/>
-                <Error v-if="userReq.isFailed()">
-                    {{ userReq.unwrapError() }}
+                <Error v-if="req.user.isFailed()">
+                    {{ req.user.unwrapError() }}
                 </Error>
             </div>
         </transition>
@@ -33,7 +33,8 @@ import MenuBar from "./components/MenuBar.vue";
 import VueRouter from "vue-router";
 import { debug } from "util";
 import { M, MsgBus } from "./messages";
-import WebRequest from './lib/WebRequest'
+import WR from './lib/WebRequest'
+import { reqPx } from './lib'
 
 // constants - for everything w/in this components scope
 enum Cs {
@@ -43,19 +44,21 @@ enum Cs {
     IS_LOGGING_IN,
 }
 
-export default /*class App extends Vue*/ {
+export default /*class App extends Vue*/ ({
     components: { LoginForm, Loading, MenuBar },
     data: () => ({
-        userReq: WebRequest.NotRequested(),
+        req: {
+            user: WR.NotRequested()
+        },
         auth: null,
         ...Cs
     }),
     methods: {
         loginFailed(msg?: string) {
-            this.userReq = WebRequest.Failed(`Login failed${msg ? `: ${msg}`: ''}`)
+            this.req.user = WR.Failed(`Login failed${msg ? `: ${msg}`: ''}`)
         },
         loadAuth() {
-            this.userReq = WebRequest.Loading()
+            this.req.user = WR.Loading()
 
             this.$flux.auth.loadAuth().caseOf({
                 nothing: () => this.loginFailed("no authentication"),
@@ -67,10 +70,12 @@ export default /*class App extends Vue*/ {
         },
         loadUser() {
             if (this.user) this.user.loading = true;
-            this.userReq = WebRequest.Loading()
-
+            this.req.user = WR.Loading()
+            this.loadUserSilent()
+        },
+        loadUserSilent() {
             this.$flux.v1.getUserDetails(this.auth).then(r => {
-                this.userReq = r;
+                this.req.user = r
                 r.do({
                     failed: e => {
                         this.loginFailed();
@@ -88,7 +93,7 @@ export default /*class App extends Vue*/ {
         },
         logout() {
             this.$flux.auth.remove()
-            this.userReq = WebRequest.NotRequested()
+            this.req.user = WR.NotRequested()
         }
     },
     created() {
@@ -97,18 +102,20 @@ export default /*class App extends Vue*/ {
         MsgBus.$on(M.REFRESH_AUTH, () => {
             this.loadAuth();
         });
-        MsgBus.$on(M.REFRESH_USER, () => {
+        MsgBus.$on(M.REFRESH_USER, (opts = {}) => {
+            if (opts.silent)
+                return this.loadUserSilent()
             this.loadUser();
         });
         MsgBus.$on(M.GOT_USER_DETAILS, (user) => {
             this.user = user
-            this.userReq = WebRequest.Success(user)
+            this.req.user = WR.Success(user)
         });
 
         this.$on(M.LOGOUT, this.logout)
         MsgBus.$on(M.LOGOUT, this.logout)
     }
-};
+});
 </script>
 
 <style lang="scss">

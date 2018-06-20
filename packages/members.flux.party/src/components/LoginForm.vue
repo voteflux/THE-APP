@@ -34,9 +34,10 @@
 
 <script lang=ts>
 import Loading from "./Loading.vue";
-import { mkErrContainer } from "../lib/errors";
+import { mkErrContainer } from "@/lib/errors";
 import { Error } from "./common/";
 import { MsgBus, M } from '@/messages';
+import WR from '@/lib/WebRequest';
 
 enum Cs {
     NEED_EMAIL,
@@ -44,10 +45,13 @@ enum Cs {
     EMAIL_SENT
 };
 
-export default {
+export default ({
     name: "LoginForm",
     components: { Loading, Error },
     data: () => ({
+        req: {
+            login: WR.NotRequested()
+        },
         user: {
             email: ""
         },
@@ -65,12 +69,12 @@ export default {
             this.$flux.v1
                 .sendUserDetails(this.user)
                 .then(r => {
-                    r.caseOf({
-                        left: e => {
+                    (this.req.login = r) && r.do({
+                        failed: e => {
                             this.state = Cs.NEED_EMAIL;
                             this.errs.email = this.$err(e, _email);
                         },
-                        right: r => {
+                        success: r => {
                             if (r.sent_email) {
                                 this.state = Cs.EMAIL_SENT;
                             } else {
@@ -100,7 +104,7 @@ export default {
             return false;
         }
     }
-};
+});
 </script>
 
 <style scoped>
