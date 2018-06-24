@@ -7,8 +7,7 @@ require("normalize.css");
 // eslint-disable-next-line
 require("tachyons");
 
-Vue.config.productionTip = true;
-Vue.prototype.$dev = Vue.config.productionTip;
+// Vue.config.productionTip = true;
 
 import VueResource from "vue-resource";
 Vue.use(VueResource);

@@ -47,6 +47,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
+import Component from 'vue-class-component';
 
 enum Cs {
     // state constants
@@ -59,7 +60,7 @@ enum Cs {
     NOT_SMALL,
 }
 
-export default Vue.extend({
+const Editable = Vue.extend({
     props: {
         name: String,
         value: String,
@@ -70,6 +71,7 @@ export default Vue.extend({
 
     data: () => ({
         state: Cs.DISPLAY,
+        newValue: '',
         err: {msg: ""},
         ...Cs
     }),
@@ -101,6 +103,7 @@ export default Vue.extend({
     mounted(){
     }
 })
+export default Editable;
 </script>
 
 <style scoped lang="scss">

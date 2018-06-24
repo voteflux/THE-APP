@@ -25,7 +25,7 @@ export default Vue.extend({
     }),
 
     methods: {
-        _onStart() { this.$nextTick(() => this.$refs.inputfield.focus()) },
+        _onStart() { this.$nextTick(() => (<HTMLElement>this.$refs.inputfield).focus()) },
 
         _onSave() {
             return this.$props.onSave(this.newValue)
@@ -37,9 +37,9 @@ export default Vue.extend({
 
         _onEnter() {
             if (this.newValue !== this.$props.value) {
-                this.$refs.mainEdit._doSave()
+                (<any>this.$refs.mainEdit)._doSave()
             } else {
-                this.$refs.mainEdit.resetNoSave()
+                (<any>this.$refs.mainEdit).resetNoSave()
             }
         }
     },

@@ -32,7 +32,7 @@ export default Vue.extend({
     data: () => ({
         newValue: true,
         newValueInv: false,
-        optNames: [],
+        optNames: [] as string[],
     }),
 
     methods: {

@@ -6,7 +6,7 @@ const RT = RequestTag
 interface NetCases<D, E, R> {
     notRequested: () => R;
     loading: () => R;
-    failed: (error: E) => R;
+    failed: (error: E, errObj?: any) => R;
     success: (data: D) => R;
 };
 
@@ -20,7 +20,7 @@ export default class WebRequest<E,D> {
      * @param data
      * @param error
      */
-    constructor(private tag: RequestTag, private data?: D, private error?: E) {
+    constructor(private tag: RequestTag, private data?: D, private error?: E, private errObj?: any) {
         if (tag === RT.Success && this.data === undefined)
             throw TypeError("Cannot create Successful web requests without a data value")
         if (tag === RT.Failed && this.error === undefined)
@@ -36,7 +36,7 @@ export default class WebRequest<E,D> {
           case RT.Failed:
             if (this.error === undefined)
                 throw TypeError('WebRequest: this.error was undefined')
-            return cases.failed(this.error);
+            return cases.failed(this.error, this.errObj);
           case RT.Success:
             if (this.data === undefined)
                 throw TypeError('WebRequest: this.data was undefined')
@@ -58,7 +58,7 @@ export default class WebRequest<E,D> {
     isFailed() { return this.tag == RT.Failed }
     isSuccess() { return this.tag == RT.Success }
 
-    static Failed = <E, D>(error: E) => new WebRequest<E,D>(RT.Failed, undefined, error)
+    static Failed = <E,D>(error: E, errObj?: any) => new WebRequest<E,D>(RT.Failed, undefined, error, errObj)
     static Loading = () => new WebRequest(RT.Loading)
     static NotRequested = () => new WebRequest(RT.NotRequested)
     static Success = <E,D>(data: D) => new WebRequest<E,D>(RT.Success, data)

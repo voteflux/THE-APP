@@ -2,9 +2,12 @@
 
 import { Maybe, Either } from "tsmonad";
 import WebRequest from './WebRequest'
+import { VueConstructor, Vue } from "vue/types/vue";
+import { Http, HttpResponse } from "vue-resource/types/vue_resource";
+import { PluginObject } from "vue";
 // import io from "socket.io-client";
 
-interface UserV1Object {
+export interface UserV1Object {
   fname: string;
   mnames: string;
   sname: string;
@@ -16,20 +19,20 @@ interface UserV1Object {
   addr_street_no: string;
 }
 
-interface Auth {
+export interface Auth {
   apiToken: string | null;
   s: string | null;
 }
 
-interface CheckEmailResp {
+export interface CheckEmailResp {
   doOnboarding: boolean;
 }
 
 type R<r> = WebRequest<string, r>;
 // promise response
-type PR<r> = Promise<R<r>>;
+type PR<r> = PromiseLike<R<r>>;
 
-const mkResp = data => {
+const mkResp = <r>(data): WebRequest<string,r> => {
     if (data.status == 200) {
         if (data.body.error === undefined) {
             return WebRequest.Success(data.body);
@@ -41,16 +44,22 @@ const mkResp = data => {
     }
 };
 
-const mkErr = path => err => {
+const mkErr = (path: string) => <r>(err: HttpResponse): WebRequest<string,r> => {
     // console.log('Flux api got error', err);
-    return WebRequest.Failed(`Request error at ${path}: ${err.status}`)
+    return WebRequest.Failed(`Request error at ${path}: ${err.status}`, err)
 };
 
-const FluxApi = {
-  install: function(Vue, options) {
+
+const FluxApi: PluginObject<{}> = {
+  install: function(_Vue: VueConstructor, options?: any) {
+
+    const Vue = _Vue as (VueConstructor & {http: Http});
+
+    const http = <Http>(<any>Vue).http;
+
     const _api2 = (_path: string) => {
       let root;
-      if (Vue.$dev) {
+      if (false /*Vue.$dev*/) {
         root = "https://dev.api.flux.party/";
       } else {
         root = "https://api.flux.party/";
@@ -72,12 +81,12 @@ const FluxApi = {
       return root + _path;
     };
 
-    const post = <r>(url, data): PR<r> => {
-      return Vue.http.post(url, data).then(mkResp, mkErr(url));
+    const post = <r>(url: string, data: any): PR<r> => {
+      return Vue.http.post(url, data).then(mkResp, mkErr(url)) as PR<r>;
     };
 
-    const get = <r>(url): PR<r> => {
-      return Vue.http.get(url).then(mkResp, mkErr(url));
+    const get = <r>(url: string): PR<r> => {
+      return Vue.http.get(url).then(mkResp, mkErr(url)) as PR<r>;
     };
 
     Vue.prototype.$flux = {
@@ -100,11 +109,8 @@ const FluxApi = {
         sendUserDetails({ email }) {
           return post(_api1("send_user_details"), { email });
         },
-        validationWebsocket() {
+        validationWebsocket(): WebSocket {
           return new WebSocket(_api1("ws_validation").replace("http", "ws"));
-        },
-        captchaImgUrl(session) {
-          return _api1("au/captcha_img/" + session);
         },
         getSuburbs(country, postcode) {
           return get(_api1(`get_suburbs/${country}/${postcode}`));
@@ -115,6 +121,12 @@ const FluxApi = {
         revokeMembership({ s }): PR<void> {
           return post(_api1("delete_user"), { s });
         }
+      },
+
+      utils: {
+        captchaImgUrl(session) {
+          return _api1("au/captcha_img/" + session);
+        },
       },
 
       auth: {
@@ -140,7 +152,7 @@ const FluxApi = {
           this.sendSToAllFluxDomains(secret);
         },
 
-        sendSToAllFluxDomains(s) {
+        sendSToAllFluxDomains(s: string) {
           const sendSToUrlAsHashParam = (url, s) => {
             if (s) {
               var ifrm = document.createElement("iframe");

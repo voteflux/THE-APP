@@ -77,8 +77,8 @@ export default Vue.extend({
     props: ["auth"],
     data: () => ({
         state: Cs.UNINITIALIZED,
-        socket: null,
-        msgHandlers: null,
+        socket: undefined as undefined | WebSocket,
+        msgHandlers: {finish: msg => {}, deliver_session: ({session}) => {}},
         validationSuccess: false,
         validationReason: "",
         sessionImg: new Image(),
@@ -104,8 +104,8 @@ export default Vue.extend({
                 deliver_session: ({ session }) => {
                     this.session = session;
                     this.state = Cs.AWAITING_CAPTCHA;
-                    this.$nextTick(() => this.$refs.captcha.focus())
-                    this.captchaImg = this.$flux.v1.captchaImgUrl(session);
+                    this.$nextTick(() => (<HTMLElement>this.$refs.captcha).focus())
+                    this.captchaImg = this.$flux.utils.captchaImgUrl(session);
                     this.sessionImg = new Image();
                     this.sessionImg.src = this.captchaImg;
                 }
@@ -128,12 +128,13 @@ export default Vue.extend({
             this.socket.onmessage = this.onSocketMessage;
 
             this.socket.onerror = e => {
-                this.err.socket = this.$err(e, e);
+                this.err.socket = this.$err(JSON.stringify(e), e);
                 this.state = Cs.ERROR;
             };
         },
         sendJson(toSend) {
-            this.socket.send(JSON.stringify(toSend));
+            if (this.socket)
+                this.socket.send(JSON.stringify(toSend));
         },
         sendInit() {
             this.state = Cs.STARTING_SESSION;

@@ -1,4 +1,6 @@
-interface SError<T> {
+import { VueConstructor, PluginObject } from "vue";
+
+export interface SError<T> {
     msg: string;
     sample: T | null;
     wipe: () => void;
@@ -9,7 +11,7 @@ export const emptyErr = <T>(): SError<T> => {
     return new Proxy(
         _err,
         {
-            get: (obj, prop) => {
+            get: (obj: any, prop: string) => {
                 if (prop == "wipe")
                     return () => {
                         obj.msg = "";
@@ -21,29 +23,29 @@ export const emptyErr = <T>(): SError<T> => {
     )
 }
 
-export const mkErrFrom = <T>(msg, sample: T): SError<T> => {
+export const mkErrFrom = <T>(msg: string, sample: T): SError<T> => {
     const e: SError<T> = emptyErr();
     e.msg = msg;
     e.sample = sample;
     return e;
 };
 
-export const mkErrContainer = () => {
+export const mkErrContainer = (): any => {
     let newObj = {};
     return new Proxy(newObj, {
-        get: (obj, prop) => {
+        get: (obj: any, prop: string) => {
             return prop in obj ? obj[prop] : emptyErr();
         },
-        set: (obj, prop, value) => {
+        set: (obj: any, prop: string, value: any) => {
             obj[prop] = value;
             return true;
         }
     });
 };
 
-const FluxErrHandler = {
-    install: Vue => {
-        Vue.prototype.$err = <T>(msg, orig: T): SError<T> => {
+const FluxErrHandler: PluginObject<{}> = {
+    install: (Vue: VueConstructor) => {
+        Vue.prototype.$err = <T>(msg: string, orig: T): SError<T> => {
             Vue.prototype.$notify({
                 title: "Error",
                 text: msg,
@@ -52,7 +54,7 @@ const FluxErrHandler = {
             return mkErrFrom(msg, orig);
         };
 
-        Vue.prototype.$unknownErr = (e: any) => {
+        Vue.prototype.$unknownErr = <T>(e: T): SError<T> => {
             // debugger;
             // eslint-disable-next-line
             console.log("Unknown error", e)

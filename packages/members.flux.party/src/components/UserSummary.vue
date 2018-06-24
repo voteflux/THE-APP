@@ -28,7 +28,11 @@ import UserDetailsValid from "./UserDetails/UserDetailsValid.vue"
 export default Vue.extend({
     components: { Table2Cols, UserDetailsValid },
 
-    props: ["user"],
+    props: {
+        user: {
+            type: Object
+        }
+    },
 
     data: () => ({
         R

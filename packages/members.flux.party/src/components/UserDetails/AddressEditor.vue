@@ -70,6 +70,8 @@
 import Vue from 'vue'
 import {Error} from '../common'
 import {MsgBus, M} from '@/messages'
+import WR from '@/lib/WebRequest'
+import WebRequest from '@/lib/WebRequest';
 
 enum Cs {
     INPUT_COUNTRY,  // not yet used
@@ -88,12 +90,23 @@ export default Vue.extend({
     props: ["user"],
 
     data: () => ({
-        req: {},
+        req: {
+            suburbs: WR.NotRequested(),
+            streets: WR.NotRequested(),
+            fullUserDeets: WR.NotRequested(),
+        },
         state: Cs.DISPLAY,
         isLoading: false,
-        newAddress: {},
+        newAddress: {
+            addr_country: "AU",
+            addr_postcode: "",
+            addr_street: "",
+            addr_street_no: "",
+            addr_suburb: ""
+        },
         suburbs: [],
         streets: [],
+        errMsg: {},
         ...Cs
     }),
 
@@ -134,11 +147,11 @@ export default Vue.extend({
             }
         },
 
-        loadSuburbs(postcode) {
+        loadSuburbs(postcode: string) {
             this.$flux.v1.getSuburbs('au', postcode)
-                .then(r => (this.req.suburbs = r) && r.do({
+                .then((r) => (this.req.suburbs = r) && r.do({
                     failed: e => this.gotError,
-                    success: _subs => {
+                    success: (_subs) => {
                         this.suburbs = _subs.suburbs
                         this.isLoading = false
                     }
@@ -147,7 +160,7 @@ export default Vue.extend({
 
         loadStreets(postcode, suburb) {
             this.$flux.v1.getStreets('au', postcode, suburb)
-                .then(r => (this.req.streest = r) && r.do({
+                .then(r => (this.req.streets = r) && r.do({
                     failed: e => this.gotError,
                     success: _streets => {
                         this.streets = _streets.streets
@@ -157,7 +170,7 @@ export default Vue.extend({
         },
 
         nextFormPart() {
-            if ([Cs.INPUT_POSTCODE, Cs.INPUT_SUBURB].includes(this.state)) {
+            if (this.state == Cs.INPUT_POSTCODE || this.state == Cs.INPUT_SUBURB) {
                 this.isLoading = true;
             }
 
@@ -183,8 +196,7 @@ export default Vue.extend({
                                     MsgBus.$emit(M.GOT_USER_DETAILS, fullUserDeets)
                                     this.state = Cs.DISPLAY
                                 }
-                            })
-                        }).catch(e => {
+                            })}, e => {
                             this.errMsg = e
                             this.state = Cs.ERROR
                         });

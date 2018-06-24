@@ -34,6 +34,7 @@ import VueRouter from "vue-router";
 import { debug } from "util";
 import { M, MsgBus } from "./messages";
 import WR from './lib/WebRequest'
+import { UserV1Object, Auth } from "@/lib/api";
 
 // constants - for everything w/in this components scope
 enum Cs {
@@ -43,13 +44,14 @@ enum Cs {
     IS_LOGGING_IN,
 }
 
-export default /*class App extends Vue*/ ({
+export default /*class App extends Vue*/ Vue.extend({
     components: { LoginForm, Loading, MenuBar },
     data: () => ({
         req: {
-            user: WR.NotRequested()
+            user: WR.NotRequested(),
         },
-        auth: null,
+        auth: undefined as any & Auth,
+        user: {} as any,
         ...Cs
     }),
     methods: {
@@ -68,17 +70,17 @@ export default /*class App extends Vue*/ ({
             });
         },
         loadUser() {
-            if (this.user) this.user.loading = true;
             this.req.user = WR.Loading()
             this.loadUserSilent()
         },
         loadUserSilent() {
             this.$flux.v1.getUserDetails(this.auth).then(r => {
                 this.req.user = r
+                console.log(r)
                 r.do({
-                    failed: e => {
+                    failed: (e, errObj) => {
                         this.loginFailed();
-                        if (e.err && e.err.status == 403) {
+                        if (errObj && errObj.status == 403) {
                             this.$flux.auth.remove();
                         } else {
                             this.$unknownErr(e);

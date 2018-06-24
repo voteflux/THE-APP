@@ -38,6 +38,7 @@ import { mkErrContainer } from "@/lib/errors";
 import { Error } from "./common/";
 import { MsgBus, M } from '@/messages';
 import WR from '@/lib/WebRequest';
+import Vue from "vue";
 
 enum Cs {
     NEED_EMAIL,
@@ -45,7 +46,7 @@ enum Cs {
     EMAIL_SENT
 };
 
-export default ({
+export default Vue.extend({
     name: "LoginForm",
     components: { Loading, Error },
     data: () => ({
@@ -83,8 +84,7 @@ export default ({
                             }
                         }
                     });
-                })
-                .catch(e => {
+                }, e => {
                     this.state = Cs.NEED_EMAIL;
                     this.errs.email = this.$err("Error talking to server...", _email);
                     this.$unknownErr(e);
