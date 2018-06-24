@@ -99,4 +99,10 @@ export default class WebRequest<E,D> {
         if (this.error === undefined) throw TypeError("Failed to unwrapError with error=undefined")
         return this.error
     }
+
+    unwrapOrDefault(d: D): D {
+        if (this.tag === RT.Success && this.data)
+            return this.data
+        return d
+    }
 }

@@ -4,18 +4,20 @@ import WebRequest from "@/lib/WebRequest";
 import { Auth } from './api';
 import { Maybe } from "tsmonad/lib/src";
 
-interface HasAddr {
+export interface HasAddr {
     addr_street_no: string;
     addr_street: string;
     addr_suburb: string;
     addr_postcode: string;
 }
 
-interface HasName {
+export interface HasName {
     fname: string;
     sname: string;
     mnames: string;
 }
+
+type PR<r> = PromiseLike<WebRequest<string, r>>
 
 declare module "vue/types/vue" {
     interface Vue {
@@ -25,12 +27,12 @@ declare module "vue/types/vue" {
         $unknownErr: (msg: any) => SError<any>;
         $flux: {
             v1: {
-                [method: string]: (...args: any[]) => PromiseLike<WebRequest<string, any>>
+                [method: string]: (...args: any[]) => PR<any>
             } & {
                 validationWebsocket: () => WebSocket
             },
             v2: {
-                [method: string]: (...args: any[]) => PromiseLike<WebRequest<string, any>>
+                getRoles: ({s} : {s: string}) => PR<{roles: string[]}>
             },
             utils: {
                 [method: string]: (...args: any[]) => any

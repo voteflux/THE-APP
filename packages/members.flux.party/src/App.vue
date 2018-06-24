@@ -11,7 +11,7 @@
 
             <div v-else-if="req.user.isSuccess()" :key="IS_LOGGED_IN">
                 <transition name="fade" mode="out-in">
-                    <router-view :auth="auth" :user="req.user.unwrap()" :roles="['admin']"/>
+                    <router-view :auth="auth" :user="req.user.unwrap()" :roles="req.roles.unwrapOrDefault(['default_role'])"/>
                 </transition>
             </div>
 
@@ -49,12 +49,26 @@ export default /*class App extends Vue*/ Vue.extend({
     data: () => ({
         req: {
             user: WR.NotRequested(),
+            roles: WR.NotRequested(),
         },
         auth: undefined as any & Auth,
         user: {} as any,
         ...Cs
     }),
     methods: {
+        getRoles() {
+            this.req.roles = WR.Loading();
+            this.$flux.v2.getRoles(this.auth).then(r => {
+                this.req.roles = r.map(({roles}) => roles)
+                r.do({
+                    failed: (e, errObj) => {
+                        // todo: handle failed roles check
+                    },
+                    success: ({roles}) => {}
+                })
+                this.$forceUpdate()
+            })
+        },
         loginFailed(msg?: string) {
             this.req.user = WR.Failed(`Login failed${msg ? `: ${msg}`: ''}`)
         },
@@ -76,7 +90,6 @@ export default /*class App extends Vue*/ Vue.extend({
         loadUserSilent() {
             this.$flux.v1.getUserDetails(this.auth).then(r => {
                 this.req.user = r
-                console.log(r)
                 r.do({
                     failed: (e, errObj) => {
                         this.loginFailed();
@@ -99,6 +112,7 @@ export default /*class App extends Vue*/ Vue.extend({
     },
     created() {
         this.loadAuth();
+        this.getRoles();
 
         MsgBus.$on(M.REFRESH_AUTH, () => {
             this.loadAuth();
@@ -112,6 +126,9 @@ export default /*class App extends Vue*/ Vue.extend({
             this.user = user
             this.req.user = WR.Success(user)
         });
+        MsgBus.$on(M.REFRESH_ROLES, () => {
+            this.getRoles();
+        })
 
         this.$on(M.LOGOUT, this.logout)
         MsgBus.$on(M.LOGOUT, this.logout)

@@ -34,7 +34,7 @@ type PR<r> = PromiseLike<R<r>>;
 
 const mkResp = <r>(data): WebRequest<string,r> => {
     if (data.status == 200) {
-        if (data.body.error === undefined) {
+        if (data.body.error === undefined || data.body.error === '' || data.body.error == false) {
             return WebRequest.Success(data.body);
         } else {
             return WebRequest.Failed(data.body.error);
@@ -62,7 +62,7 @@ const FluxApi: PluginObject<{}> = {
       if (false /*Vue.$dev*/) {
         root = "https://dev.api.flux.party/";
       } else {
-        root = "https://api.flux.party/";
+        root = "https://api.flux.party/v2/";
       }
       return root + _path;
     };
@@ -91,11 +91,11 @@ const FluxApi: PluginObject<{}> = {
 
     Vue.prototype.$flux = {
       v2: {
-        checkEmailToOnboard({ email }): PR<CheckEmailResp> {
+        checkEmailToOnboard({ email }): PR<any> {
           return post(_api2("user/check_email"), { email });
         },
-        getRoles({ s }): PR<CheckEmailResp> {
-          return post(_api2("/usr/getRoles"), { s });
+        getRoles({ s }): PR<{roles: string[]}> {
+          return post(_api2("user/getRoles"), { s });
         }
       },
 
