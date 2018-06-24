@@ -69,8 +69,7 @@
 <script lang="ts">
 import Vue from 'vue'
 import {Error} from '../common'
-import {MsgBus, M} from '../../messages'
-import {reqPx} from '@/lib'
+import {MsgBus, M} from '@/messages'
 
 enum Cs {
     INPUT_COUNTRY,  // not yet used
@@ -89,7 +88,7 @@ export default Vue.extend({
     props: ["user"],
 
     data: () => ({
-        req: reqPx(),
+        req: {},
         state: Cs.DISPLAY,
         isLoading: false,
         newAddress: {},

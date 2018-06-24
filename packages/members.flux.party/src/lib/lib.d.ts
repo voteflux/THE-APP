@@ -15,7 +15,7 @@ interface HasName {
 
 declare module "vue/types/vue" {
     interface Vue {
-        $formatAddress: (HasAddr) => string;
-        $formatName: (HasName) => string;
+        $formatAddress: (user: HasAddr) => string;
+        $formatName: (user: HasName) => string;
     }
 }

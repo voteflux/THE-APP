@@ -54,6 +54,7 @@ const FluxErrHandler = {
 
         Vue.prototype.$unknownErr = (e: any) => {
             // debugger;
+            // eslint-disable-next-line
             console.log("Unknown error", e)
             return Vue.prototype.$err("Unknown error", e)
         };

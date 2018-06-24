@@ -34,7 +34,6 @@ import VueRouter from "vue-router";
 import { debug } from "util";
 import { M, MsgBus } from "./messages";
 import WR from './lib/WebRequest'
-import { reqPx } from './lib'
 
 // constants - for everything w/in this components scope
 enum Cs {
@@ -102,7 +101,7 @@ export default /*class App extends Vue*/ ({
         MsgBus.$on(M.REFRESH_AUTH, () => {
             this.loadAuth();
         });
-        MsgBus.$on(M.REFRESH_USER, (opts = {}) => {
+        MsgBus.$on(M.REFRESH_USER, (opts = {silent: false}) => {
             if (opts.silent)
                 return this.loadUserSilent()
             this.loadUser();
