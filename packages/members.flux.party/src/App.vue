@@ -11,7 +11,7 @@
 
             <div v-else-if="req.user.isSuccess()" :key="IS_LOGGED_IN">
                 <transition name="fade" mode="out-in">
-                    <router-view :auth="auth" :user="req.user.unwrap()" :roles="req.roles.unwrapOrDefault(['default_role'])"/>
+                    <router-view :auth="auth" :user="req.user.unwrap()" :roles="req.roles"/>
                 </transition>
             </div>
 

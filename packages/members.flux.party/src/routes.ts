@@ -2,5 +2,6 @@ export default {
     EditUserDetails: "/membership/details",
     Dashboard: "/",
     ValidateSelf: "/membership/validation",
-    MembershipRevocation: "/membership/revoke"
+    MembershipRevocation: "/membership/revoke",
+    FinanceUtils: "/admin/finance"
 };

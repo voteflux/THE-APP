@@ -6,8 +6,15 @@
             <UserSummary :user='user'></UserSummary>
         </UiSection>
 
-        <UiSection v-if="roles && roles.includes(Roles.ORGANISER)" title="Organiser Utilities">
-            <OrganiserUtils />
+        <UiSection v-if="roles.isSuccess() && roles.unwrap().length > 0" title="Admin Utilities">
+            <warning>This section is under active development</warning>
+            <ul>
+                <li v-if="hasRole(Roles.ADMIN)">Admin utils link will go here when done</li>
+                <li v-if="hasRole(Roles.FINANCE)"><router-link :to="Routes.FinanceUtils">Finance Utilities</router-link></li>
+                <li v-if="hasRole(Roles.ORGANISER)">Organiser utils link will go here when done</li>
+                <li v-if="hasRole(Roles.COMMS)">Comms utils link will go here when done</li>
+                <li v-if="hasRole(Roles.REGO_OFFICER)">Rego Officer utils link will go here when done</li>
+            </ul>
         </UiSection>
 
         <ui-section title="Member Tools">
@@ -30,25 +37,36 @@
 import Vue from "vue";
 import UserSummary from "./UserSummary.vue";
 import OrganiserUtils from "./OrganiserUtils.vue";
-import { UiSection } from "./common";
+import FinanceUtils from "./FinanceUtils.vue"
+import { UiSection, Warning } from "./common";
 
 import Routes from "../routes"
 import Roles from "../lib/roles";
 
 import {M, MsgBus} from "../messages"
+import WebRequest from "@/lib/WebRequest";
 
 export default Vue.extend({
     name: "Dashboard",
-    components: { UserSummary, UiSection, OrganiserUtils },
+    components: { UserSummary, UiSection, Warning },
     props: {
         user: Object,
-        roles: Array,
+        roles: WebRequest,
     },
     data: () => ({
         Roles,
         Routes,
         M, MsgBus,
-    })
+    }),
+    methods: {
+        hasRole(r) {
+            const rs = this.$props.roles
+            if (rs.isSuccess()) {
+                return rs.unwrap().includes(r)
+            }
+            return false
+        }
+    }
 });
 </script>
 

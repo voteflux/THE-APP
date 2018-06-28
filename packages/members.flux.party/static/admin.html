@@ -139,6 +139,7 @@
                 <select ng-model="flux.um.giveRole">
                     <option value="">--- Make a choice below ---</option>
                     <option value="validator">Validator (membership deets)</option>
+                    <option value="finance">Finance</option>
                     <option value="comms">Comms (emails and member contact)</option>
                     <option value="organiser">Organiser (required for all branches)</option>
                     <option ng-repeat="juri in flux.juris track by $index" value="organiser:{{juri}}">
