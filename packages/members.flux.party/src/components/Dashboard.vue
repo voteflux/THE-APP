@@ -8,7 +8,7 @@
 
         <UiSection v-if="roles.isSuccess() && roles.unwrap().length > 0" title="Admin Utilities">
             <warning>This section is under active development</warning>
-            <ul>
+            <ul class="ul-spaced">
                 <li v-if="hasRole(Roles.ADMIN)">Admin utils link will go here when done</li>
                 <li v-if="hasRole(Roles.FINANCE)"><router-link :to="Routes.FinanceUtils">Finance Utilities</router-link></li>
                 <li v-if="hasRole(Roles.ORGANISER)">Organiser utils link will go here when done</li>

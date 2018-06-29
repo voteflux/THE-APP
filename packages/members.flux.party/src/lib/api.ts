@@ -7,6 +7,9 @@ import { Http, HttpResponse } from "vue-resource/types/vue_resource";
 import { PluginObject } from "vue";
 // import io from "socket.io-client";
 
+
+export interface Paginated {pageN: number, limit: number, total: number}
+
 export interface UserV1Object {
   fname: string;
   mnames: string;
@@ -19,9 +22,29 @@ export interface UserV1Object {
   addr_street_no: string;
 }
 
+export interface Donation {
+    name: string;
+    street: string;
+    city: string;
+    state: string;
+    postcode: string;
+    country: string;
+    branch: string;
+    ts: number;
+    date: string;
+    amount: string;
+    unit: string;
+    email: string;
+    payment_source: string;
+    id: string;
+    extra_data: object | undefined;
+}
+
+export interface DonationsResp {donations: Donation[], totalDonations: number, pageN: number, limit: number}
+
 export interface Auth {
-  apiToken: string | null;
-  s: string | null;
+  apiToken?: string;
+  s: string | undefined;
 }
 
 export interface CheckEmailResp {
@@ -96,6 +119,9 @@ const FluxApi: PluginObject<{}> = {
         },
         getRoles({ s }): PR<{roles: string[]}> {
           return post(_api2("user/getRoles"), { s });
+        },
+        getDonations({ s }): PR<DonationsResp> {
+          return post(_api2('finance/getDonations'), { s })
         }
       },
 
@@ -131,8 +157,8 @@ const FluxApi: PluginObject<{}> = {
 
       auth: {
         loadAuth(): Maybe<Auth> {
-          const memberSecret = localStorage.getItem("s");
-          const apiToken = localStorage.getItem("flux.member.apiToken");
+          const memberSecret = localStorage.getItem("s") || undefined;
+          const apiToken = localStorage.getItem("flux.member.apiToken") || undefined;
           if (memberSecret || apiToken)
             return Maybe.just({ apiToken, s: memberSecret });
           return Maybe.nothing();

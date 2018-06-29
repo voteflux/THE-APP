@@ -1,7 +1,7 @@
 import Vue from "vue";
 import {SError} from './errors'
 import WebRequest from "@/lib/WebRequest";
-import { Auth } from './api';
+import { Auth, Donation, DonationsResp, Paginated } from './api';
 import { Maybe } from "tsmonad/lib/src";
 
 export interface HasAddr {
@@ -32,7 +32,8 @@ declare module "vue/types/vue" {
                 validationWebsocket: () => WebSocket
             },
             v2: {
-                getRoles: ({s} : {s: string}) => PR<{roles: string[]}>
+                getRoles: (opts : Auth) => PR<{roles: string[]}>,
+                getDonations: (opts : Auth | Paginated) => PR<DonationsResp>
             },
             utils: {
                 [method: string]: (...args: any[]) => any
