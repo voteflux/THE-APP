@@ -42,6 +42,8 @@ export interface Donation {
 
 export interface DonationsResp {donations: Donation[], totalDonations: number, pageN: number, limit: number}
 
+export interface RoleResp {role: string, users: UserV1Object[]}
+
 export interface Auth {
   apiToken?: string;
   s: string | undefined;
@@ -122,6 +124,9 @@ const FluxApi: PluginObject<{}> = {
         },
         getDonations({ s }): PR<DonationsResp> {
           return post(_api2('finance/getDonations'), { s })
+        },
+        getRoleAudit({ s }): PR<RoleResp[]> {
+          return post(_api2("admin/getRoleAudit"), { s })
         }
       },
 

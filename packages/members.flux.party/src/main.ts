@@ -34,7 +34,8 @@ import Dashboard from "./components/Dashboard.vue";
 import UserValidation from "./components/UserValidation.vue";
 import UserDetailsMain from "./components/UserDetails";
 import UserRevocation from "./components/UserRevocation.vue";
-import FinanceUtils from "./components/FinanceUtils.vue"
+import FinanceUtils from "./components/FinanceUtils.vue";
+import AuditRoles from "./components/Admin/AuditRoles.vue";
 
 import R from "./routes";
 
@@ -44,6 +45,7 @@ const routes = [
     { path: R.EditUserDetails, component: UserDetailsMain },
     { path: R.MembershipRevocation, component: UserRevocation },
     { path: R.FinanceUtils, component: FinanceUtils },
+    { path: R.AdminAuditRoles, component: AuditRoles },
     { path: "*", redirect: "/" }
 ];
 

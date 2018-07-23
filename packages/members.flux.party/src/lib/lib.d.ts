@@ -1,7 +1,7 @@
 import Vue from "vue";
 import {SError} from './errors'
 import WebRequest from "@/lib/WebRequest";
-import { Auth, Donation, DonationsResp, Paginated } from './api';
+import { Auth, Donation, DonationsResp, Paginated, RoleResp } from './api';
 import { Maybe } from "tsmonad/lib/src";
 
 export interface HasAddr {
@@ -33,7 +33,8 @@ declare module "vue/types/vue" {
             },
             v2: {
                 getRoles: (opts : Auth) => PR<{roles: string[]}>,
-                getDonations: (opts : Auth | Paginated) => PR<DonationsResp>
+                getDonations: (opts : Auth | Paginated) => PR<DonationsResp>,
+                getRoleAudit: (opts: Auth) => PR<RoleResp[]>,
             },
             utils: {
                 [method: string]: (...args: any[]) => any

@@ -10,6 +10,7 @@
             <warning>This section is under active development</warning>
             <ul class="ul-spaced">
                 <li v-if="hasRole(Roles.ADMIN)">Admin utils link will go here when done</li>
+                <li v-if="hasRole(Roles.ADMIN)"><router-link :to="Routes.AdminAuditRoles">Audit Roles and Permissions</router-link></li>
                 <li v-if="hasRole(Roles.FINANCE)"><router-link :to="Routes.FinanceUtils">Finance Utilities</router-link></li>
                 <li v-if="hasRole(Roles.ORGANISER)">Organiser utils link will go here when done</li>
                 <li v-if="hasRole(Roles.COMMS)">Comms utils link will go here when done</li>

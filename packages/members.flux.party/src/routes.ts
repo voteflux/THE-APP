@@ -3,5 +3,6 @@ export default {
     Dashboard: "/",
     ValidateSelf: "/membership/validation",
     MembershipRevocation: "/membership/revoke",
-    FinanceUtils: "/admin/finance"
+    FinanceUtils: "/admin/finance",
+    AdminAuditRoles: "/admin/auditRoles",
 };

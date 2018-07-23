@@ -5,5 +5,6 @@ import Table2Cols from "./Table2Cols.vue";
 import UiSection from "./UiSection.vue";
 import Paginate from './Paginate.vue'
 import Donation from './Donation.vue'
+import TableNCols from './TableNCols.vue'
 
-export { Error, Warning, Row2, Table2Cols, UiSection, Paginate, Donation };
+export { Error, Warning, Row2, Table2Cols, UiSection, Paginate, Donation, TableNCols };
