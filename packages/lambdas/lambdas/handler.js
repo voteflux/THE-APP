@@ -18,24 +18,13 @@ const R = require('ramda')
 const db = {};  // we will populate this obj later via DB.init(db)
 
 const utils = require('./flux/utils')
-const handlerUtils = require('./handlerUtils')
+const handlerUtils = require('./flux/handlers/handlerUtils')
 
 
 
 module.exports.hello = async (event, context) => {
   return {message: 'Go Serverless v1.0! Your function executed successfully!'}
 };
-
-
-
-module.exports.genStatsGetinfo = async (event, context) => {
-  return {result: await db.update_getinfo_stats()}
-}
-
-
-module.exports.genStatsPublic = async (event, context) => {
-  return {result: await db.update_public_stats()}
-}
 
 
 module.exports.getStats = async (event, context) => {

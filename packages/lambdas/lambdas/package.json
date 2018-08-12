@@ -14,11 +14,17 @@
   "author": "Max Kaye, Flux Devs",
   "license": "MIT",
   "dependencies": {
+    "@types/node": "^10.1.2",
+    "bson": "^3.0.0",
     "mongodb": "^3.0.6",
-    "ramda": "^0.25.0",
-    "serverless-dynamodb-local": "^0.2.30"
+    "ramda": "^0.25.0"
   },
   "devDependencies": {
-    "serverless-domain-manager": "^2.3.6"
+    "aws-sdk": "^2.243.1",
+    "serverless": "^1.27.3",
+    "serverless-domain-manager": "^2.3.6",
+    "serverless-dynamodb-local": "^0.2.30",
+    "serverless-iam-roles-per-function": "^0.1.8",
+    "serverless-plugin-aws-alerts": "^1.2.4"
   }
 }

@@ -1,8 +1,19 @@
 const R = require('ramda')
+this.R = R
 
 // utils module to avoid repeating common operations.
 
-this.j = obj => JSON.stringify(obj, null, 2),
+this.j = obj => JSON.stringify(obj, null, 2) || ""
+
+this.mkPromise = f => (...args) => new Promise((resolve, reject) => {
+    f(...args, (err, resp) => {
+        if (err)
+            return reject(err);
+        return resolve(resp);
+    })
+})
+
+this.genPagination = (total, limit, pageN) => ({total, limit, pageN})
 
 this.all_states = ['nsw', 'qld', 'sa', 'nt', 'act', 'vic', 'wa', 'tas', 'nostate', 'weirdstate']
 
@@ -67,7 +78,14 @@ this.countPropInReduce = propName => (acc, obj) => {
 }
 
 
+const getProps = (props, user) => R.fromPairs(R.zip(props, R.props(props, user)))
 
+
+const staffSafeProps = [
+    'fname', 'sname', 'mnames', 'addr_suburb', 'addr_postcode', 'contact_number', 'email', 'member_comment',
+    'dobYear', 'volunteer', 'state_consent', 'onAECRoll', 'detailsValid', 'needsValidating', '_id'
+]
+this.cleanUserDoc = user => getProps(staffSafeProps, user)
 
 
 module.exports = this;

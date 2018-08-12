@@ -2,3 +2,4 @@
 **/node_modules
 **/.serverless
 **/jspm_packages
+.idea

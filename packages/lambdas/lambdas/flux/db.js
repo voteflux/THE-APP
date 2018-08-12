@@ -15,9 +15,17 @@ R.log = o => {
     return o;
 }
 const MongoClient = require('mongodb').MongoClient;
-
+const {ObjectID} = require('bson');
 
 const utils = require('./utils')
+
+
+/* DB Utils */
+
+const cleanId = rawId => R.is(ObjectID, rawId) ? rawId : new ObjectID(rawId);
+
+
+/* DB Setup - v1 */
 
 
 const mongoUrl = process.env.MONGODB_URI || "mongodb://localhost:27017/flux"
@@ -25,14 +33,16 @@ const mongoUrl = process.env.MONGODB_URI || "mongodb://localhost:27017/flux"
 let dbv1 = {};
 
 
+/* DB Setup v2 - might never be used if we keep mongodb... */
 let dbv2 = undefined;
 
 
+/* DB Constants */
 const PUB_STATS_ID = 0
 const GETINFO_ID = 1
 
 
-// Helpers for queries - able to be composed with R.merge
+/* DB Helpers for queries - able to be composed with R.merge */
 const _rgx = (r) => ({'$regex': r})
 const _exists = {'$exists': true}
 const _set = s => ({'$set': s})
@@ -60,6 +70,7 @@ const _volunteer = {volunteer: true}
 const _needsValidating = {needsValidating: true}
 
 
+/* Helper to create DB v1 with accessors for our collections (e.g. `db.users.findOne(...)`) - makes it nicer to use */
 const mkDbV1 = () => new Promise((res, rej) => {
     MongoClient.connect(mongoUrl, (err, client) => {
         if (err !== null) {
@@ -74,26 +85,36 @@ const mkDbV1 = () => new Promise((res, rej) => {
         const dbv1 = {rawDb, client}
         const setCollection = (i) => { dbv1[i] = rawDb.collection(i) }
         R.map(setCollection, collections);
-        console.info(`Created dbv1 obj w keys: ${utils.j(R.keys(dbv1))}`)
+        // console.info(`Created dbv1 obj w keys: ${utils.j(R.keys(dbv1))}`)
 
         return res(dbv1);
     })
 });
 
 
+/* DB Meta calls */
 const get_version = async () => {
     // (await mongo.db_meta.find_one({'id': {'$eq': 1}}, {'version': 1}))['version']
     return (await dbv1.db_meta.findOne({id: 1})).version;
 }
 
 
-/* GENERALISED DB CALLS */
+/* GENERALISED DB CALLS - Used for mass queries / counts. They can be extended with arguments. */
 
 
 const count_members = (...conds) => dbv1.users.count(conds.length == 0 ? {} : {'$and': conds})
 
 const find_members = (...conds) => dbv1.users.find(conds.length == 0 ? {} : {'$and': conds})
 
+/**
+ *
+ * @param {(qGen) => Promise<[string, any]>} dbFunc
+ *  takes a qGen function and performs the query returned by qGen(state).
+ *  this function is run once for each state
+ * @param {(state: string) => query: object} qGen
+ *  a query that takes a state (lowercase abbreviation) and returns a query
+ * @returns {{[state]: [result]}}
+ */
 const queryByState = async (dbFunc, qGen) =>
     await Promise.all(
         R.map(
@@ -109,7 +130,7 @@ const findByState = async (qGen) => await queryByState((q) => dbv1.users.find(q)
 
 /* SPECIFIC DB CALLS */
 
-// Member Calls
+/* Aggregate Member Calls */
 
 const n_members_by_state = async () =>
     await countByState(s => ({'$and': [_onRoll, _stateConsent, _userInState(s)]}))
@@ -154,6 +175,50 @@ const count_validation_queue_state = async () =>
 
 const count_volunteers = () => count_members(_volunteer)
 
+/* Finance */
+
+const getDonations = async (pageN = 0, limit = 10) =>
+    await dbv1.donations.find({}, {sort: [['ts', 1]], limit, skip: pageN * limit}).toArray()
+
+const getDonationsN = async () =>
+    await dbv1.donations.count()
+
+
+/* Member Specific Calls */
+
+/* User calls */
+
+const getUidFromS = async s =>
+    await dbv1.users.findOne({s}, {projection: {_id: 1}})
+
+const getUserFromS = async s =>
+    await dbv1.users.findOne({s})
+
+const getUserFromUid = async userId => {
+    const _id = cleanId(userId);
+    return await dbv1.users.findOne({_id})
+}
+
+/* Role Calls */
+
+// Role schema: {role: string, uids: uid[], _id}
+
+const getUserRoles = async userId => {
+    const _id = cleanId(userId)
+    const rolesAll = await dbv1.roles.find({'uids': _id}).toArray()
+    return R.map(R.prop('role'), rolesAll)
+}
+
+/**
+ * Return a list of all roles along with the users that have each role.
+ * @returns {{role: string, users: User[]}[]} List of all roles as an object with keys `role` and `users`. The `users` key is a list of user objects.
+ */
+const getRoleAudit = async () => {
+    const rolesAll = await dbv1.roles.find({}).toArray()
+    const uniqueUserIDs = R.compose(R.uniq, R.reduce(R.concat, []), R.map(R.prop('uids')))(rolesAll)
+    const userMap = await Promise.all(R.map(uid => getUserFromUid(uid).then(u => [uid, u]), uniqueUserIDs)).then(R.fromPairs)
+    return R.map(({role, uids}) => ({role, users: R.map(u => userMap[u], uids)}), rolesAll)
+}
 
 /* STATS */
 
@@ -214,13 +279,26 @@ const update_public_stats = async () => {
 module.exports = {
     init: async (dbObj) => {
         const dbMethods = {
+            /* meta */
             get_version,
+            /* members */
             count_members,
             n_members_by_state,
             n_members_validated,
             n_members_validated_state,
+            /* stats */
             update_getinfo_stats,
             update_public_stats,
+            /* personal / per member */
+            getUserFromS,
+            getUserFromUid,
+            getUidFromS,
+            getUserRoles,
+            /* finance */
+            getDonations,
+            getDonationsN,
+            /* admin */
+            getRoleAudit,
         }
         R.mapObjIndexed((f, fName) => { dbObj[fName] = f }, dbMethods);
 

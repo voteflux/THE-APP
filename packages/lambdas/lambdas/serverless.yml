@@ -16,26 +16,42 @@ service: flux-api-2
 plugins:
   - serverless-domain-manager
   - serverless-dynamodb-local
+  - serverless-iam-roles-per-function
+  - serverless-plugin-aws-alerts
 
 # You can pin your service to only deploy with a specific Serverless version
 # Check out our docs for more details
 # frameworkVersion: "=X.X.X"
 
 custom:
-  profile: ${file(sls-custom.yml):profile}
-  stage: ${file(sls-custom.yml):stage}
-  customDomain: ${file(sls-${self:provider.stage}-domain.yml)}
+  defaults:
+    profile: 'flux-api'
+  # profile: ${file(./sls-custom.yml):profile}
+  stage: ${file(./sls-custom.yml):stage}
+  # region: ${file(./sls-custom.yml):region}
+  customDomain: ${file(./sls-${self:provider.stage}-domain.yml)}
+  # cognito: ${file(./sls-${self:provider.stage}-cognito.yml):cognito}
+  iam:
+    cognitoAdmin:
+      - Effect: "Allow"
+        Action: "cognito-idp:*"
+        Resource: "arn:aws:cognito-idp:*:*:userpool/*"
+  alerts: ${file(./sls-alerts.yaml):alerts}
 
 provider:
   name: aws
+  # region should be us-east-1 for prod
   # region: ap-southeast-2
   region: us-east-1
   runtime: nodejs8.10
-  profile: ${self:custom.profile}
+  profile: ${self:custom.profile, self:custom.defaults.profile}
   stage: ${opt:stage, self:custom.stage}
   memorySize: 128
   environment:
     MONGODB_URI: ${ssm:${self:provider.stage}MongoDbUri}
+    STAGE: ${self:provider.stage}
+    # USER_POOL_ID: ${self:custom.cognito.poolId}
+    # CLIENT_ID: ${self:custom.cognito.clientId}
 
 # you can overwrite defaults here
 #  stage: dev
@@ -71,28 +87,62 @@ provider:
 #    - exclude-me-dir/**
 
 functions:
-  hello:
-    handler: handler.hello
-    events:
-      - http:
-          path: /test/hello
-          method: get
   genStatsGetinfo:
-    handler: handler.genStatsGetinfo
+    handler: flux/handlers/stats.genStatsGetinfo
     timeout: 60
     events:
       - schedule: rate(1 minute)
   genStatsPublic:
-    handler: handler.genStatsPublic
+    handler: flux/handlers/stats.genStatsPublic
     timeout: 60
     events:
       - schedule: rate(1 minute)
+  # user requests
+  getRoles:
+    handler: flux/handlers/user.getRoles
+    events:
+      - http:
+          path: /v2/user/getRoles
+          method: post
+          cors: true
+  # admin/finance requests
+  getDonations:
+    handler: flux/handlers/admin-finance.getDonations
+    events:
+      - http:
+          path: /v2/finance/getDonations
+          method: post
+          cors: true
+  # admin/role requests
+  getRoleAudit:
+    handler: flux/handlers/admin-roles.getRoleAudit
+    events:
+      - http:
+          path: /v2/admin/getRoleAudit
+          method: post
+          cors: true
+  # admin/other requests
+
+  # random stuff from past
+
+  # checkEmail:
+  #   handler: flux/handlers/login.checkEmail
+  #   iamRoleStatementsInherit: true
+  #   iamRoleStatements: ${self:custom.iam.cognitoAdmin}
+  #   events:
+  #     - http:
+  #         path: /user/check_email
+  #         method: post
+
+
   # getStats:
   #   handler: handler.getStats
   #   events:
   #     - http:
   #       path: /stats/{id}
   #       method: get
+
+
 
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
