@@ -3,3 +3,6 @@ lerna-debug.log
 .git
 npm-debug.log
 yarn-debug.log
+
+# don't includ flux dir since that is output of compiled code
+packages/api/flux
