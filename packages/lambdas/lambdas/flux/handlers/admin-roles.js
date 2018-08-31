@@ -17,10 +17,7 @@ module.exports.getRoleAudit = auth.role(Roles.ADMIN, async (event, context, {use
     console.log(`roleAuditRawLen ${roleAuditRaw.length}`, roleAuditRaw)
     // wipe `s` param
     const roleAudit = R.map(role => ({ ...role, users: R.map(utils.cleanUserDoc, role.users) }), roleAuditRaw)
-    return {
-        roleAudit,
-        status: 'okay'
-    }
+    return roleAudit
 });
 
 
