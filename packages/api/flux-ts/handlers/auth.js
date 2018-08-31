@@ -2,7 +2,7 @@ const R = require('ramda');
 
 const fail = msg => ({statusCode: 403, body: msg})
 
-const checkAuthOfRole = db => (role, f) => async (event, context) => {
+const checkAuthOfRole = (db) => (role, f) => async (event, context) => {
     const data = event.body
 
     if (data['s']) {
@@ -32,7 +32,7 @@ const checkAuthOfRole = db => (role, f) => async (event, context) => {
 
     if (role !== 'user') {  // special role
         // check we have the role
-        roles = await db.getUserRoles(user._id)
+        const roles = await db.getUserRoles(user._id)
         if (roles.includes(role)){
             // then we are okay
         } else {

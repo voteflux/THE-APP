@@ -246,7 +246,8 @@ const update_getinfo_stats = async () => {
     return getinfo
 }
 
-const update_public_stats = async () => {
+
+const update_public_stats = async (): PublicStats => {
     const stats = {id: PUB_STATS_ID}
 
     const all_members = await find_members(_onRoll).project({timestamp: 1, address: 1, addr_postcode: 1, dobYear: 1}).toArray()
