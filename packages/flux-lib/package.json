@@ -1,0 +1,26 @@
+{
+  "name": "flux-lib",
+  "version": "0.1.0",
+  "description": "library for common code between flux projects",
+  "author": "Max Kaye <m@xk.io>",
+  "homepage": "https://voteflux.org",
+  "license": "MIT",
+  "main": "lib/flux-lib.js",
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "lib"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/voteflux/THE-APP.git"
+  },
+  "scripts": {
+    "test": "echo \"Error: run tests from root\" && exit 1"
+  },
+  "bugs": {
+    "url": "https://github.com/voteflux/THE-APP/issues"
+  }
+}

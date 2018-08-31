@@ -3,3 +3,6 @@
 **/.serverless
 **/jspm_packages
 .idea
+
+# don't include this so ppl can set whatever they like
+sls-custom.yml
