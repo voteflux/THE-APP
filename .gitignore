@@ -6,3 +6,11 @@ yarn-debug.log
 
 # don't includ flux dir since that is output of compiled code
 packages/api/flux
+
+**/yarn-error.log
+**/.serverless
+**/jspm_packages
+**/.idea
+
+# don't include this so ppl can set whatever they like
+packages/api/sls-custom.yml
