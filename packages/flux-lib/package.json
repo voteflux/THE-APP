@@ -22,5 +22,8 @@
   },
   "bugs": {
     "url": "https://github.com/voteflux/THE-APP/issues"
+  },
+  "devDependencies": {
+    "typescript": "^3.0.3"
   }
 }
