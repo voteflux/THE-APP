@@ -1,11 +1,13 @@
 {
-  "name": "flux-lib",
+  "name": "lib",
   "version": "0.1.0",
+  "private": true,
   "description": "library for common code between flux projects",
   "author": "Max Kaye <m@xk.io>",
   "homepage": "https://voteflux.org",
   "license": "MIT",
-  "main": "lib/flux-lib.js",
+  "main": "lib/main.ts",
+  "types": "lib/main.d.ts",
   "directories": {
     "lib": "lib",
     "test": "__tests__"
@@ -28,8 +30,9 @@
     "typescript": "^3.0.3"
   },
   "dependencies": {
-    "@types/node": "^10.9.4",
     "fp-ts": "^1.8.0",
-    "io-ts": "^1.3.0"
+    "io-ts": "^1.3.0",
+    "rimraf": "^2.6.2",
+    "ts-transformer-keys": "^0.3.3"
   }
 }

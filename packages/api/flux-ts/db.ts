@@ -8,16 +8,24 @@
  *
  */
 
+import * as _R from 'ramda'
+import {keys} from 'ts-transformer-keys'
 
-const R = require('ramda')
-R.log = o => {
-    console.log(o);
-    return o;
+import { MongoClient } from 'mongodb'
+import  {ObjectID} from 'bson'
+
+import * as utils from './utils'
+
+
+const R = {
+    ..._R,
+    log: o => {
+        console.log(o);
+        return o;
+    }
 }
-const MongoClient = require('mongodb').MongoClient;
-const {ObjectID} = require('bson');
 
-const utils = require('./utils')
+
 
 
 /* DB Utils */
@@ -51,7 +59,7 @@ const _notExists = {'$exists': false}
 const _onRoll = {onAECRoll: true}
 const _stateConsent = {state_consent: true}
 const _userInState = s => {
-    rgxPC = _rgx(utils.state_regex(s))
+    const rgxPC = _rgx(utils.state_regex(s))
     if (s == 'weirdstate') {
         return {
             '$nor': R.concat(
@@ -79,8 +87,6 @@ const mkDbV1 = () => new Promise((res, rej) => {
         }
 
         const rawDb = client.db();
-
-        collections = require('./dbV1Collections')
 
         const dbv1 = {rawDb, client}
         const setCollection = (i) => { dbv1[i] = rawDb.collection(i) }

@@ -1,11 +1,12 @@
 {
-  "name": "flux-api-2",
+  "name": "api",
   "version": "0.1.0",
   "description": "flux api v2",
   "main": "index.js",
+  "private": true,
   "scripts": {
     "test": "echo \"Note: no tests yet...\" && exit 0",
-    "build": "tsc",
+    "build": "rimraf flux && tsc",
     "deploy": "npm run build && ./travis-deploy.sh"
   },
   "repository": {
@@ -15,12 +16,14 @@
   "author": "Max Kaye, Flux Devs",
   "license": "MIT",
   "dependencies": {
-    "@types/node": "^10.1.2",
     "bson": "^3.0.0",
     "fp-ts": "^1.8.0",
     "io-ts": "^1.3.0",
+    "lib": "^0.1.0",
     "mongodb": "^3.0.6",
-    "ramda": "^0.25.0"
+    "ramda": "^0.25.0",
+    "rimraf": "^2.6.2",
+    "ts-transformer-keys": "^0.3.3"
   },
   "devDependencies": {
     "@types/node": "^10.9.4",

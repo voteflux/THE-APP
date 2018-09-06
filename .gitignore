@@ -3,14 +3,19 @@ lerna-debug.log
 .git
 npm-debug.log
 yarn-debug.log
-
-# don't includ flux dir since that is output of compiled code
-packages/api/flux
-
 **/yarn-error.log
 **/.serverless
 **/jspm_packages
 **/.idea
+**/__pycache__
+
+# don't includ flux dir since that is output of compiled code
+packages/api/flux
 
 # don't include this so ppl can set whatever they like
 packages/api/sls-custom.yml
+
+# dev init flag
+.dev_app_init_last
+.venv
+.vscode

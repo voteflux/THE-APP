@@ -1,11 +1,12 @@
-const R = require('ramda')
-this.R = R
+import * as _R from 'ramda'
+
+export const R = _R
 
 // utils module to avoid repeating common operations.
 
-this.j = obj => JSON.stringify(obj, null, 2) || ""
+export const j = obj => JSON.stringify(obj, null, 2) || ""
 
-this.mkPromise = f => (...args) => new Promise((resolve, reject) => {
+export const mkPromise = f => (...args) => new Promise((resolve, reject) => {
     f(...args, (err, resp) => {
         if (err)
             return reject(err);
@@ -13,11 +14,11 @@ this.mkPromise = f => (...args) => new Promise((resolve, reject) => {
     })
 })
 
-this.genPagination = (total, limit, pageN) => ({total, limit, pageN})
+export const genPagination = (total, limit, pageN) => ({total, limit, pageN})
 
-this.all_states = ['nsw', 'qld', 'sa', 'nt', 'act', 'vic', 'wa', 'tas', 'nostate', 'weirdstate']
+export const all_states = ['nsw', 'qld', 'sa', 'nt', 'act', 'vic', 'wa', 'tas', 'nostate', 'weirdstate']
 
-this.state_regex = s => {
+export const state_regex = s => {
     const _act_regex = '(260[0-9])|(261[0124567])|(290[0-6])|(291[1-4])'
     const lookup = {
         act: _act_regex,
@@ -39,7 +40,7 @@ this.state_regex = s => {
 }
 
 
-this.stateFromPC = (pc = "xxxx") => {
+export const stateFromPC = (pc = "xxxx") => {
     const lookup = {
         '0': 'nt',
         '3': 'vic',
@@ -51,7 +52,7 @@ this.stateFromPC = (pc = "xxxx") => {
     if (lookup[pc[0]])
         return lookup[pc[0]]
     if (pc[0] == '2') {
-        if (pc.match(this.state_regex('act')) !== null)
+        if (pc.match(state_regex('act')) !== null)
             return 'act'
         return 'nsw'
     }
@@ -59,15 +60,15 @@ this.stateFromPC = (pc = "xxxx") => {
 }
 
 
-this.extractPostCode = m => {
+export const extractPostCode = m => {
     if (m.addr_postcode)
        return m.addr_postcode
     return R.last(m.address.toString().match(/[0-9]{4}/g) || [])
 }
 
-this.extractState = m => this.stateFromPC(this.extractPostCode(m))
+export const extractState = m => stateFromPC(extractPostCode(m))
 
-this.countPropInReduce = propName => (acc, obj) => {
+export const countPropInReduce = propName => (acc, obj) => {
     var t = obj[propName]
     if (t === undefined)
         return acc
@@ -78,14 +79,11 @@ this.countPropInReduce = propName => (acc, obj) => {
 }
 
 
-const getProps = (props, user) => R.fromPairs(R.zip(props, R.props(props, user)))
+export const getProps = (props, user) => R.fromPairs(R.zip(props, R.props(props, user)))
 
 
-const staffSafeProps = [
+export const staffSafeProps = [
     'fname', 'sname', 'mnames', 'addr_suburb', 'addr_postcode', 'contact_number', 'email', 'member_comment',
     'dobYear', 'volunteer', 'state_consent', 'onAECRoll', 'detailsValid', 'needsValidating', '_id'
 ]
-this.cleanUserDoc = user => getProps(staffSafeProps, user)
-
-
-module.exports = this;
+export const cleanUserDoc = user => getProps(staffSafeProps, user)
