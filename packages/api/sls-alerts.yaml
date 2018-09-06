@@ -5,13 +5,13 @@ alerts:
     - staging
   dashboards: true
   topics:
-    ok: ${self:service}-${opt:stage}-alerts-ok
+    ok: ${self:service}-${self:provider.stage}-alerts-ok
     alarm:
-      topic: ${self:service}-${opt:stage}-alerts-alarm
+      topic: ${self:service}-${self:provider.stage}-alerts-alarm
       notifications:
         - protocol: email
           endpoint: max.kaye@voteflux.org
-    insufficientData: ${self:service}-${opt:stage}-alerts-insufficientData
+    insufficientData: ${self:service}-${self:provider.stage}-alerts-insufficientData
   definitions:
     functionErrors:
       period: 300

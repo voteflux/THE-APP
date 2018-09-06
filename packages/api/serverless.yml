@@ -18,6 +18,7 @@ plugins:
   - serverless-dynamodb-local
   - serverless-iam-roles-per-function
   - serverless-plugin-aws-alerts
+  - serverless-offline
 
 # You can pin your service to only deploy with a specific Serverless version
 # Check out our docs for more details

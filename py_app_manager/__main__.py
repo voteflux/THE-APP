@@ -9,13 +9,16 @@ from contextlib import suppress
 from py_app_manager.pre_deps import *
 
 
-def ensure_deps():
-    if not deps_up_to_date():
-        must_run("pip3 install -r requirements.txt")
-        must_run("npm i")
-        must_run("./node_modules/.bin/lerna bootstrap --hoist")
-        must_run("cd packages/api && node_modules/.bin/sls dynamodb install")
+_deps_updated = False
+def ensure_deps(force=False):
+    global _deps_updated
+    if (force or not deps_up_to_date()) and not _deps_updated:
+        must_run("time pip3 install -r requirements.txt")
+        must_run("time npm i")
+        must_run("time npx lerna bootstrap --hoist")
+        must_run("cd packages/api && time node_modules/.bin/sls dynamodb install")
         set_deps_up_to_date()
+        _deps_updated = True
 
 
 # check we're in the correct directory
@@ -25,7 +28,7 @@ try:
         assert pkg_file['name'] == "root"
         assert os.path.isdir("./packages/api")
         assert os.path.isdir("./packages/lib")
-        assert os.path.isdir("./packages/members.flux.party")
+        assert os.path.isdir("./packages/ui")
 except Exception as e:
     print("Please run ./manage from the root directory (of the repository)")
     sys.exit(1)
@@ -53,6 +56,11 @@ def cli(debug):
     if debug:
         logging.basicConfig(level=logging.DEBUG)
         logging.debug("Debug mode enabled")
+
+
+@cli.command()
+def reinstall():
+    ensure_deps(force=True)
 
 
 @cli.command()
@@ -111,17 +119,18 @@ def dev(env, dev_target):
     def run_dev_cmd(dir, cmd, name):
         nonlocal session, window, log_files
         (to_run, l) = cmd_w_log(cmd, name, dir_offset='../../')
-        to_run += "; echo -e '\\n\\n' && read -p 'Press enter to continue...' "
+        to_run += "; echo -e '\\n\\n' && /usr/bin/read -p 'Press enter to terminate all...' && tmux kill-session -t main"
         log_files.append(l)
         if session is None:
             session = server.new_session(session_name="main", start_directory=dir, window_command=to_run)
             session.set_option('mouse', 'on')
+            # session.set_option('remain-on-exit', 'on')
             window = session.list_windows()[0]
         else:
             pane = window.split_window(start_directory=dir, shell=to_run, vertical=False)
 
     if dev_target in {'ui', 'all'}:
-        run_dev_cmd('./packages/members.flux.party', "npm run serve", 'dev-ui')
+        run_dev_cmd('./packages/ui', "npm run serve", 'dev-ui')
 
     if dev_target in {'api', 'all'}:
         cmd = "node_modules/.bin/sls offline start --stage dev --port %d" % (api_port,)

@@ -4,7 +4,7 @@
 
 You need to be using some sort of *nix system (macos, linux, or windows linux subsystem)
 
-`./manage setup`
+Running `./manage` will set up dependencies and such
 
 ### Dev
 

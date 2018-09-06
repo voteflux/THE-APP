@@ -21,9 +21,9 @@ def run_or(cmd, error_msg, verbose=False):
 
 def cmd_w_log(cmd, log_name, dir_offset="./"):
     assert dir_offset[-1] == "/"
-    fname = """.{l}.log""".format(d=dir_offset, l=log_name, t=int(time.time()))
+    fname = """.{l}.log""".format(l=log_name)
     fpath = '{d}{f}'.format(d=dir_offset, f=fname)
-    return ('mv {p} {p}.previous || true && ' + cmd + ''' 2>&1 | tee "{p}" '''.format(p=fpath), fname)
+    return (('mv {p} {p}.previous || true && ' + cmd + ''' 2>&1 | tee "{p}" ''').format(p=fpath), fname)
 
 def get_git_head():
     return subprocess.check_output(['git', 'rev-parse', 'HEAD'])
