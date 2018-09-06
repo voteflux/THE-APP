@@ -17,7 +17,7 @@ const checkAuthOfRole = (db) => (role, f) => async (event, context) => {
     }
 
     if (R.is(String, data.s) && data.s === data.s.toString()) {
-        if (data.s.length < 20 || data.s.length > 50) {
+        if (data.s.length < 1 || data.s.length > 50) {
             return fail('bad auth')
         }
     } else {
@@ -33,7 +33,7 @@ const checkAuthOfRole = (db) => (role, f) => async (event, context) => {
     if (role !== 'user') {  // special role
         // check we have the role
         const roles = await db.getUserRoles(user._id)
-        if (roles.includes(role)){
+        if (roles.includes(role) || roles.includes('admin')){
             // then we are okay
         } else {
             return fail('insufficient permissions')

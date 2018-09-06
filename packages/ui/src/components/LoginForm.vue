@@ -12,7 +12,7 @@
                     Email:
                     <input v-model.trim="user.email" placeholder="name@example.com" type="email" name="email" />
                 </label>
-                <error v-show="errs.email.msg">
+                <error v-if="errs.email.msg">
                     {{ errs.email.msg }}
                 </error>
 
@@ -64,7 +64,7 @@ export default Vue.extend({
 
     methods: {
         checkEmail() {
-            this.errs.email.wipe();
+            this.errs.email = false
             this.state = Cs.SENDING_EMAIL;
             const _email = this.user.email;
             this.$flux.v1

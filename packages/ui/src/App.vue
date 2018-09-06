@@ -30,6 +30,7 @@ import { Component, Vue } from "vue-property-decorator";
 import LoginForm from "./components/LoginForm.vue";
 import Loading from "./components/Loading.vue";
 import MenuBar from "./components/MenuBar.vue";
+import {Error} from "./components/common"
 import VueRouter from "vue-router";
 import { debug } from "util";
 import { M, MsgBus } from "./messages";
@@ -45,7 +46,7 @@ enum Cs {
 }
 
 export default /*class App extends Vue*/ Vue.extend({
-    components: { LoginForm, Loading, MenuBar },
+    components: { LoginForm, Loading, MenuBar, Error },
     data: () => ({
         req: {
             user: WR.NotRequested(),

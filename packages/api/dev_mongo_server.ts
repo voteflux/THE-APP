@@ -13,10 +13,11 @@ async function main() {
     console.log("DB URI:", uri)
     const db = await DB.init({}, uri)
     const {client, rawDb} = db.dbv1
-    if ((await rawDb.collections()).length < 5) {
+    // always refresh for the moment
+    if ((await rawDb.collections()).length < 5 || true) {
         // then we need to populate it
         console.log("loading saved db")
-        await new Promise((res, rej) => restore({uri, root: __dirname + "/dev-mongo-data/flux", callback: (e,v) => e ? rej(e) : res(v)}));
+        await new Promise((res, rej) => restore({uri, drop: true, root: __dirname + "/dev-mongo-data/flux", callback: (e,v) => e ? rej(e) : res(v)}));
     }
     console.log("Mongo server ready!")
 }

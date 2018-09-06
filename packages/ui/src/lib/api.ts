@@ -7,11 +7,11 @@ import { Http, HttpResponse } from "vue-resource/types/vue_resource";
 import { PluginObject } from "vue";
 // import io from "socket.io-client";
 
+import { UserV1Object } from "@lib/types/db"
+export * from '@lib/types/db'
 
 export interface Paginated {pageN: number, limit: number, total: number}
 
-import { UserV1Object } from "@lib/types/db"
-export * from '@lib/types/db'
 
 export interface Donation {
     name: string;
@@ -66,6 +66,20 @@ const mkErr = (path: string) => <r>(err: HttpResponse): WebRequest<string,r> => 
 };
 
 
+// todo: check API paths against diff
+const apiRoots = () => {
+  switch (window.location.hostname) {
+    case "127.0.0.1":
+    case "localhost":
+      return {v2: "http://localhost:52700/v2/", v1: "https://flux-api-dev.herokuapp.com/", prod: false}
+    case "dev.app.flux.party":
+      return {v2: "https://dev.api.flux.party/v2/", v1: "https://flux-api-dev.herokuapp.com/", prod: false};
+    default:
+      return {v2: "https://api.flux.party/v2/", v1: "https://api.voteflux.org/", prod: true}
+  }
+}
+
+
 const FluxApi: PluginObject<{}> = {
   install: function(_Vue: VueConstructor, options?: any) {
 
@@ -73,14 +87,10 @@ const FluxApi: PluginObject<{}> = {
 
     const http = <Http>(<any>Vue).http;
 
+    const roots = apiRoots()
+
     const _api2 = (_path: string) => {
-      let root;
-      if (false /*Vue.$dev*/) {
-        root = "https://dev.api.flux.party/";
-      } else {
-        root = "https://api.flux.party/v2/";
-      }
-      return root + _path;
+      return roots.v2 + _path;
     };
 
     const _api1 = (_path: string) => {
@@ -88,13 +98,7 @@ const FluxApi: PluginObject<{}> = {
         _path = "api/v0/" + _path;
       }
 
-      let root;
-      // if (Vue.$dev) {
-      //     root = "https://flux-api-dev.herokuapp.com/";
-      // } else {
-      root = "https://api.voteflux.org/";
-      // }
-      return root + _path;
+      return roots.v1 + _path;
     };
 
     const post = <r>(url: string, data: any): PR<r> => {
@@ -176,7 +180,7 @@ const FluxApi: PluginObject<{}> = {
 
         sendSToAllFluxDomains(s: string) {
           const sendSToUrlAsHashParam = (url, s) => {
-            if (s) {
+            if (s && roots.prod) {
               var ifrm = document.createElement("iframe");
               ifrm.setAttribute("src", url + "#s=" + s);
               ifrm.style.width = "0";
