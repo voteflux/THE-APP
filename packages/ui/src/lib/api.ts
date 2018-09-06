@@ -10,17 +10,8 @@ import { PluginObject } from "vue";
 
 export interface Paginated {pageN: number, limit: number, total: number}
 
-export interface UserV1Object {
-  fname: string;
-  mnames: string;
-  sname: string;
-  detailsValid: boolean;
-  validationReason: string;
-  addr_street: string;
-  addr_suburb: string;
-  addr_postcode: string | number;
-  addr_street_no: string;
-}
+import { UserV1Object } from "@lib/types/db"
+export * from '@lib/types/db'
 
 export interface Donation {
     name: string;

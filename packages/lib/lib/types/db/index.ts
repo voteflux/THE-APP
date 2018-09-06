@@ -1,12 +1,9 @@
+import { DBV1Collections } from './index';
 export * from './stats'
+import { Collection } from 'mongodb'
 
-type Collection<T> = {
-    find: (...args: any[]) => Promise<T[]>,
-}
-
-export type DBV1 = {
-    rawDb: any,
-    client: any,
+// when adding a collection add to list of strings below too
+export interface DBV1Collections {
     db_meta: Collection<any>,
     users: Collection<any>,
     public_stats: Collection<any>,
@@ -33,5 +30,54 @@ export type DBV1 = {
     rate_limits: Collection<any>,
     rego_forms_collected: Collection<any>,
     streets: Collection<any>,
-    suburb: Collection<any>,
+    suburb: Collection<any>
+}
+
+// no easy way to keep the type and this list in sync :/
+export const collections = [
+    "db_meta",
+    "users",
+    "public_stats",
+    "roles",
+    "credits",
+    "aec_captcha",
+    "aec_sessions",
+    "app_feedback",
+    "donations",
+    "email_queue",
+    "sms_queue",
+    "email_validation",
+    "sms_verifications",
+    "errors",
+    "log",
+    "login_codes",
+    "login_tokens",
+    "notify_queue",
+    "party_registration",
+    "paypal_ipn",
+    "pdf_to_user",
+    "pdfs",
+    "poll_options",
+    "rate_limits",
+    "rego_forms_collected",
+    "streets",
+    "suburb",
+]
+
+export type DBV1 = {
+    rawDb: any,
+    client: any,
+} & DBV1Collections
+
+export interface UserV1Object {
+    fname: string;
+    mnames: string;
+    sname: string;
+    detailsValid: boolean;
+    validationReason: string;
+    addr_street: string;
+    addr_suburb: string;
+    addr_postcode: string | number;
+    addr_street_no: string;
+    timestamp: number;
 }

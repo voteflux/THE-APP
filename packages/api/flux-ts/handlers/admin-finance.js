@@ -1,11 +1,11 @@
 'use strict';
+const handlerUtils = require('./handlerUtils')
 
 const R = require('ramda')
 
 const db = {};  // we will populate this obj later via DB.init(db)
 
 const utils = require('../utils')
-const handlerUtils = require('./handlerUtils')
 
 const auth = require('./auth')(db);
 

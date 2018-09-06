@@ -9,18 +9,18 @@ const aws = require('aws-sdk');
 const handlerUtils = require('./handlerUtils')
 
 
-module.exports.getRoles = async (event, context) => {
-    const {s} = event;
+// module.exports.getRoles = async (event, context) => {
+//     const {s} = event;
 
-    const p = {
-        ...cognito.common,
-        AttributesToGet: null,
-    }
-    const r = await cognito.identity.listUsers(p)
-    console.log(r);
+//     const p = {
+//         ...cognito.common,
+//         AttributesToGet: null,
+//     }
+//     const r = await cognito.identity.listUsers(p)
+//     console.log(r);
 
-    return {};
-};
+//     return {};
+// };
 
 
 // Last part of file - wrap all handlers to automatically JSON.stringify responses

@@ -20,6 +20,13 @@ plugins:
   - serverless-plugin-aws-alerts
   - serverless-offline
 
+package:
+  exclude:
+    - dev-mongo-data/**
+    - flux-ts/**
+    - bin/**
+    - .dynamodb/**
+
 # You can pin your service to only deploy with a specific Serverless version
 # Check out our docs for more details
 # frameworkVersion: "=X.X.X"
@@ -38,6 +45,8 @@ custom:
         Action: "cognito-idp:*"
         Resource: "arn:aws:cognito-idp:*:*:userpool/*"
   alerts: ${file(./sls-alerts.yaml):alerts}
+  # this is separated out because the structure changed; better to put it here
+  handlers: "flux/api/flux-ts/handlers"
 
 provider:
   name: aws
@@ -87,20 +96,23 @@ provider:
 #    - exclude-me.js
 #    - exclude-me-dir/**
 
+
+
 functions:
+  # stats
   genStatsGetinfo:
-    handler: flux/handlers/stats.genStatsGetinfo
+    handler: ${self:custom.handlers}/stats.genStatsGetinfo
     timeout: 60
     events:
       - schedule: rate(1 minute)
   genStatsPublic:
-    handler: flux/handlers/stats.genStatsPublic
+    handler: ${self:custom.handlers}/stats.genStatsPublic
     timeout: 60
     events:
       - schedule: rate(1 minute)
   # user requests
   getRoles:
-    handler: flux/handlers/user.getRoles
+    handler: ${self:custom.handlers}/user.getRoles
     events:
       - http:
           path: /v2/user/getRoles
@@ -108,7 +120,7 @@ functions:
           cors: true
   # admin/finance requests
   getDonations:
-    handler: flux/handlers/admin-finance.getDonations
+    handler: ${self:custom.handlers}/admin-finance.getDonations
     events:
       - http:
           path: /v2/finance/getDonations
@@ -116,7 +128,7 @@ functions:
           cors: true
   # admin/role requests
   getRoleAudit:
-    handler: flux/handlers/admin-roles.getRoleAudit
+    handler: ${self:custom.handlers}/admin-roles.getRoleAudit
     events:
       - http:
           path: /v2/admin/getRoleAudit
@@ -127,7 +139,7 @@ functions:
   # random stuff from past
 
   # checkEmail:
-  #   handler: flux/handlers/login.checkEmail
+  #   handler: ${self:custom.handlers}/login.checkEmail
   #   iamRoleStatementsInherit: true
   #   iamRoleStatements: ${self:custom.iam.cognitoAdmin}
   #   events:

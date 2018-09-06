@@ -11,8 +11,8 @@ yarn-debug.log
 **/.dynamodb
 
 # all logfiles
-*.log
-*.log.previous
+.flux-dev.*.log
+.flux-dev.*.log.previous
 
 # don't includ flux dir since that is output of compiled code
 packages/api/flux

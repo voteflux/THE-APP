@@ -1,5 +1,5 @@
-// utilities for handlers
-
+// must be first
+require('module-alias/register')
 
 const DB = require('../db')
 const utils = require('../utils')

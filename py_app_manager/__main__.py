@@ -5,6 +5,7 @@ import sys, os, json, logging, subprocess
 logging.basicConfig(level=logging.INFO)
 
 from contextlib import suppress
+from git import Repo
 
 from py_app_manager.pre_deps import *
 
@@ -13,11 +14,14 @@ _deps_updated = False
 def ensure_deps(force=False):
     global _deps_updated
     if (force or not deps_up_to_date()) and not _deps_updated:
-        must_run("time pip3 install -r requirements.txt")
-        must_run("time npm i")
-        must_run("time npx lerna bootstrap --hoist")
-        must_run("cd packages/api && time node_modules/.bin/sls dynamodb install")
-        set_deps_up_to_date()
+        if Repo('./').is_dirty():
+            logging.warning("⚠️ Repository is dirty; skipping reinstall of requirements!")
+        else:
+            must_run("time pip3 install -r requirements.txt")
+            must_run("time npm i")
+            must_run("time npx lerna bootstrap")
+            must_run("cd packages/api && time node_modules/.bin/sls dynamodb install")
+            set_deps_up_to_date()
         _deps_updated = True
 
 
@@ -32,6 +36,13 @@ try:
 except Exception as e:
     print("Please run ./manage from the root directory (of the repository)")
     sys.exit(1)
+
+
+skip_ensure_deps = len(sys.argv) > 1 and ( \
+        sys.argv[1] == "mgr_set_up_to_date" \
+        or False
+    )
+_deps_updated = skip_ensure_deps
 
 
 # ensure deps and things are installed before we go further
@@ -67,7 +78,7 @@ def reinstall():
 def clean():
     # clean up any temporary / boring files
     cmds = [
-        "rm -rf ./.*.log"
+        "rm -rf ./.flux-dev.*.log*"
     ]
     logging.debug("Cleaning up...")
     for cmd in cmds:
@@ -88,6 +99,11 @@ def mgr_add_dep(ctx, pkgs):
     logging.info("Installed packages: %s" % list(pkgs))
     must_run("pip3 freeze > requirements.txt")
     logging.info("Saved `requirements.txt`")
+
+
+@cli.command()
+def mgr_set_up_to_date():
+    set_deps_up_to_date()
 
 
 @cli.command()
@@ -116,7 +132,7 @@ def dev(env, dev_target):
     window = None
     log_files = []
 
-    def run_dev_cmd(dir, cmd, name):
+    def run_dev_cmd(dir, cmd, name, active_pane=None, vertical=False):
         nonlocal session, window, log_files
         (to_run, l) = cmd_w_log(cmd, name, dir_offset='../../')
         to_run += "; echo -e '\\n\\n' && /usr/bin/read -p 'Press enter to terminate all...' && tmux kill-session -t main"
@@ -126,15 +142,21 @@ def dev(env, dev_target):
             session.set_option('mouse', 'on')
             # session.set_option('remain-on-exit', 'on')
             window = session.list_windows()[0]
+            return window.attached_pane
         else:
-            pane = window.split_window(start_directory=dir, shell=to_run, vertical=False)
+            opts = {} if active_pane is None else {'target': active_pane.id}
+            return window.split_window(start_directory=dir, shell=to_run, vertical=vertical, **opts)
 
     if dev_target in {'ui', 'all'}:
-        run_dev_cmd('./packages/ui', "npm run serve", 'dev-ui')
+        ui_pane = run_dev_cmd('./packages/ui', "npm run serve", 'dev-ui')
 
     if dev_target in {'api', 'all'}:
-        cmd = "node_modules/.bin/sls offline start --stage dev --port %d" % (api_port,)
-        run_dev_cmd('./packages/api', cmd, "dev-api")
+        # mongo dev server port: 53799
+        mongo_pane = run_dev_cmd('./packages/api', 'npm run mongo-dev', "mongo-dev", vertical=False)
+        api_cmd = "node_modules/.bin/sls offline start --stage dev --port %d" % (api_port,)
+        api_pane = run_dev_cmd('./packages/api', api_cmd, "dev-api", vertical=True, active_pane=mongo_pane)
+        compile_pane = run_dev_cmd('./packages/api', 'npm run watch:build', 'api-watch', vertical=True)
+        # mongo_pane.set_height(20)
 
     session.attach_session()
     kill_sessions()

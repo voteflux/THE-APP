@@ -137,6 +137,9 @@ export default /*class App extends Vue*/ Vue.extend({
 </script>
 
 <style lang="scss">
+@import "tachyons";
+@import '../node_modules/normalize.css/normalize.css';
+
 // app container styling
 #app {
     font-family: "Avenir", Helvetica, Arial, sans-serif;
@@ -165,7 +168,6 @@ export default /*class App extends Vue*/ Vue.extend({
 
 // main sitewide styling
 
-@import "tachyons";
 
 // not sure if we'll use this
 $btn-pri-color: #e3580d;

@@ -15,6 +15,7 @@ import { MongoClient } from 'mongodb'
 import  {ObjectID} from 'bson'
 
 import * as utils from './utils'
+import { DBV1, UserV1Object, PublicStats, DBV1Collections, collections } from '@lib/types/db'
 
 
 const R = {
@@ -26,8 +27,6 @@ const R = {
 }
 
 
-
-
 /* DB Utils */
 
 const cleanId = rawId => R.is(ObjectID, rawId) ? rawId : new ObjectID(rawId);
@@ -35,10 +34,9 @@ const cleanId = rawId => R.is(ObjectID, rawId) ? rawId : new ObjectID(rawId);
 
 /* DB Setup - v1 */
 
-
-const mongoUrl = process.env.MONGODB_URI || "mongodb://localhost:27017/flux"
+const mongoUrl = process.env.MONGODB_URI || "mongodb://localhost:52799/flux"
 // const dbName = R.last(mongoUrl.split('/'))
-let dbv1 = {};
+let dbv1 = {} as DBV1;
 
 
 /* DB Setup v2 - might never be used if we keep mongodb... */
@@ -63,6 +61,7 @@ const _userInState = s => {
     if (s == 'weirdstate') {
         return {
             '$nor': R.concat(
+                // @ts-ignore
                 R.map(ss => ({address: _rgx(utils.state_regex(ss))}), utils.all_states),
                 R.map(ss => ({addr_postcode: _rgx(utils.state_regex(ss))}), utils.all_states),
             )
@@ -79,8 +78,8 @@ const _needsValidating = {needsValidating: true}
 
 
 /* Helper to create DB v1 with accessors for our collections (e.g. `db.users.findOne(...)`) - makes it nicer to use */
-const mkDbV1 = () => new Promise((res, rej) => {
-    MongoClient.connect(mongoUrl, (err, client) => {
+export const mkDbV1 = (uri=mongoUrl): Promise<DBV1> => new Promise((res, rej) => {
+    MongoClient.connect(uri, (err, client) => {
         if (err !== null) {
             console.error(`mkDbV1 error: ${utils.j(err)}`)
             return rej(err);
@@ -88,12 +87,12 @@ const mkDbV1 = () => new Promise((res, rej) => {
 
         const rawDb = client.db();
 
-        const dbv1 = {rawDb, client}
-        const setCollection = (i) => { dbv1[i] = rawDb.collection(i) }
+        let _dbv1 = {rawDb, client}
+        const setCollection = (i) => { _dbv1[i] = rawDb.collection(i) }
         R.map(setCollection, collections);
         // console.info(`Created dbv1 obj w keys: ${utils.j(R.keys(dbv1))}`)
 
-        return res(dbv1);
+        return res({..._dbv1} as DBV1);
     })
 });
 
@@ -209,9 +208,9 @@ const getUserFromUid = async userId => {
 
 // Role schema: {role: string, uids: uid[], _id}
 
-const getUserRoles = async userId => {
-    const _id = cleanId(userId)
-    const rolesAll = await dbv1.roles.find({'uids': _id}).toArray()
+const getUserRoles = async (userId): Promise<string[]> => {
+    const _uid = cleanId(userId)
+    const rolesAll = await dbv1.roles.find({'uids': _uid}).toArray()
     return R.map(R.prop('role'), rolesAll)
 }
 
@@ -219,9 +218,11 @@ const getUserRoles = async userId => {
  * Return a list of all roles along with the users that have each role.
  * @returns {{role: string, users: User[]}[]} List of all roles as an object with keys `role` and `users`. The `users` key is a list of user objects.
  */
-const getRoleAudit = async () => {
+const getRoleAudit = async (): Promise<{role: string, users: UserV1Object[]}[]> => {
     const rolesAll = await dbv1.roles.find({}).toArray()
-    const uniqueUserIDs = R.compose(R.uniq, R.reduce(R.concat, []), R.map(R.prop('uids')))(rolesAll)
+    // @ts-ignore
+    const uniqueUserIDs = R.compose(R.uniq, R.reduce(R.concat, []), R.map(R.prop('uids')))(rolesAll as Array<{uids: ObjectID}>)
+    // @ts-ignore
     const userMap = await Promise.all(R.map(uid => getUserFromUid(uid).then(u => [uid, u]), uniqueUserIDs)).then(R.fromPairs)
     return R.map(({role, uids}) => ({role, users: R.map(u => userMap[u], uids)}), rolesAll)
 }
@@ -230,7 +231,7 @@ const getRoleAudit = async () => {
 
 
 const update_getinfo_stats = async () => {
-    getinfo = {
+    let getinfo = {
         id: GETINFO_ID,  //  getinfo ID
         n_members: await count_members(_onRoll),
         n_members_w_state_consent: await count_members(_onRoll, _stateConsent),
@@ -253,29 +254,35 @@ const update_getinfo_stats = async () => {
 }
 
 
-const update_public_stats = async (): PublicStats => {
-    const stats = {id: PUB_STATS_ID}
+const update_public_stats = async (): Promise<PublicStats> => {
+    const stats = <any>{id: PUB_STATS_ID}
 
-    const all_members = await find_members(_onRoll).project({timestamp: 1, address: 1, addr_postcode: 1, dobYear: 1}).toArray()
+    const all_members = (await find_members(_onRoll).project({timestamp: 1, address: 1, addr_postcode: 1, dobYear: 1}).toArray()) as any[]
     console.log(`Public Stats generator got ${all_members.length} members`)
 
-    stats.signup_times = R.compose(R.sort((a,b) => b - a), R.map(m => m.timestamp | 0), R.filter(m => m.timestamp !== undefined))(all_members)
+    // @ts-ignore
+    stats.signup_times = R.compose(R.sort((a:any,b:any) => b - a), R.map(m => m.timestamp | 0), R.filter((m: any) => m.timestamp !== undefined))(all_members)
     console.log(`SIGNUP_TIMES: N=${stats.signup_times.length}, ${stats.signup_times.toString().slice(0,300)}`)
 
-    stats.dob_years = R.compose(R.countBy(R.prop('dobYear')), R.filter(m => m.dobYear !== undefined))(all_members)
+    // @ts-ignore
+    stats.dob_years = R.compose(R.countBy(R.prop('dobYear')), R.filter((m: any) => m.dobYear !== undefined))(all_members)
 
     const pcs = R.compose(R.filter(R.compose(R.not, R.isNil)), R.map(utils.extractPostCode))(all_members)
+    // @ts-ignore
     stats.postcodes = R.countBy(R.identity, pcs);
 
+    // @ts-ignore
     stats.states = R.compose(R.countBy(R.identity), R.map(utils.stateFromPC))(pcs)
 
+    // @ts-ignore
     stats.state_dob_years = R.compose(R.map(R.countBy(R.identity)), R.map(R.map(R.last)), R.groupBy(R.head), R.map(m => [utils.extractState(m), m.dobYear || "1066"]))(all_members)
 
+    // @ts-ignore
     stats.state_signup_times = R.compose(R.map(R.sort((a,b) => a - b)), R.map(R.map(R.last)), R.groupBy(R.head), R.map(m => [utils.extractState(m), (m.timestamp || 0) | 0]))(all_members)
 
     stats.last_run = (Date.now()/1000) | 0
     await dbv1.public_stats.update({id: PUB_STATS_ID}, _set(stats), _upsert)
-    return stats
+    return stats as PublicStats
 }
 
 
@@ -283,36 +290,37 @@ const update_public_stats = async (): PublicStats => {
 
 
 // set exports + db object
-module.exports = {
-    init: async (dbObj) => {
-        const dbMethods = {
-            /* meta */
-            get_version,
-            /* members */
-            count_members,
-            n_members_by_state,
-            n_members_validated,
-            n_members_validated_state,
-            /* stats */
-            update_getinfo_stats,
-            update_public_stats,
-            /* personal / per member */
-            getUserFromS,
-            getUserFromUid,
-            getUidFromS,
-            getUserRoles,
-            /* finance */
-            getDonations,
-            getDonationsN,
-            /* admin */
-            getRoleAudit,
-        }
-        R.mapObjIndexed((f, fName) => { dbObj[fName] = f }, dbMethods);
-
-        dbv1 = await mkDbV1();
-        dbv2 = undefined;
-
-        dbObj.close = () => dbv1.client.close();
-        return
+export const init = async (dbObj, dbV1Uri = mongoUrl) => {
+    const dbMethods = {
+        /* meta */
+        get_version,
+        /* members */
+        count_members,
+        n_members_by_state,
+        n_members_validated,
+        n_members_validated_state,
+        /* stats */
+        update_getinfo_stats,
+        update_public_stats,
+        /* personal / per member */
+        getUserFromS,
+        getUserFromUid,
+        getUidFromS,
+        getUserRoles,
+        /* finance */
+        getDonations,
+        getDonationsN,
+        /* admin */
+        getRoleAudit,
     }
+    R.mapObjIndexed((f, fName) => { dbObj[fName] = f }, dbMethods);
+
+    dbv1 = await mkDbV1(dbV1Uri);
+    dbv2 = undefined;
+
+    dbObj.close = () => dbv1.client.close();
+    dbObj.dbv1 = dbv1;
+    return dbObj
 }
+
+export default {init}

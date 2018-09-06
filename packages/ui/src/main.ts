@@ -2,10 +2,10 @@ import Vue from "vue";
 import App from "./App.vue";
 import {} from "./lib/lib";
 
-// eslint-disable-next-line
-require("normalize.css");
-// eslint-disable-next-line
-require("tachyons");
+// // eslint-disable-next-line
+// require("normalize.css");
+// // eslint-disable-next-line
+// require("tachyons");
 
 // Vue.config.productionTip = true;
 
