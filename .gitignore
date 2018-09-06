@@ -8,6 +8,10 @@ yarn-debug.log
 **/jspm_packages
 **/.idea
 **/__pycache__
+**/.dynamodb
+
+# all logfiles
+*.log
 
 # don't includ flux dir since that is output of compiled code
 packages/api/flux
