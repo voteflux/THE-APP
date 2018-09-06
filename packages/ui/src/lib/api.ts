@@ -117,8 +117,8 @@ const FluxApi: PluginObject<{}> = {
         getRoles({ s }): PR<{roles: string[]}> {
           return post(_api2("user/getRoles"), { s });
         },
-        getDonations({ s }): PR<DonationsResp> {
-          return post(_api2('finance/getDonations'), { s })
+        getDonations(args): PR<DonationsResp> {
+          return post(_api2('finance/getDonations'), args)
         },
         getRoleAudit({ s }): PR<RoleResp[]> {
           return post(_api2("admin/getRoleAudit"), { s })

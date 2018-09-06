@@ -1,3 +1,14 @@
+import { SortMethod } from './db';
+import { ThenArg } from '@lib/types';
+
+import * as _R from 'ramda'
+
+import { MongoClient } from 'mongodb'
+import  {ObjectID} from 'bson'
+
+import * as utils from './utils'
+import { DBV1, UserV1Object, PublicStats, DBV1Collections, collections } from '@lib/types/db'
+
 /*
  * DB functions for Flux DB (both v1 and v2)
  *
@@ -8,16 +19,6 @@
  *
  */
 
-import * as _R from 'ramda'
-import {keys} from 'ts-transformer-keys'
-
-import { MongoClient } from 'mongodb'
-import  {ObjectID} from 'bson'
-
-import * as utils from './utils'
-import { DBV1, UserV1Object, PublicStats, DBV1Collections, collections } from '@lib/types/db'
-
-
 const R = {
     ..._R,
     log: o => {
@@ -26,6 +27,15 @@ const R = {
     }
 }
 
+export { SortMethod } from '@lib/types/db'
+const SM = SortMethod
+
+const renderSM = (sm: SortMethod): [[string, number]] => {
+    return (<{[k:string]:[[string, number]]}>{
+        [SM.TS]: [['ts', 1]],
+        [SM.ID]: [['_id', 1]]
+    })[sm || SM.TS]
+}
 
 /* DB Utils */
 
@@ -182,8 +192,9 @@ const count_volunteers = () => count_members(_volunteer)
 
 /* Finance */
 
-const getDonations = async (pageN = 0, limit = 10) =>
-    await dbv1.donations.find({}, {sort: [['ts', 1]], limit, skip: pageN * limit}).toArray()
+const getDonations = async (pageN = 0, limit = 10, sortMethod: SortMethod = SM.TS) => {
+    return await dbv1.donations.find({}, {sort: renderSM(sortMethod), limit, skip: pageN * limit}).toArray()
+}
 
 const getDonationsN = async () =>
     await dbv1.donations.count()
@@ -291,7 +302,11 @@ const update_public_stats = async (): Promise<PublicStats> => {
 
 // set exports + db object
 export const init = async (dbObj, dbV1Uri = mongoUrl) => {
+    dbv1 = await mkDbV1(dbV1Uri);
+    dbv2 = undefined;
     const dbMethods = {
+        dbv1, dbv2,
+        close: () => dbv1.client.close(),
         /* meta */
         get_version,
         /* members */
@@ -313,14 +328,11 @@ export const init = async (dbObj, dbV1Uri = mongoUrl) => {
         /* admin */
         getRoleAudit,
     }
+
     R.mapObjIndexed((f, fName) => { dbObj[fName] = f }, dbMethods);
-
-    dbv1 = await mkDbV1(dbV1Uri);
-    dbv2 = undefined;
-
-    dbObj.close = () => dbv1.client.close();
-    dbObj.dbv1 = dbv1;
-    return dbObj
+    return dbMethods
 }
 
 export default {init}
+
+export type DB = ThenArg<ReturnType<typeof init>>;

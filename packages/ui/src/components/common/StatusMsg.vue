@@ -1,6 +1,6 @@
 <template>
     <div v-if="visible == VISIBLE" class="db mh3 mv4 common relative" v-bind:class="getClass()">
-        <span class="pr2 pt2 top-1 right-1 absolute fr" @click="visible = HIDING">X</span>
+        <span class="pr2 pt2 top-0 right-0 absolute fr" @click="visible = HIDING">X</span>
         <div class="heading pl2 pt2 pr1">{{ getHeading() }}</div>
         <div class="err-text pl2 pb2 pr2">
             <slot></slot>

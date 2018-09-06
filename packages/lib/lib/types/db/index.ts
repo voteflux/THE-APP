@@ -1,4 +1,3 @@
-import { DBV1Collections } from './index';
 export * from './stats'
 import { Collection } from 'mongodb'
 
@@ -81,3 +80,9 @@ export interface UserV1Object {
     addr_street_no: string;
     timestamp: number;
 }
+
+export enum SortMethod {
+    TS,
+    ID
+}
+export const SM = SortMethod
