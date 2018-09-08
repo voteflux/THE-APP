@@ -6,7 +6,7 @@ import DB from './flux-ts/db'
 
 let port = 53799
 
-const mongod = new MongodbMemoryServer({instance: {port, dbName: "flux", debug: true}});
+const mongod = new MongodbMemoryServer({instance: {port, dbName: "flux"}, debug: true});
 
 async function main() {
     const uri = await mongod.getConnectionString()

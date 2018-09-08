@@ -15,15 +15,18 @@
 
         <!-- large version -->
         <div v-else class="flex flex-column ma3">
-            <div class="flex mb2">
+            <div class="flex flex-row flex-wrap mb2">
                 <div class="dib mr4">
                     ID: <code>{{ donation.id }}</code>
                 </div>
                 <div class="dib mr4">
                     Date: {{ donation.date }} (<small><code>{{ donation.ts }}</code></small>)
                 </div>
+                <div class="dib mr4">
+                    Source: {{ donation.payment_source }}
+                </div>
             </div>
-            <div class="flex mb2">
+            <div class="flex mb2 flex-wrap">
                 <div class="dib mr4">
                     Amount: <code>{{ donation.amount }} {{ donation.unit }}</code>
                 </div>

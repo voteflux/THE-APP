@@ -32,8 +32,8 @@ const SM = SortMethod
 
 const renderSM = (sm: SortMethod): [[string, number]] => {
     return (<{[k:string]:[[string, number]]}>{
-        [SM.TS]: [['ts', 1]],
-        [SM.ID]: [['_id', 1]]
+        [SM.TS]: [['ts', -1]],
+        [SM.ID]: [['_id', -1]]
     })[sm || SM.TS]
 }
 

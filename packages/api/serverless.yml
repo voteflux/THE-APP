@@ -58,7 +58,7 @@ provider:
   stage: ${opt:stage, self:custom.stage}
   memorySize: 128
   environment:
-    MONGODB_URI: ${ssm:${self:provider.stage}MongoDbUri}
+    MONGODB_URI: ${ssm:${self:provider.stage}MongoDbUri, 'mongodb://localhost:53799/flux'}
     STAGE: ${self:provider.stage}
     # USER_POOL_ID: ${self:custom.cognito.poolId}
     # CLIENT_ID: ${self:custom.cognito.clientId}

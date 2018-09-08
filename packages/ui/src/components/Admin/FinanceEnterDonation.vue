@@ -57,7 +57,7 @@
             </div>
         </ui-section>
 
-        <ui-section title="Recent Donations">
+        <ui-section title="Recently Entered Donations">
             <Error v-if="req.donations.isFailed()">{{ req.donations.unwrapError() }}</Error>
             <Loading v-else-if="!req.donations.isSuccess()">Loading donations...</Loading>
             <div v-else>
@@ -140,6 +140,7 @@ export default Vue.extend({
             this.$flux.v2.addNewDonation({ ...this.auth, doc: {...this.entry} as DonationT })
                 .then(r => this.req.saveReq = r)
             this.entry = {...defaultDonation}
+            this.getDonations()
         },
         getDonations(_pageN?:number, _limit?:number) {
             const pageN = _pageN || 0
