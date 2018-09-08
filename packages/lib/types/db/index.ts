@@ -1,5 +1,6 @@
 export * from './stats'
 import { Collection } from 'mongodb'
+import * as t from 'io-ts'
 
 // when adding a collection add to list of strings below too
 export interface DBV1Collections {
@@ -76,9 +77,15 @@ export interface UserV1Object {
     validationReason: string;
     addr_street: string;
     addr_suburb: string;
-    addr_postcode: string | number;
+    addr_postcode: string;
     addr_street_no: string;
+    addr_country: string;
     timestamp: number;
+    dobDay: number
+    dobMonth: number
+    dobYear: number
+    dob: string
+    s: string
 }
 
 export enum SortMethod {
@@ -90,23 +97,24 @@ export const SM = SortMethod
 
 export interface Paginated {pageN: number, limit: number, total: number}
 
-export interface Donation {
-    name: string;
-    street: string;
-    city: string;
-    state: string;
-    postcode: string;
-    country: string;
-    branch: string;
-    ts: number;
-    date: string;
-    amount: string;
-    unit: string;
-    email: string;
-    payment_source: string;
-    id: string;
-    extra_data: object | undefined;
-}
+export const DonationRT = t.type({
+    name: t.string,
+    street: t.string,
+    city: t.string,
+    state: t.string,
+    postcode: t.string,
+    country: t.string,
+    branch: t.string,
+    ts: t.number,
+    date: t.string,
+    amount: t.string,
+    unit: t.string,
+    email: t.string,
+    payment_source: t.string,
+    id: t.string,
+    extra_data: t.union([t.object, t.undefined]),
+})
+export type Donation = t.TypeOf<typeof DonationRT>
 
 export interface DonationsResp {donations: Donation[], totalDonations: number, pageN: number, limit: number, sortMethod: number}
 

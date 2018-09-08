@@ -59,8 +59,8 @@ export default class WebRequest<E,D> {
     isSuccess() { return this.tag == RT.Success }
 
     static Failed = <E,D>(error: E, errObj?: any) => new WebRequest<E,D>(RT.Failed, undefined, error, errObj)
-    static Loading = () => new WebRequest(RT.Loading)
-    static NotRequested = () => new WebRequest(RT.NotRequested)
+    static Loading = <E, D>() => new WebRequest<E,D>(RT.Loading)
+    static NotRequested = <E,D>() => new WebRequest<E,D>(RT.NotRequested)
     static Success = <E,D>(data: D) => new WebRequest<E,D>(RT.Success, data)
 
     private clone<E2,D2>(): WebRequest<E2,D2> {

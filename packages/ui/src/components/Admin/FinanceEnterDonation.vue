@@ -61,7 +61,7 @@
 const JSError = Error;
 import Vue from 'vue'
 import * as R from 'ramda'
-import { UserV1Object, SortMethod, Donation as DonationT } from 'flux-lib/types/db';
+import { UserV1Object, SortMethod, Donation as DonationT, DonationsResp } from 'flux-lib/types/db';
 import WebRequest from '@/lib/WebRequest';
 import FluxLogo from '@/components/common/FluxLogo.vue';
 import Loading from '@/components/Loading.vue';
@@ -95,10 +95,12 @@ export default Vue.extend({
     },
     data: () => ({
         req: {
-            donations: WebRequest.NotRequested(),
+            donations: WebRequest.NotRequested() as Req<DonationsResp>,
+        } as {
+            donations: Req<DonationsResp>
         },
-        initDate: new Date(),
-        entry: R.clone(defaultDonation),
+        initDate: new Date() as Date,
+        entry: R.clone(defaultDonation) as DonationT,
         defaultDonation,
         R
     }),
@@ -147,7 +149,8 @@ label {
     margin: 0.5rem;
 }
 
-label input {
+label * {
+    @extend .w-60;
     margin-left: 0.25rem;
 }
 </style>

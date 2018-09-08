@@ -1,6 +1,6 @@
 <template>
     <div class="flex flex-wrap flex-row items-center tl editable-root">
-        <div class="col w-75-ns w-70 flex flex-wrap items-center">
+        <div :class="'col flex flex-wrap items-center ' + calcWidth()">
             <div class="col w-40-ns w-100 var-name">
                 <div class="pl2 dib f6 f5-ns b normal-ns pr2">
                     {{ name }}
@@ -23,13 +23,11 @@
         </div>
 
         <!--  -->
-        <div class="col w-30 w-25-ns flex flex-no-wrap justify-around icons">
+        <div v-if="!autoSave" class="col w-30 w-25-ns flex flex-no-wrap justify-around icons">
             <!-- :click="onSave(newValue)" -->
             <div v-if="state == EDITING" class="btn-group">
-                <span v-if="!autoSave">
-                    <button class="tool-btn" v-on:click="resetNoSave()">❌</button>
-                    <button class="tool-btn" v-on:click="_doSave()">💾</button>
-                </span>
+                <button class="tool-btn" v-on:click="resetNoSave()">❌</button>
+                <button class="tool-btn" v-on:click="_doSave()">💾</button>
             </div>
 
             <div v-if="state == DISPLAY" class="">
@@ -83,6 +81,13 @@ const Editable = Vue.extend({
     }),
 
     methods: {
+        calcWidth() {
+            if (this.autoSave) {
+                return 'w-100'
+            }
+            return "w-75-ns w-70"
+        },
+
         startEdit() {
             this.newValue = this.$props.value
             this.state = Cs.EDITING

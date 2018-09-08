@@ -72,6 +72,7 @@ import {Error} from '../common'
 import {MsgBus, M} from '@/messages'
 import WR from '@/lib/WebRequest'
 import WebRequest from '@/lib/WebRequest';
+import { UserV1Object } from '../../lib/api';
 
 enum Cs {
     INPUT_COUNTRY,  // not yet used
@@ -87,7 +88,9 @@ enum Cs {
 export default Vue.extend({
     components: {Error},
 
-    props: ["user"],
+    props: {
+        user: Object as () => UserV1Object
+    },
 
     data: () => ({
         req: {
@@ -104,8 +107,8 @@ export default Vue.extend({
             addr_street_no: "",
             addr_suburb: ""
         },
-        suburbs: [],
-        streets: [],
+        suburbs: [] as string[],
+        streets: [] as string[],
         errMsg: {},
         ...Cs
     }),
