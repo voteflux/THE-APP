@@ -12,7 +12,7 @@
     // "sourceMap": true,                     /* Generates corresponding '.map' file. */
     // "outFile": "./",                       /* Concatenate and emit output to single file. */
     "outDir": "./flux",                        /* Redirect output structure to the directory. */
-    "rootDir": "../",                       /* Specify the root directory of input files. Use to control the output directory structure with --outDir. */
+    "rootDir": "./flux-ts",                       /* Specify the root directory of input files. Use to control the output directory structure with --outDir. */
     // "composite": true,                     /* Enable project compilation */
     // "removeComments": true,                /* Do not emit comments to output. */
     // "noEmit": true,                        /* Do not emit outputs. */
@@ -57,14 +57,12 @@
     // "emitDecoratorMetadata": true,         /* Enables experimental support for emitting type metadata for decorators. */
     "types": [ "node" ],
     "paths": {
-      "@/*": [ "flux-ts/*" ],
-      "@lib/*": [ "../../lib/lib/*" ]
+      "@/*": [ "flux-ts/*" ]
     }
   },
   "include": [
     "flux-ts/**/*.ts",
-    "flux-ts/**/*.js",
-    "../../lib/lib/**/*.ts"
+    "flux-ts/**/*.js"
   ],
   "exclude": [
     "node_modules",

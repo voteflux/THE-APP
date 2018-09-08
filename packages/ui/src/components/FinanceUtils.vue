@@ -2,7 +2,7 @@
     <div>
         <flux-logo title="Finance Utils"/>
 
-        <ui-section title="Member Tools">
+        <ui-section title="Tools">
             <ul class="ul-spaced">
                 <li><router-link :to="Routes.AdminFinanceDonationEntry">Donation Entry</router-link></li>
             </ul>

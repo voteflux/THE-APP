@@ -46,7 +46,7 @@ custom:
         Resource: "arn:aws:cognito-idp:*:*:userpool/*"
   alerts: ${file(./sls-alerts.yaml):alerts}
   # this is separated out because the structure changed; better to put it here
-  handlers: "flux/api/flux-ts/handlers"
+  handlers: "flux/handlers"
 
 provider:
   name: aws

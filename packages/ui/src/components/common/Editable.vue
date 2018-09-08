@@ -26,8 +26,10 @@
         <div class="col w-30 w-25-ns flex flex-no-wrap justify-around icons">
             <!-- :click="onSave(newValue)" -->
             <div v-if="state == EDITING" class="btn-group">
-                <button class="tool-btn" v-on:click="resetNoSave()">❌</button>
-                <button class="tool-btn" v-on:click="_doSave()">💾</button>
+                <span v-if="!autoSave">
+                    <button class="tool-btn" v-on:click="resetNoSave()">❌</button>
+                    <button class="tool-btn" v-on:click="_doSave()">💾</button>
+                </span>
             </div>
 
             <div v-if="state == DISPLAY" class="">
@@ -67,6 +69,10 @@ const Editable = Vue.extend({
         onSave: Function,
         onReset: Function,
         onStart: Function,
+        autoSave: {
+            type: Boolean,
+            default: false
+        }
     },
 
     data: () => ({
@@ -83,11 +89,17 @@ const Editable = Vue.extend({
             this.$props.onStart()
         },
 
+        _autoSave() {
+            if (this.autoSave) {
+                this._doSave()
+            }
+        },
+
         _doSave() {
-            this.state = Cs.SAVING
-            this.$props.onSave()
+            this.state = this.autoSave ? Cs.SAVING : Cs.EDITING
+            return this.$props.onSave()
                 .then(() => {
-                    this.state = Cs.DISPLAY
+                    this.state = this.autoSave ? Cs.DISPLAY : Cs.EDITING
                 }).catch(e => {
                     this.state = Cs.ERROR
                     this.err = this.$err(e)
@@ -101,6 +113,9 @@ const Editable = Vue.extend({
     },
 
     mounted(){
+        if (this.autoSave) {
+            this.startEdit()
+        }
     }
 })
 export default Editable;

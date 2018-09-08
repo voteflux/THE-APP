@@ -147,6 +147,7 @@ def dev(env, dev_target):
             opts = {} if active_pane is None else {'target': active_pane.id}
             return window.split_window(start_directory=dir, shell=to_run, vertical=vertical, **opts)
 
+    lib_pane = run_dev_cmd('./packages/lib', 'npm run watch', 'dev-lib')
     if dev_target in {'ui', 'all'}:
         ui_pane = run_dev_cmd('./packages/ui', "npm run serve", 'dev-ui')
 

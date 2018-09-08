@@ -7,33 +7,8 @@ import { Http, HttpResponse } from "vue-resource/types/vue_resource";
 import { PluginObject } from "vue";
 // import io from "socket.io-client";
 
-import { UserV1Object } from "@lib/types/db"
-export * from '@lib/types/db'
-
-export interface Paginated {pageN: number, limit: number, total: number}
-
-
-export interface Donation {
-    name: string;
-    street: string;
-    city: string;
-    state: string;
-    postcode: string;
-    country: string;
-    branch: string;
-    ts: number;
-    date: string;
-    amount: string;
-    unit: string;
-    email: string;
-    payment_source: string;
-    id: string;
-    extra_data: object | undefined;
-}
-
-export interface DonationsResp {donations: Donation[], totalDonations: number, pageN: number, limit: number}
-
-export interface RoleResp {role: string, users: UserV1Object[]}
+import { UserV1Object, DonationsResp, RoleResp } from "flux-lib/types/db"
+export * from 'flux-lib/types/db'
 
 export interface Auth {
   apiToken?: string;
@@ -44,9 +19,11 @@ export interface CheckEmailResp {
   doOnboarding: boolean;
 }
 
-type R<r> = WebRequest<string, r>;
+export type Req<r> = WebRequest<string, r>;
+type R<T> = Req<T>;
 // promise response
-type PR<r> = PromiseLike<R<r>>;
+export type PromReq<r> = PromiseLike<R<r>>;
+type PR<T> = PromReq<T>;
 
 const mkResp = <r>(data): WebRequest<string,r> => {
     if (data.status == 200) {

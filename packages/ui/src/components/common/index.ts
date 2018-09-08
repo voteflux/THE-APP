@@ -6,5 +6,9 @@ import UiSection from "./UiSection.vue";
 import Paginate from './Paginate.vue'
 import Donation from './Donation.vue'
 import TableNCols from './TableNCols.vue'
+import EditableText from './EditableText.vue'
+import EditableDate from './EditableDate.vue'
+import EditableOpt from './EditableOpt.vue'
+import AddressEditor from './AddressEditor.vue'
 
-export { Error, Warning, Row2, Table2Cols, UiSection, Paginate, Donation, TableNCols };
+export { Error, Warning, Row2, Table2Cols, UiSection, Paginate, Donation, TableNCols, EditableText, EditableDate, EditableOpt, AddressEditor };

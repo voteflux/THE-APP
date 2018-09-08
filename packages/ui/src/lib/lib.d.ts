@@ -1,7 +1,8 @@
 import Vue from "vue";
 import {SError} from './errors'
 import WebRequest from "@/lib/WebRequest";
-import { Auth, Donation, DonationsResp, Paginated, RoleResp } from './api';
+import { Auth } from './api';
+import { Donation, DonationsResp, Paginated, RoleResp } from 'flux-lib/types/db'
 import { Maybe } from "tsmonad/lib/src";
 
 export interface HasAddr {

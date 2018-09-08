@@ -21,7 +21,9 @@
   "author": "Max Kaye, Flux Devs",
   "license": "MIT",
   "dependencies": {
+    "@types/mongodb": "^3.1.4",
     "bson": "^3.0.0",
+    "flux-lib": "^0.1.1",
     "fp-ts": "^1.8.0",
     "io-ts": "^1.3.0",
     "lib": "^0.1.1",
@@ -56,7 +58,6 @@
     "typescript": "^3.0.3"
   },
   "_moduleAliases": {
-    "@": "flux/api/flux-ts/",
-    "@lib": "flux/lib/lib/"
+    "@": "flux/api/flux-ts/"
   }
 }

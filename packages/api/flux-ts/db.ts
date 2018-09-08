@@ -1,5 +1,5 @@
 import { SortMethod } from './db';
-import { ThenArg } from '@lib/types';
+import { ThenArg } from 'flux-lib/types';
 
 import * as _R from 'ramda'
 
@@ -7,7 +7,7 @@ import { MongoClient } from 'mongodb'
 import  {ObjectID} from 'bson'
 
 import * as utils from './utils'
-import { DBV1, UserV1Object, PublicStats, DBV1Collections, collections } from '@lib/types/db'
+import { DBV1, UserV1Object, PublicStats, DBV1Collections, collections } from 'flux-lib/types/db'
 
 /*
  * DB functions for Flux DB (both v1 and v2)
@@ -27,7 +27,7 @@ const R = {
     }
 }
 
-export { SortMethod } from '@lib/types/db'
+export { SortMethod } from 'flux-lib/types/db'
 const SM = SortMethod
 
 const renderSM = (sm: SortMethod): [[string, number]] => {

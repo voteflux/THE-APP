@@ -4,20 +4,43 @@
 
         <ui-section title="Enter Donation">
             <form @submit="saveDonation()" class="flex flex-row justify-between">
-                <div>
-                    <label>email: <input type="text" placeholder="name@example.com" /></label>
-                    <label>name: <input type="text" placeholder="Fname Mnames Sname" /></label>
-                    <label>branch: <input type="text" placeholder="/AUS" /></label>
-                    <label>amount (AUD): <input type="number" placeholder="10.22" /></label>
-                    <label>date (timestamp): <input type="text" placeholder="1573258824" /></label>
+                <div class="w-50">
+                    <label>email: <input type="text" placeholder="name@example.com" v-model="entry.email"/></label>
+                    <label>name: <input type="text" placeholder="Fname Mnames Sname" v-model="entry.name"/></label>
+                    <label>branch: <input type="text" placeholder="/AUS" v-model="entry.branch"/></label>
+                    <label>amount ({{ entry.unit }}): <input type="number" placeholder="10.22" v-model="entry.amount"/></label>
+                    <label>units: <input type="text" placeholder="AUD" v-model="entry.unit" /></label>
+                    <editable-date name="Date" :initDate="initDate" :onSave="onDateSave" :autoSave="true" />
                 </div>
-                <div>
-                    <label>addr street: <input type="text" placeholder="400 George St" /></label>
-                    <label>addr city: <input type="text" placeholder="Sydney" /></label>
-                    <label>addr state: <input type="text" placeholder="NSW" /></label>
-                    <label>addr postcode: <input type="text" placeholder="2000" /></label>
+                <div class="w-50">
+                    <label>street: <input type="text" placeholder="42 Wallaby Way" v-model="entry.street"/></label>
+                    <label>city: <input type="text" placeholder="Sydney" v-model="entry.city"/></label>
+                    <label>state: <input type="text" placeholder="NSW" v-model="entry.state"/></label>
+                    <label>postcode: <input type="text" placeholder="2000" v-model="entry.postcode"/></label>
+                    <label>country: <input type="text" placeholder="Australia" v-model="entry.country"/></label>
+                    <label>source: <select v-model="entry.payment_source">
+                        <option value="eft" >Bank Transfer</option>
+                        <option value="paypal">PayPal</option>
+                        <option value="crypto">Cryptocurrency</option>
+                    </select></label>
                 </div>
             </form>
+
+            <div v-if="!R.equals(entry, defaultDonation)" class="flex justify-between flex-row">
+                <div class="w-70 ma2">
+                    <h3>Preview</h3>
+                    <donation :donation="entry" />
+                </div>
+                <div class="w-30 ma2">
+                    <h3>Save</h3>
+                    <div v-if="entryComplete()">
+                        <button>Save and send email receipt</button>
+                    </div>
+                    <div v-else>
+                        Please fill in all fields of the donation entry.
+                    </div>
+                </div>
+            </div>
         </ui-section>
 
         <ui-section title="Recent Donations">
@@ -37,25 +60,56 @@
 <script lang="ts">
 const JSError = Error;
 import Vue from 'vue'
-import { UserV1Object, SortMethod } from '@lib/types/db';
+import * as R from 'ramda'
+import { UserV1Object, SortMethod, Donation as DonationT } from 'flux-lib/types/db';
 import WebRequest from '@/lib/WebRequest';
 import FluxLogo from '@/components/common/FluxLogo.vue';
 import Loading from '@/components/Loading.vue';
-import { Error, UiSection, Donation, Paginate } from '@/components/common';
+import { Error, UiSection, Donation, Paginate, EditableDate, AddressEditor } from '@/components/common';
 import { Auth, Paginated } from '@/lib/api';
+import { Req } from '@/lib/api';
+
+const defaultDonation: DonationT = {
+    ts: (new Date()).getTime() / 1000 | 0,
+    email: '',
+    name: '',
+    branch: '/AUS',
+    amount: '',
+    unit: 'AUD',
+    street: '',
+    city: '',
+    postcode: '',
+    state: '',
+    country: 'Australia',
+    payment_source: 'eft',
+    extra_data: {},
+    date: new Date().toISOString(),
+    id: 'n/a'
+}
 
 export default Vue.extend({
-    components: { FluxLogo, UiSection, Error, Loading, Paginate, Donation },
+    components: { FluxLogo, UiSection, Error, Loading, Paginate, Donation, EditableDate, AddressEditor },
     props: {
-        user: Object as () => WebRequest<String, UserV1Object>,
+        user: Object as () => Req<UserV1Object>,
         auth: Object as () => Auth
     },
     data: () => ({
         req: {
             donations: WebRequest.NotRequested(),
-        }
+        },
+        initDate: new Date(),
+        entry: R.clone(defaultDonation),
+        defaultDonation,
+        R
     }),
     methods: {
+        onDateSave(newDate: Date) {
+            this.entry.ts = newDate.getTime() / 1000 | 0
+            this.entry.date = newDate.toISOString()
+        },
+        entryComplete() {
+            return R.compose(R.all(p => !!p), R.values)(this.entry)
+        },
         saveDonation() {
 
         },
@@ -69,7 +123,7 @@ export default Vue.extend({
             if (dir === 'next') {
                 console.error('unimplemented...')
             } else if (dir === 'prev') {
-
+                console.error('unimplemented...')
             } else {
                 throw new JSError(<any>('Should have recieved one of "next" or "prev" for `dir` but got ' + (<any>dir).toString()))
             }

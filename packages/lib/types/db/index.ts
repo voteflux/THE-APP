@@ -86,3 +86,28 @@ export enum SortMethod {
     ID
 }
 export const SM = SortMethod
+
+
+export interface Paginated {pageN: number, limit: number, total: number}
+
+export interface Donation {
+    name: string;
+    street: string;
+    city: string;
+    state: string;
+    postcode: string;
+    country: string;
+    branch: string;
+    ts: number;
+    date: string;
+    amount: string;
+    unit: string;
+    email: string;
+    payment_source: string;
+    id: string;
+    extra_data: object | undefined;
+}
+
+export interface DonationsResp {donations: Donation[], totalDonations: number, pageN: number, limit: number, sortMethod: number}
+
+export interface RoleResp {role: string, users: UserV1Object[]}

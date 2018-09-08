@@ -14,6 +14,10 @@ yarn-debug.log
 .flux-dev.*.log
 .flux-dev.*.log.previous
 
+
+packages/lib/*.js
+packages/lib/**/*.js
+
 # don't includ flux dir since that is output of compiled code
 packages/api/flux
 

@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "es6",
+    "target": "es2017",
     "module": "esnext",
     "jsx": "preserve",
     "strict": true,
@@ -13,12 +13,12 @@
     "sourceMap": true,
     "noImplicitAny": false,
     "baseUrl": ".",
+    "rootDir": "../",
     "types": [
       "node"
     ],
     "paths": {
-      "@/*": ["src/*"],
-      "@lib/*": [ "../lib/lib/*" ],
+      "@/*": ["src/*"]
     }
   },
   "include": [

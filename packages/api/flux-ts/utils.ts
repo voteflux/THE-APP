@@ -1,4 +1,5 @@
 import * as _R from 'ramda'
+import { Paginated } from 'flux-lib/types';
 
 export const R = _R
 
@@ -14,7 +15,7 @@ export const mkPromise = f => (...args) => new Promise((resolve, reject) => {
     })
 })
 
-export const genPagination = (total, limit, pageN) => ({total, limit, pageN})
+export const genPagination = (total, limit, pageN): Paginated => ({total, limit, pageN})
 
 export const all_states = ['nsw', 'qld', 'sa', 'nt', 'act', 'vic', 'wa', 'tas', 'nostate', 'weirdstate']
 
