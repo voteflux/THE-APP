@@ -28,7 +28,7 @@ import Vue from 'vue'
 import FluxLogo from '@/components/common/FluxLogo.vue';
 import Loading from '@/components/Loading.vue';
 import { Error, UiSection, Paginate, Donation } from '@/components/common';
-import WebRequest from '@/lib/WebRequest';
+import WebRequest from 'flux-lib/WebRequest';
 import { Auth, Paginated } from '@/lib/api';
 
 import Routes from '@/routes'

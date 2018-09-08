@@ -1,6 +1,13 @@
 import Vue from "vue";
 import App from "./App.vue";
 
+import { library } from '@fortawesome/fontawesome-svg-core'
+import { faCoffee, faArrowLeft, faArrowCircleLeft, faPlusSquare, faMinusSquare } from '@fortawesome/free-solid-svg-icons'
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+
+library.add(faCoffee, faArrowCircleLeft, faPlusSquare, faMinusSquare)
+Vue.component('fa-icon', FontAwesomeIcon)
+
 // // eslint-disable-next-line
 // require("normalize.css");
 // // eslint-disable-next-line

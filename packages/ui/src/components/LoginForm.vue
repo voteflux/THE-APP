@@ -37,7 +37,7 @@ import Loading from "./Loading.vue";
 import { mkErrContainer } from "@/lib/errors";
 import { Error } from "./common/";
 import { MsgBus, M } from '@/messages';
-import WR from '@/lib/WebRequest';
+import WR from 'flux-lib/WebRequest';
 import Vue from "vue";
 
 enum Cs {

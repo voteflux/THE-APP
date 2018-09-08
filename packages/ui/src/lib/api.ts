@@ -2,29 +2,19 @@ import { FluxApiMethods } from './api.d';
 // all api calls should be written up as methods here (where the methods take the correct arguments)
 
 import { Maybe, Either } from "tsmonad";
-import WebRequest from './WebRequest'
 import { VueConstructor, Vue } from "vue/types/vue";
 import { Http, HttpResponse } from "vue-resource/types/vue_resource";
 import { PluginObject } from "vue";
 // import io from "socket.io-client";
 
-import { UserV1Object, DonationsResp, RoleResp } from "flux-lib/types/db"
+import { UserV1Object, DonationsResp, RoleResp, Auth, PR } from "flux-lib/types/db"
+import WebRequest from 'flux-lib/WebRequest';
 export * from 'flux-lib/types/db'
-
-export interface Auth {
-  apiToken?: string;
-  s: string | undefined;
-}
+export * from 'flux-lib/types/db/api'
 
 export interface CheckEmailResp {
   doOnboarding: boolean;
 }
-
-export type Req<r> = WebRequest<string, r>;
-type R<T> = Req<T>;
-// promise response
-export type PromReq<r> = PromiseLike<R<r>>;
-type PR<T> = PromReq<T>;
 
 const mkResp = <r>(data): WebRequest<string,r> => {
     if (data.status == 200) {
@@ -95,6 +85,9 @@ export function FluxApi(_Vue: VueConstructor, options?: any): void {
       },
       getDonations(args): PR<DonationsResp> {
         return post(_api2('finance/getDonations'), args)
+      },
+      addNewDonation(args) {
+        return post(_api2('finance/addNewDonation'), args)
       },
       getRoleAudit({ s }): PR<RoleResp[]> {
         return post(_api2("admin/getRoleAudit"), { s })

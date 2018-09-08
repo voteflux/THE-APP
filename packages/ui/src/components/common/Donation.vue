@@ -1,6 +1,20 @@
 <template>
-    <div class="br3 ba pa3">
-        <div class="flex flex-column">
+    <div class="br3 ba">
+        <!-- small version -->
+        <div v-if="small" class="flex flex-column ma2">
+            <div>
+                ID: <span>{{donation.id}}</span>
+            </div>
+            <div>
+                Name: <strong>{{donation.name}}</strong>
+            </div>
+            <div>
+                Date: <strong>{{donation.date}}</strong> (<small>{{donation.ts}}</small>)
+            </div>
+        </div>
+
+        <!-- large version -->
+        <div v-else class="flex flex-column ma3">
             <div class="flex mb2">
                 <div class="dib mr4">
                     ID: <code>{{ donation.id }}</code>
@@ -40,6 +54,10 @@ import { Donation } from '@/lib/api';
 export default Vue.extend({
     props: {
         donation: Object as () => Donation,
+        small: {
+            type: Boolean,
+            default: false
+        }
     }
 })
 </script>

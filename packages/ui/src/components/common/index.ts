@@ -10,5 +10,10 @@ import EditableText from './EditableText.vue'
 import EditableDate from './EditableDate.vue'
 import EditableOpt from './EditableOpt.vue'
 import AddressEditor from './AddressEditor.vue'
+import Section from './Section.vue'
 
-export { Error, Warning, Row2, Table2Cols, UiSection, Paginate, Donation, TableNCols, EditableText, EditableDate, EditableOpt, AddressEditor };
+export {
+    Error, Warning, Row2, Table2Cols, UiSection, Paginate, Donation, TableNCols, EditableText,
+    EditableDate, EditableOpt, AddressEditor,
+    Section
+};

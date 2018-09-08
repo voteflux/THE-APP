@@ -126,6 +126,13 @@ functions:
           path: /v2/finance/getDonations
           method: post
           cors: true
+  addNewDonation:
+    handler: ${self:custom.handlers}/admin-finance.addNewDonation
+    events:
+      - http:
+          path: /v2/finance/addNewDonation
+          method: post
+          cors: true
   # admin/role requests
   getRoleAudit:
     handler: ${self:custom.handlers}/admin-roles.getRoleAudit

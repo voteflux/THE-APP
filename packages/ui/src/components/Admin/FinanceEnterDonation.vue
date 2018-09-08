@@ -3,16 +3,16 @@
         <flux-logo title="Donation Entry"/>
 
         <ui-section title="Enter Donation">
-            <form @submit="saveDonation()" class="flex flex-row justify-between">
-                <div class="w-50">
+            <form @submit="saveDonation()" class="flex flex-wrap">
+                <div class="w-50-l w-100">
                     <label>email: <input type="text" placeholder="name@example.com" v-model="entry.email"/></label>
                     <label>name: <input type="text" placeholder="Fname Mnames Sname" v-model="entry.name"/></label>
                     <label>branch: <input type="text" placeholder="/AUS" v-model="entry.branch"/></label>
-                    <label>amount ({{ entry.unit }}): <input type="number" placeholder="10.22" v-model="entry.amount"/></label>
+                    <label>amount ({{ entry.unit }}): <input type="number" placeholder="10.22" v-model.number="entry.amount" @change="updateRecentSimilar()"/></label>
                     <label>units: <input type="text" placeholder="AUD" v-model="entry.unit" /></label>
                     <editable-date name="Date" :initDate="initDate" :onSave="onDateSave" :autoSave="true" />
                 </div>
-                <div class="w-50">
+                <div class="w-50-l w-100">
                     <label>street: <input type="text" placeholder="42 Wallaby Way" v-model="entry.street"/></label>
                     <label>city: <input type="text" placeholder="Sydney" v-model="entry.city"/></label>
                     <label>state: <input type="text" placeholder="NSW" v-model="entry.state"/></label>
@@ -26,15 +26,29 @@
                 </div>
             </form>
 
-            <div v-if="!R.equals(entry, defaultDonation)" class="flex justify-between flex-row">
-                <div class="w-70 ma2">
-                    <h3>Preview</h3>
+            <div v-if="!R.equals(entry, defaultDonation)" class="flex justify-between flex-row flex-wrap">
+                <Section title="Preview" class="w-100 w-50-l pa2">
                     <donation :donation="entry" />
+                </Section>
+                <div class="w-50 w-25-l pa2">
+                    <h3>Similar Donations ({{ logreq() || req.recentSimilar.map(d => d.donations.length).unwrapOr('...') }})</h3>
+                    <div v-if="req.recentSimilar.isSuccess()" class="f6">
+                        <span v-for="(item, index) in req.recentSimilar.unwrap().donations" :key="index">
+                            <Donation :donation="item" :small="true" class="mb1" />
+                        </span>
+                    </div>
+                    <Error v-else-if="req.recentSimilar.isFailed()">
+                        {{ req.recentSimilar.unwrapError() }}
+                    </Error>
+                    <Loading v-else-if="req.recentSimilar.isLoading()" >
+                        Loading donations ( amount == {{entry.amount}} )...
+                    </Loading>
+                    <span v-else>Waiting for update...</span>
                 </div>
-                <div class="w-30 ma2">
+                <div class="w-50 w-25-l pa2">
                     <h3>Save</h3>
                     <div v-if="entryComplete()">
-                        <button>Save and send email receipt</button>
+                        <button @click="saveDonation()">Save and send email receipt</button>
                     </div>
                     <div v-else>
                         Please fill in all fields of the donation entry.
@@ -61,11 +75,11 @@
 const JSError = Error;
 import Vue from 'vue'
 import * as R from 'ramda'
-import { UserV1Object, SortMethod, Donation as DonationT, DonationsResp } from 'flux-lib/types/db';
-import WebRequest from '@/lib/WebRequest';
+import { UserV1Object, SortMethod, Donation as DonationT, DonationsResp, SM } from 'flux-lib/types/db';
+import WebRequest from 'flux-lib/WebRequest';
 import FluxLogo from '@/components/common/FluxLogo.vue';
 import Loading from '@/components/Loading.vue';
-import { Error, UiSection, Donation, Paginate, EditableDate, AddressEditor } from '@/components/common';
+import { Error, UiSection, Donation, Paginate, EditableDate, AddressEditor, Section } from '@/components/common';
 import { Auth, Paginated } from '@/lib/api';
 import { Req } from '@/lib/api';
 
@@ -74,7 +88,7 @@ const defaultDonation: DonationT = {
     email: '',
     name: '',
     branch: '/AUS',
-    amount: '',
+    amount: 0,
     unit: 'AUD',
     street: '',
     city: '',
@@ -88,16 +102,20 @@ const defaultDonation: DonationT = {
 }
 
 export default Vue.extend({
-    components: { FluxLogo, UiSection, Error, Loading, Paginate, Donation, EditableDate, AddressEditor },
+    components: { FluxLogo, UiSection, Error, Loading, Paginate, Donation, EditableDate, AddressEditor, Section },
     props: {
         user: Object as () => Req<UserV1Object>,
         auth: Object as () => Auth
     },
     data: () => ({
         req: {
-            donations: WebRequest.NotRequested() as Req<DonationsResp>,
+            donations: WebRequest.NotRequested(),
+            recentSimilar: WebRequest.NotRequested(),
+            saveReq: WebRequest.NotRequested(),
         } as {
-            donations: Req<DonationsResp>
+            donations: Req<DonationsResp>,
+            recentSimilar: Req<DonationsResp>,
+            saveReq: Req<{}>,
         },
         initDate: new Date() as Date,
         entry: R.clone(defaultDonation) as DonationT,
@@ -112,8 +130,16 @@ export default Vue.extend({
         entryComplete() {
             return R.compose(R.all(p => !!p), R.values)(this.entry)
         },
+        updateRecentSimilar() {
+            this.req.recentSimilar = WebRequest.Loading()
+            this.$flux.v2.getDonations({ ...this.auth, query: {amount: this.entry.amount}, sortMethod: SM.ID })
+                .then(r => this.req.recentSimilar = r)
+        },
         saveDonation() {
-
+            this.req.saveReq = WebRequest.Loading()
+            this.$flux.v2.addNewDonation({ ...this.auth, doc: {...this.entry} as DonationT })
+                .then(r => this.req.saveReq = r)
+            this.entry = {...defaultDonation}
         },
         getDonations(_pageN?:number, _limit?:number) {
             const pageN = _pageN || 0
@@ -129,6 +155,10 @@ export default Vue.extend({
             } else {
                 throw new JSError(<any>('Should have recieved one of "next" or "prev" for `dir` but got ' + (<any>dir).toString()))
             }
+        },
+        logreq() {
+            console.log(this.req.recentSimilar)
+            console.log(this.req.recentSimilar.map(d => d.donations.length))
         }
     },
     mounted() {

@@ -70,8 +70,8 @@
 import Vue from 'vue'
 import {Error} from '../common'
 import {MsgBus, M} from '@/messages'
-import WR from '@/lib/WebRequest'
-import WebRequest from '@/lib/WebRequest';
+import WR from 'flux-lib/WebRequest'
+import WebRequest from 'flux-lib/WebRequest';
 import { UserV1Object } from '../../lib/api';
 
 enum Cs {

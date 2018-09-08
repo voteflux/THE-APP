@@ -34,7 +34,7 @@ import {Error} from "./components/common"
 import VueRouter from "vue-router";
 import { debug } from "util";
 import { M, MsgBus } from "./messages";
-import WR from './lib/WebRequest'
+import WR from 'flux-lib/WebRequest'
 import { UserV1Object, Auth } from "@/lib/api";
 
 // constants - for everything w/in this components scope
@@ -188,6 +188,12 @@ $btn-norm-color: #ddd;
     transition: box-shadow 0.3s ease-in-out;
 }
 
+.btn-transparent {
+    @extend .btn;
+    @extend .bn;
+    background-color: rgba( 0, 0, 0, 0.0 );
+}
+
 .btn:active:enabled {
     @extend .depressed-btn-shadow;
 }
@@ -198,6 +204,10 @@ a.btn {
 
 button {
     @extend .btn;
+}
+
+button .btn-transparent {
+    @extend .btn-transparent;
 }
 
 button:hover {

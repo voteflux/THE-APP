@@ -1,10 +1,11 @@
-import { UserV1Object } from 'flux-lib/types/db';
+import { ER } from 'flux-lib/types/index';
 import Vue from "vue";
 import {SError} from './errors'
-import WebRequest from "@/lib/WebRequest";
+import WebRequest from "flux-lib/WebRequest";
 import { Auth } from './api';
-import { Donation, DonationsResp, Paginated, RoleResp } from 'flux-lib/types/db'
+import { UserV1Object, SortMethod, Donation, DonationsResp, Paginated, RoleResp, PR } from 'flux-lib/types/db'
 import { Maybe } from "tsmonad/lib/src";
+import { StdV1, GetArbitraryPartial, } from 'flux-lib/types/db/api'
 
 export interface HasAddr {
     addr_street_no: string;
@@ -19,9 +20,6 @@ export interface HasName {
     mnames: string;
 }
 
-type PR<r> = PromiseLike<WebRequest<string, r>>
-
-type StdV1<r> = (opts: Auth) => PR<r>
 
 export interface FluxApiMethods {
     v1: {
@@ -35,7 +33,8 @@ export interface FluxApiMethods {
     },
     v2: {
         getRoles: (opts : Auth) => PR<{roles: string[]}>,
-        getDonations: (opts : Auth | Paginated) => PR<DonationsResp>,
+        getDonations: (opts : GetArbitraryPartial<Donation>) => PR<DonationsResp>,
+        addNewDonation: (opts: {doc: Donation} & Auth) => PR<ER<boolean>>,
         getRoleAudit: (opts: Auth) => PR<RoleResp[]>,
     },
     utils: {

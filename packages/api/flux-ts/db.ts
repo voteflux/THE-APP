@@ -3,11 +3,11 @@ import { ThenArg } from 'flux-lib/types';
 
 import * as _R from 'ramda'
 
-import { MongoClient } from 'mongodb'
+import { MongoClient, FilterQuery, FindOneOptions } from 'mongodb'
 import  {ObjectID} from 'bson'
 
 import * as utils from './utils'
-import { DBV1, UserV1Object, PublicStats, DBV1Collections, collections } from 'flux-lib/types/db'
+import { DBV1, UserV1Object, PublicStats, DBV1Collections, collections, Donation } from 'flux-lib/types/db'
 
 /*
  * DB functions for Flux DB (both v1 and v2)
@@ -62,6 +62,10 @@ const GETINFO_ID = 1
 const _rgx = (r) => ({'$regex': r})
 const _exists = {'$exists': true}
 const _set = s => ({'$set': s})
+const _push = e => ({'$push': e})
+const _lt = n => ({'$lt': n})
+const _gt = n => ({'$gt': n})
+const _eq = n => ({'$eq': n})
 const _upsert = {'upsert': true}
 const _notExists = {'$exists': false}
 const _onRoll = {onAECRoll: true}
@@ -192,8 +196,8 @@ const count_volunteers = () => count_members(_volunteer)
 
 /* Finance */
 
-const getDonations = async (pageN = 0, limit = 10, sortMethod: SortMethod = SM.TS) => {
-    return await dbv1.donations.find({}, {sort: renderSM(sortMethod), limit, skip: pageN * limit}).toArray()
+const getDonations = async (pageN = 0, limit = 10, sortMethod: SortMethod = SM.TS, query: FilterQuery<Donation> = {}): Promise<Donation[]> => {
+    return await dbv1.donations.find(query, {sort: renderSM(sortMethod), limit, skip: pageN * limit}).toArray()
 }
 
 const getDonationsN = async () =>
@@ -237,6 +241,56 @@ const getRoleAudit = async (): Promise<{role: string, users: UserV1Object[]}[]> 
     const userMap = await Promise.all(R.map(uid => getUserFromUid(uid).then(u => [uid, u]), uniqueUserIDs)).then(R.fromPairs)
     return R.map(({role, uids}) => ({role, users: R.map(u => userMap[u], uids)}), rolesAll)
 }
+
+
+/* Generic Queues */
+
+export enum Qs {
+    Q_RECEIPTS = 'RECEIPTS'
+}
+
+
+const listAllQueues = async(): Promise<string[]> => {
+    return await dbv1.generic_queues.distinct('queue_enum', {})
+}
+
+const countQueue = async(queue_enum: Qs): Promise<number> => {
+    return await dbv1.generic_queues.count({queue_enum, in_progress: false, tries: {'$lt': 2}})
+}
+
+const addToQueue = async (queue_enum: Qs, doc): Promise<any> => {
+    return await dbv1.generic_queues.insertOne({
+        sent: false,
+        ts: utils.now(),
+        tries: 0,
+        send_log: [],
+        options: doc,
+        in_progress: false,
+        queue_enum
+    })
+}
+
+const getFromQueue = async (queue_enum: Qs): Promise<any> => {
+    return await dbv1.generic_queues.findOneAndUpdate({
+        queue_enum,
+        in_progress: false,
+        sent: false,
+        tries: _lt(2)
+    }, _set({in_progress: true}))
+}
+
+const updateQueue = async (queue_enum: Qs, doc, success, reason): Promise<any> => {
+    const updates = {
+        ..._set({
+            in_progress: false,
+            sent: success === true,
+            tries: doc['tries'] + 1
+        }),
+        ..._push({'send_log': `(${queue_enum}) SENT_${success ? 'GOOD' : 'FAIL'} @ ${utils.now()} : ${reason}`})
+    }
+    return await dbv1.generic_queues.findOneAndUpdate({ _id: doc._id }, updates)
+}
+
 
 /* STATS */
 
@@ -327,6 +381,12 @@ export const init = async (dbObj, dbV1Uri = mongoUrl) => {
         getDonationsN,
         /* admin */
         getRoleAudit,
+        /* queues */
+        listAllQueues,
+        countQueue,
+        addToQueue,
+        getFromQueue,
+        updateQueue,
     }
 
     R.mapObjIndexed((f, fName) => { dbObj[fName] = f }, dbMethods);

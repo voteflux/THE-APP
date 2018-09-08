@@ -45,7 +45,7 @@ import Routes from "../routes"
 import Roles from "../lib/roles";
 
 import {M, MsgBus} from "../messages"
-import WebRequest from "@/lib/WebRequest";
+import WebRequest from "flux-lib/WebRequest";
 
 export default Vue.extend({
     name: "Dashboard",

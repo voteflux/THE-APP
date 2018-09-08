@@ -1,4 +1,5 @@
 export * from './stats'
+export * from './api'
 import { Collection } from 'mongodb'
 import * as t from 'io-ts'
 
@@ -15,6 +16,7 @@ export interface DBV1Collections {
     donations: Collection<any>,
     email_queue: Collection<any>,
     sms_queue: Collection<any>,
+    generic_queues: Collection<any>,
     email_validation: Collection<any>,
     sms_verifications: Collection<any>,
     errors: Collection<any>,
@@ -46,6 +48,7 @@ export const collections = [
     "donations",
     "email_queue",
     "sms_queue",
+    "generic_queues",
     "email_validation",
     "sms_verifications",
     "errors",
@@ -107,7 +110,7 @@ export const DonationRT = t.type({
     branch: t.string,
     ts: t.number,
     date: t.string,
-    amount: t.string,
+    amount: t.number,
     unit: t.string,
     email: t.string,
     payment_source: t.string,

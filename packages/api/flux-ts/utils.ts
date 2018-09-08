@@ -15,6 +15,8 @@ export const mkPromise = f => (...args) => new Promise((resolve, reject) => {
     })
 })
 
+export const now = () => (new Date()).getTime() / 1000 | 0
+
 export const genPagination = (total, limit, pageN): Paginated => ({total, limit, pageN})
 
 export const all_states = ['nsw', 'qld', 'sa', 'nt', 'act', 'vic', 'wa', 'tas', 'nostate', 'weirdstate']
