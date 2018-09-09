@@ -18,7 +18,7 @@ plugins:
   - serverless-dynamodb-local
   - serverless-iam-roles-per-function
   - serverless-plugin-aws-alerts
-  - serverless-offline
+  - serverless-offline  # keep this last
 
 package:
   exclude:
@@ -32,10 +32,9 @@ package:
 # frameworkVersion: "=X.X.X"
 
 custom:
-  defaults:
-    profile: 'flux-api'
-  # profile: ${file(./sls-custom.yml):profile}
+  profile: ${file(./sls-custom.yml):profile, 'default'}
   stage: ${file(./sls-custom.yml):stage}
+  openCageApiKey: ${file(./sls-custom.yml):openCageApiKey}
   # region: ${file(./sls-custom.yml):region}
   customDomain: ${file(./sls-${self:provider.stage}-domain.yml)}
   # cognito: ${file(./sls-${self:provider.stage}-cognito.yml):cognito}
@@ -54,12 +53,13 @@ provider:
   # region: ap-southeast-2
   region: us-east-1
   runtime: nodejs8.10
-  profile: ${self:custom.profile, self:custom.defaults.profile}
+  profile: ${self:custom.profile}
   stage: ${opt:stage, self:custom.stage}
   memorySize: 128
   environment:
     MONGODB_URI: ${ssm:${self:provider.stage}MongoDbUri, 'mongodb://localhost:53799/flux'}
     STAGE: ${self:provider.stage}
+    OPENCAGE_API: ${ssm:${self:provider.stage}OpenCageApiKey, self:custom.openCageApiKey}
     # USER_POOL_ID: ${self:custom.cognito.poolId}
     # CLIENT_ID: ${self:custom.cognito.clientId}
 

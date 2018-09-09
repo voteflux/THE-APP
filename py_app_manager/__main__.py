@@ -5,7 +5,10 @@ import sys, os, json, logging, subprocess
 logging.basicConfig(level=logging.INFO)
 
 from contextlib import suppress
-from git import Repo
+try:
+    from git import Repo
+except ImportError as e:
+    Repo = None
 
 from py_app_manager.pre_deps import *
 
@@ -14,10 +17,10 @@ _deps_updated = False
 def ensure_deps(force=False):
     global _deps_updated
     if (force or not deps_up_to_date()) and not _deps_updated:
-        if Repo('./').is_dirty():
+        if Repo is not None and Repo('./').is_dirty():
             logging.warning("⚠️ Repository is dirty; skipping reinstall of requirements!")
         else:
-            must_run("time pip3 install -r requirements.txt")
+            must_run("time python3 -m pip install -r requirements.txt")
             must_run("time npm i")
             must_run("time npx lerna bootstrap")
             must_run("cd packages/api && time node_modules/.bin/sls dynamodb install")
@@ -59,6 +62,7 @@ except Exception as e:
 
 
 import click
+stage_option = click.option('--stage', type=click.Choice(['prod', 'staging', 'dev']), default='dev')
 
 
 @click.group()
@@ -95,9 +99,9 @@ def mgr_add_dep(ctx, pkgs):
     if len(pkgs) == 0:
         logging.error("No packages supplied to install. Exiting.")
         sys.exit(1)
-    run_or("pip3 install %s" % (' '.join(pkgs) or '',), 'Unable to install packages: %s' % (pkgs,))
+    run_or("python3 -m pip install %s" % (' '.join(pkgs) or '',), 'Unable to install packages: %s' % (pkgs,))
     logging.info("Installed packages: %s" % list(pkgs))
-    must_run("pip3 freeze > requirements.txt")
+    must_run("python3 -m pip freeze > requirements.txt")
     logging.info("Saved `requirements.txt`")
 
 
@@ -107,16 +111,41 @@ def mgr_set_up_to_date():
 
 
 @cli.command()
-@click.option('--stage', default="dev")
+@stage_option
 @click.argument('args', nargs=-1)
-def deploy_api(stage, args):
-    must_run("cd packages/api && node_modules/.bin/sls deploy --stage %s %s" % (stage,' '.join(list(args))))
+def deploy_api(env, args):
+    must_run("cd packages/api && node_modules/.bin/sls deploy --stage %s %s" % (env,' '.join(list(args))))
 
 
 @cli.command()
-@click.option('--env', type=click.Choice(['prod', 'staging', 'dev']), default='dev')
+@click.argument('target', nargs=1, type=click.Choice(['ui', 'api', 'all']))
+@stage_option
+def build(target, stage):
+    logging.info("Building {} for {}".format(target, stage))
+
+    def build_ui():
+        logging.info("### BUILDING UI ###")
+        must_run("cd packages/ui && npm run build")
+    
+    def build_api():
+        logging.info("### BUILDING API ###")
+        must_run("cd packages/api && npm run build --stage {stage}".format(stage=stage))
+
+    def build_all():
+        build_ui()
+        build_api()
+    
+    return ({
+        'ui': build_ui,
+        'api': build_api,
+        'all': build_all
+    }[target])()
+
+
+@cli.command()
 @click.argument('dev_target', type=click.Choice(['ui', 'api', 'all']))
-def dev(env, dev_target):
+@stage_option
+def dev(dev_target, stage):
     import libtmux
     api_port = 52700
     ui_port = 32710
@@ -154,7 +183,7 @@ def dev(env, dev_target):
     if dev_target in {'api', 'all'}:
         # mongo dev server port: 53799
         mongo_pane = run_dev_cmd('./packages/api', 'npm run mongo-dev', "mongo-dev", vertical=False)
-        api_cmd = "node_modules/.bin/sls offline start --stage dev --port %d" % (api_port,)
+        api_cmd = "node_modules/.bin/sls offline start --stage dev --noEnvironment --port %d" % (api_port,)
         api_pane = run_dev_cmd('./packages/api', api_cmd, "dev-api", vertical=True, active_pane=mongo_pane)
         compile_pane = run_dev_cmd('./packages/api', 'npm run watch:build', 'api-watch', vertical=True)
         # mongo_pane.set_height(20)
