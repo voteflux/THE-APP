@@ -8,6 +8,8 @@ import  {ObjectID} from 'bson'
 
 import * as utils from './utils'
 import { DBV1, UserV1Object, PublicStats, DBV1Collections, collections, Donation } from 'flux-lib/types/db'
+import DBCheckCache from 'db/cache';
+import { DBV2 } from '../../lib/types/db/index';
 
 /*
  * DB functions for Flux DB (both v1 and v2)
@@ -59,18 +61,18 @@ const GETINFO_ID = 1
 
 
 /* DB Helpers for queries - able to be composed with R.merge */
-const _rgx = (r) => ({'$regex': r})
-const _exists = {'$exists': true}
-const _set = s => ({'$set': s})
-const _push = e => ({'$push': e})
-const _lt = n => ({'$lt': n})
-const _gt = n => ({'$gt': n})
-const _eq = n => ({'$eq': n})
-const _upsert = {'upsert': true}
-const _notExists = {'$exists': false}
-const _onRoll = {onAECRoll: true}
-const _stateConsent = {state_consent: true}
-const _userInState = s => {
+export const _rgx = (r) => ({'$regex': r})
+export const _exists = {'$exists': true}
+export const _set = s => ({'$set': s})
+export const _push = e => ({'$push': e})
+export const _lt = n => ({'$lt': n})
+export const _gt = n => ({'$gt': n})
+export const _eq = n => ({'$eq': n})
+export const _upsert = {'upsert': true}
+export const _notExists = {'$exists': false}
+export const _onRoll = {onAECRoll: true}
+export const _stateConsent = {state_consent: true}
+export const _userInState = s => {
     const rgxPC = _rgx(utils.state_regex(s))
     if (s == 'weirdstate') {
         return {
@@ -85,10 +87,10 @@ const _userInState = s => {
         [s == 'nostate' ? '$and' : '$or']: [ {address: rgxPC, addr_postcode: _notExists}, {addr_postcode: rgxPC} ]
     }
 }
-const _deetsValid = {detailsValid: true}
-const _lastValidatedExists = {lastValidated: _exists}
-const _volunteer = {volunteer: true}
-const _needsValidating = {needsValidating: true}
+export const _deetsValid = {detailsValid: true}
+export const _lastValidatedExists = {lastValidated: _exists}
+export const _volunteer = {volunteer: true}
+export const _needsValidating = {needsValidating: true}
 
 
 /* Helper to create DB v1 with accessors for our collections (e.g. `db.users.findOne(...)`) - makes it nicer to use */
@@ -353,41 +355,48 @@ const update_public_stats = async (): Promise<PublicStats> => {
 
 /* MODULE EXPORTS */
 
+export class DBMethods extends DBCheckCache {
+    constructor(public dbv1: DBV1, public dbv2: DBV2) {
+        super(dbv1, dbv2)
+    }
+
+    close() { return this.dbv1.client.close() }
+
+    /* meta */
+    get_version
+    /* members */
+    count_members
+    n_members_by_state
+    n_members_validated
+    n_members_validated_state
+    /* stats */
+    update_getinfo_stats
+    update_public_stats
+    /* personal / per member */
+    getUserFromS
+    getUserFromUid
+    getUidFromS
+    getUserRoles
+    /* finance */
+    getDonations
+    getDonationsN
+    /* admin */
+    getRoleAudit
+    /* queues */
+    listAllQueues
+    countQueue
+    addToQueue
+    getFromQueue
+    updateQueue
+}
 
 // set exports + db object
 export const init = async (dbObj, dbV1Uri = mongoUrl) => {
     dbv1 = await mkDbV1(dbV1Uri);
     dbv2 = undefined;
-    const dbMethods = {
-        dbv1, dbv2,
-        close: () => dbv1.client.close(),
-        /* meta */
-        get_version,
-        /* members */
-        count_members,
-        n_members_by_state,
-        n_members_validated,
-        n_members_validated_state,
-        /* stats */
-        update_getinfo_stats,
-        update_public_stats,
-        /* personal / per member */
-        getUserFromS,
-        getUserFromUid,
-        getUidFromS,
-        getUserRoles,
-        /* finance */
-        getDonations,
-        getDonationsN,
-        /* admin */
-        getRoleAudit,
-        /* queues */
-        listAllQueues,
-        countQueue,
-        addToQueue,
-        getFromQueue,
-        updateQueue,
-    }
+
+    const dbMethods = new DBMethods(dbv1, dbv2)
+
 
     R.mapObjIndexed((f, fName) => { dbObj[fName] = f }, dbMethods);
     return dbMethods

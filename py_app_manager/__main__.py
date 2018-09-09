@@ -111,9 +111,15 @@ def mgr_set_up_to_date():
 
 @cli.command()
 @stage_option
+@click.argument('target', nargs=1, type=click.Choice(['api']))
 @click.argument('args', nargs=-1)
-def deploy_api(env, args):
-    must_run("cd packages/api && node_modules/.bin/sls deploy --stage %s %s" % (env,' '.join(list(args))))
+def deploy(stage, target, args):
+    (to_run, _add) = ([], lambda n, a: to_run.append((n, a)))
+    if target in {'api', 'all'}:
+        _add('api', lambda: must_run("cd packages/api && node_modules/.bin/sls deploy --stage %s %s" % (stage, ' '.join(list(args)))))
+    list([(print("Running:", n), f()) for (n, f) in to_run])
+
+
 
 
 @cli.command()
@@ -145,6 +151,11 @@ def build(target, stage):
 @click.argument('dev_target', type=click.Choice(['ui', 'api', 'all']))
 @stage_option
 def dev(dev_target, stage):
+    # first check dynamodb install
+    if dev_target in {'api', 'all'}:
+        # we need to ensure dynamodb is installed for API dev (note: currently not _actually_ required for anything... -- 9/9/2018)
+        must_run("cd packages/api && node_modules/.bin/sls dynamodb install")
+
     import libtmux
     api_port = 52700
     ui_port = 32710
@@ -180,8 +191,6 @@ def dev(dev_target, stage):
         ui_pane = run_dev_cmd('./packages/ui', "npm run serve", 'dev-ui')
 
     if dev_target in {'api', 'all'}:
-        # we need to ensure dynamodb is installed for API dev (note: currently not _actually_ required for anything... -- 9/9/2018)
-        must_run("cd packages/api && node_modules/.bin/sls dynamodb install")
         # mongo dev server port: 53799
         mongo_pane = run_dev_cmd('./packages/api', 'npm run mongo-dev', "mongo-dev", vertical=False)
         api_cmd = "node_modules/.bin/sls offline start --stage dev --noEnvironment --port %d" % (api_port,)

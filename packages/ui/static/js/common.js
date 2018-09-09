@@ -1,6 +1,6 @@
-var __DEBUG_COMMON__ = window.location.hostname == 'localhost' || window.location.hostname == '127.0.0.1';
-
-var __DEV_COMMON__ = window.location.hostname == "flux-api-dev.herokuapp.com"
+var hn = window.location.hostname
+var __DEBUG_COMMON__ = hn == 'localhost' || hn == '127.0.0.1';
+var __DEV_COMMON__ = hn == "flux-api-dev.herokuapp.com" || hn == "dev.app.flux.party"
 
 // http://stackoverflow.com/questions/5448545/how-to-retrieve-get-parameters-from-javascript
 function getParam(val) {

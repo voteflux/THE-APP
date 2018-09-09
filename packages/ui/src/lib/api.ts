@@ -41,6 +41,7 @@ const apiRoots = () => {
     case "localhost":
       return {v2: "http://localhost:52700/v2/", v1: "https://flux-api-dev.herokuapp.com/", prod: false}
     case "dev.app.flux.party":
+    case "flux-app-dev.netlify.com":
       return {v2: "https://dev.api.flux.party/v2/", v1: "https://flux-api-dev.herokuapp.com/", prod: false};
     default:
       return {v2: "https://api.flux.party/v2/", v1: "https://api.voteflux.org/", prod: true}

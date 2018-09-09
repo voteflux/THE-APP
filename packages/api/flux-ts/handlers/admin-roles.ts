@@ -1,9 +1,10 @@
+import { DB } from './../db';
 'use strict';
 const handlerUtils = require('./handlerUtils')
 
 const R = require('ramda')
 
-const db = {};  // we will populate this obj later via DB.init(db)
+const db = {} as DB;  // we will populate this obj later via DB.init(db)
 
 const utils = require('../utils')
 

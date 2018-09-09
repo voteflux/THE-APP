@@ -1,9 +1,18 @@
+import { DBV1 } from 'flux-lib/types';
 // integrating with opencagedata.com
-import { either, Either } from 'fp-ts';
+import { either, left } from 'fp-ts/lib/Either';
+import { some, none } from 'fp-ts/lib/Option'
+import Axios from 'axios'
+import { DBMethods } from '../db';
 
-Either
+const CACHE_ADDR_COORDS = "addr_geo_coords"
 
 const apiKey = process.env.OPENCAGE_API
+
+const mkFwdGeocodeUrl = (address: string) => {
+    const formattedAddr = encodeURIComponent(address)
+    return `https://api.opencagedata.com/geocode/v1/json?no_annotations=1&key=${apiKey}&q=${formattedAddr}`
+}
 
 export enum OpenCageErrs {
     NO_API
@@ -11,12 +20,31 @@ export enum OpenCageErrs {
 type Errs = OpenCageErrs
 const Errs = OpenCageErrs
 
-const w = <R>(f: (...args: any[]) => R) => (...args): Either<Errs, R> => {
-    if (!apiKey) {
-        return either.left(Errs.NO_API)
-        
-    }
-    return f(...args)
-}
+type GeoDoc = { confidence: number, geometry: {lat:number, lng:number} }
 
-export const 
+export const getCoordinatesOfAddress = async (db: DBMethods, address: string) => {
+    if (!apiKey) {
+        throw "No OpenCageData API Key"
+    }
+
+    const knownCoords = await db.checkCache<GeoDoc>(CACHE_ADDR_COORDS, address)
+    if (knownCoords.isRight()) {
+        return some(knownCoords.value.geometry)
+    }
+
+    const url = mkFwdGeocodeUrl(address)
+    const {data: req} = await Axios.get(url)
+    let bestResult = {confidence: -1, geometry: {lat:0,lng:0}}
+    for (let i = 0; i < req.results.length; i++) {
+        if (req.results[i].confidence > bestResult.confidence)
+            bestResult = req.results[i]
+    }
+
+    if (bestResult.confidence === -1) {
+        return none
+    }
+
+    await db.insertInCache(CACHE_ADDR_COORDS, address, bestResult)
+
+    return some(bestResult.geometry)
+}

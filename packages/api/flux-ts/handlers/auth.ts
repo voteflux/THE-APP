@@ -1,8 +1,9 @@
+import { DB } from './../db';
 const R = require('ramda');
 
 const fail = msg => ({statusCode: 403, body: msg})
 
-const checkAuthOfRole = (db) => (role, f) => async (event, context) => {
+const checkAuthOfRole = (db: DB) => (role, f) => async (event, context) => {
     const data = event.body
 
     if (data['s']) {

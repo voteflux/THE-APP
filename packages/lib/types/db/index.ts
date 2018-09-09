@@ -6,6 +6,7 @@ import * as t from 'io-ts'
 // when adding a collection add to list of strings below too
 export interface DBV1Collections {
     db_meta: Collection<any>,
+    cache: Collection<any>,
     users: Collection<any>,
     public_stats: Collection<any>,
     roles: Collection<any>,
@@ -38,6 +39,7 @@ export interface DBV1Collections {
 // no easy way to keep the type and this list in sync :/
 export const collections = [
     "db_meta",
+    "cache",
     "users",
     "public_stats",
     "roles",
@@ -71,6 +73,9 @@ export type DBV1 = {
     rawDb: any,
     client: any,
 } & DBV1Collections
+
+export type DBV2 = undefined
+
 
 export interface UserV1Object {
     fname: string;

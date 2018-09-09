@@ -14,6 +14,7 @@
 service: flux-api-2
 
 plugins:
+  - serverless-webpack
   - serverless-domain-manager
   - serverless-dynamodb-local
   - serverless-iam-roles-per-function
@@ -46,6 +47,10 @@ custom:
   alerts: ${file(./sls-alerts.yaml):alerts}
   # this is separated out because the structure changed; better to put it here
   handlers: "flux/handlers"
+  webpack:
+    webpackConfig: 'webpack.config.js'   # Name of webpack configuration file
+    includeModules: false   # Node modules configuration for packaging
+    packager: 'npm'   # Packager that will be used to package your external modules
 
 provider:
   name: aws
