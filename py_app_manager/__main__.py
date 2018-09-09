@@ -151,10 +151,10 @@ def build(target, stage):
 @click.argument('dev_target', type=click.Choice(['ui', 'api', 'all']))
 @stage_option
 def dev(dev_target, stage):
-    # first check dynamodb install
-    if dev_target in {'api', 'all'}:
-        # we need to ensure dynamodb is installed for API dev (note: currently not _actually_ required for anything... -- 9/9/2018)
-        must_run("cd packages/api && node_modules/.bin/sls dynamodb install")
+    # # first check dynamodb install
+    # if dev_target in {'api', 'all'}:
+    #     # we need to ensure dynamodb is installed for API dev (note: currently not _actually_ required for anything... -- 9/9/2018)
+    #     must_run("cd packages/api && node_modules/.bin/sls dynamodb install")
 
     import libtmux
     api_port = 52700

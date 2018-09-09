@@ -127,7 +127,7 @@ export function FluxApi(_Vue: VueConstructor, options?: any): void {
 
     auth: {
       loadAuth(): Maybe<Auth> {
-        const memberSecret = localStorage.getItem("s") || undefined;
+        const memberSecret = localStorage.getItem("s") || undefined
         const apiToken = localStorage.getItem("flux.member.apiToken") || undefined;
         if (memberSecret || apiToken)
           return Maybe.just({ apiToken, s: memberSecret });

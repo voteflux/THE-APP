@@ -2,12 +2,12 @@ import { DBV1, DBV2 } from 'flux-lib/types/db/index';
 import sha256 from "fast-sha256";
 import { left, right, Either, Left, Right } from 'fp-ts/lib/Either';
 import {encodeBase64, decodeBase64, decodeUTF8} from 'tweetnacl-util';
-import { promiseToEither } from 'flix-lib/utils/either';
+import { promiseToEither } from 'flux-lib/utils/either';
 import { _set } from '../db';
 import * as R from 'ramda';
 import { now } from '../utils';
 
-type PR<R> = Promise<Either<string, R>>
+type PR<R> = Promise<Either<Error, R>>
 
 export const calcKey = (cacheRawKey: string) => sha256(decodeUTF8(cacheRawKey))
 

@@ -19,6 +19,7 @@ packages/lib/*.js
 packages/lib/**/*.js
 
 packages/api/dist
+packages/api/.webpack
 
 # don't include this so ppl can set whatever they like
 packages/api/sls-custom.yml

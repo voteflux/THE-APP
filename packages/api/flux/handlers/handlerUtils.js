@@ -1,5 +1,5 @@
 // must be first
-require('module-alias/register')
+// require('module-alias/register')
 
 const DB = require('../db')
 const utils = require('../utils')

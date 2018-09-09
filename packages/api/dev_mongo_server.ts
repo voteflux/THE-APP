@@ -2,7 +2,7 @@ import MongodbMemoryServer from 'mongodb-memory-server';
 import { MongoClient } from 'mongodb'
 import restore from 'mongodb-restore'
 
-import DB from './flux-ts/db'
+import DB from './flux/db'
 
 let port = 53799
 
