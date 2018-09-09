@@ -20,9 +20,9 @@ def ensure_deps(force=False):
         if Repo is not None and Repo('./').is_dirty():
             logging.warning("⚠️ Repository is dirty; skipping reinstall of requirements!")
         else:
-            must_run("time python3 -m pip install -r requirements.txt")
-            must_run("time npm i")
-            must_run("time npx lerna bootstrap")
+            must_run("python3 -m pip install -r requirements.txt")
+            must_run("npm i")
+            must_run("npx lerna bootstrap")
             must_run("cd packages/api && time node_modules/.bin/sls dynamodb install")
             set_deps_up_to_date()
         _deps_updated = True
