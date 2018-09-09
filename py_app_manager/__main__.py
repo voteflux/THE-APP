@@ -23,7 +23,7 @@ def ensure_deps(force=False):
             must_run("python3 -m pip install -r requirements.txt")
             must_run("npm i")
             must_run("npx lerna bootstrap")
-            must_run("cd packages/api && time node_modules/.bin/sls dynamodb install")
+            must_run("cd packages/api && node_modules/.bin/sls dynamodb install")
             set_deps_up_to_date()
         _deps_updated = True
 
