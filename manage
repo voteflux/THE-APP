@@ -3,6 +3,9 @@
 _error=false
 if python3 -m pip --version >/dev/null 2>&1; then
     echo 'Found pip3'
+    if [ "$REPOSITORY_URL" ]; then 
+        python3 -m pip install virtualenv
+    fi
 else
     echo "Error: 'python3 -m pip' must be available on path"
     _error=true
@@ -24,9 +27,8 @@ fi
 if tmux -V >/dev/null 2>&1; then 
     echo 'Found tmux'
 else
-    echo "Error: tmux must be available"
+    echo "WARNING: tmux must be available for './manage dev' commands"
     echo "Try 'sudo apt install tmux' or 'brew install tmux'"
-    _error=true
 fi
 
 
