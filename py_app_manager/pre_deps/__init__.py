@@ -9,7 +9,7 @@ def must_run(cmd):
     logging.debug("Command `%s` exited w code %d" % (cmd, exit_code))
     if exit_code != 0:
         logging.error("Failed to run %s" % cmd)
-        sys.exit(exit_code)
+        raise Exception("Failed to run required cmd: %s" % cmd)
 
 def run_or(cmd, error_msg, verbose=False):
     exit_code = os.system(cmd)
@@ -17,7 +17,7 @@ def run_or(cmd, error_msg, verbose=False):
         if verbose:
             logging.error("Running %s failed with exit code %d" % (cmd, exit_code))
         logging.error(error_msg)
-        sys.exit(1)
+        raise Exception("Failed to run required cmd: %s" % cmd)
 
 def cmd_w_log(cmd, log_name, dir_offset="./"):
     assert dir_offset[-1] == "/"

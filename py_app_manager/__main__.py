@@ -23,7 +23,6 @@ def ensure_deps(force=False):
             must_run("python3 -m pip install -r requirements.txt")
             must_run("npm i")
             must_run("npx lerna bootstrap")
-            must_run("cd packages/api && node_modules/.bin/sls dynamodb install")
             set_deps_up_to_date()
         _deps_updated = True
 
@@ -38,7 +37,7 @@ try:
         assert os.path.isdir("./packages/ui")
 except Exception as e:
     print("Please run ./manage from the root directory (of the repository)")
-    sys.exit(1)
+    sys.exit(255)
 
 
 skip_ensure_deps = len(sys.argv) > 1 and ( \
@@ -55,7 +54,7 @@ try:
 except Exception as e:
     print("unable to install dependencies; exiting")
     print(e, e.args, e.message)
-    sys.exit(1)
+    raise e
 
 
 # main UI
@@ -126,7 +125,7 @@ def build(target, stage):
     def build_ui():
         logging.info("### BUILDING UI ###")
         must_run("cd packages/ui && npm run build")
-    
+
     def build_api():
         logging.info("### BUILDING API ###")
         must_run("cd packages/api && npm run build --stage {stage}".format(stage=stage))
@@ -134,7 +133,7 @@ def build(target, stage):
     def build_all():
         build_ui()
         build_api()
-    
+
     return ({
         'ui': build_ui,
         'api': build_api,
@@ -181,6 +180,8 @@ def dev(dev_target, stage):
         ui_pane = run_dev_cmd('./packages/ui', "npm run serve", 'dev-ui')
 
     if dev_target in {'api', 'all'}:
+        # we need to ensure dynamodb is installed for API dev (note: currently not _actually_ required for anything... -- 9/9/2018)
+        must_run("cd packages/api && node_modules/.bin/sls dynamodb install")
         # mongo dev server port: 53799
         mongo_pane = run_dev_cmd('./packages/api', 'npm run mongo-dev', "mongo-dev", vertical=False)
         api_cmd = "node_modules/.bin/sls offline start --stage dev --noEnvironment --port %d" % (api_port,)
