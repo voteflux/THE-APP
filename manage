@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 _error=false
 if python3 -m pip --version >/dev/null 2>&1; then
     echo 'Found pip3'
