@@ -24,4 +24,4 @@ const handlerUtils = require('./handlerUtils')
 
 
 // Last part of file - wrap all handlers to automatically JSON.stringify responses
-module.exports = R.mapObjIndexed(handlerUtils.wrapHandler(db), module.exports);
+// module.exports = R.mapObjIndexed(handlerUtils.wrapHandler, module.exports);

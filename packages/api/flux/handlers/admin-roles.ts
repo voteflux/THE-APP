@@ -1,26 +1,21 @@
-import { DB } from './../db';
 'use strict';
 const handlerUtils = require('./handlerUtils')
-
 const R = require('ramda')
-
-const db = {} as DB;  // we will populate this obj later via DB.init(db)
-
 const utils = require('../utils')
-
-const auth = require('./auth')(db);
-
 const { Roles } = require('../roles')
 
 
-module.exports.getRoleAudit = auth.role(Roles.ADMIN, async (event, context, {user}) => {
-    const roleAuditRaw = await db.getRoleAudit()
-    console.log(`roleAuditRawLen ${roleAuditRaw.length}`, roleAuditRaw)
-    // wipe `s` param
-    const roleAudit = R.map(role => ({ ...role, users: R.map(utils.cleanUserDoc, role.users) }), roleAuditRaw)
-    return roleAudit
-});
+module.exports.getRoleAudit = async (db, ...args) => {
+    return require('./auth')(db).role(Roles.ADMIN, async (event, context, {user}) => {
+        console.log(db)
+        const roleAuditRaw = await db.getRoleAudit()
+        console.log(`roleAuditRawLen ${roleAuditRaw.length}`, roleAuditRaw)
+        // wipe `s` param
+        const roleAudit = R.map(role => ({ ...role, users: R.map(utils.cleanUserDoc, role.users) }), roleAuditRaw)
+        return roleAudit
+    })(...args)
+}
 
 
 // Last part of file - wrap all handlers to automatically JSON.stringify responses
-module.exports = R.mapObjIndexed(handlerUtils.wrapHandler(db), module.exports);
+module.exports = R.mapObjIndexed(handlerUtils.wrapHandler, module.exports);

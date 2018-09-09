@@ -4,21 +4,20 @@ const handlerUtils = require('./handlerUtils')
 
 const R = require('ramda')
 
-const db = {} as DB;  // we will populate this obj later via DB.init(db)
-
 const utils = require('../utils')
 
-const auth = require('./auth')(db);
 
-export const getRoles = auth.user(async (event, context, {user}) => {
-    const {_id} = user;
+export const getRoles = (db, ...args) => {
+    return require('./auth')(db).user(async (event, context, {user}) => {
+        const {_id} = user;
 
-    return {
-        roles: await db.getUserRoles(_id),
-        status: 'okay'
-    }
-})
+        return {
+            roles: await db.getUserRoles(_id),
+            status: 'okay'
+        }
+    })(...args)
+}
 
 
 // Last part of file - wrap all handlers to automatically JSON.stringify responses
-module.exports = R.mapObjIndexed(handlerUtils.wrapHandler(db), module.exports);
+module.exports = R.mapObjIndexed(handlerUtils.wrapHandler, module.exports);

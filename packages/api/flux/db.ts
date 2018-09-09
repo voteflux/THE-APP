@@ -332,7 +332,7 @@ export class DBMethods extends DBCheckCache {
             R.map(R.prop("uids"))
         )(rolesAll as Array<{ uids: ObjectID }>);
         // @ts-ignore
-        const userMap = await Promise.all(R.map(uid => getUserFromUid(uid).then(u => [uid, u]), uniqueUserIDs)).then(R.fromPairs);
+        const userMap = await Promise.all(R.map(uid => this.getUserFromUid(uid).then(u => [uid, u]), uniqueUserIDs)).then(R.fromPairs);
         // @ts-ignore
         return R.map(({ role, uids }) => ({ role, users: R.map(u => userMap[u], uids) }), rolesAll);
     };
@@ -387,7 +387,7 @@ export class DBMethods extends DBCheckCache {
 }
 
 // set exports + db object
-export const init = async (dbObj, dbV1Uri = mongoUrl) => {
+export const init = async (dbObj = {}, dbV1Uri = mongoUrl) => {
     dbv1 = await mkDbV1(dbV1Uri);
     dbv2 = undefined;
 

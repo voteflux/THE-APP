@@ -8,11 +8,10 @@ module.exports = BbPromise.try(() => {
         entry: slsw.lib.entries,
         target: "node",
         plugins: [
-            new webpack.DefinePlugin({}),
-            new webpack.EnvironmentPlugin([
+            new webpack.NodeEnvironmentPlugin([
                 'MONGODB_URI',
-                'OPENCAGE_API'
-            ])
+                'OPENCAGE_API',
+            ]),
         ],
         resolve: {
             extensions: [".ts", ".tsx", ".js"]
