@@ -18,8 +18,7 @@ tmux*.log
 packages/lib/*.js
 packages/lib/**/*.js
 
-# don't includ flux dir since that is output of compiled code
-packages/api/flux
+packages/api/dist
 
 # don't include this so ppl can set whatever they like
 packages/api/sls-custom.yml
