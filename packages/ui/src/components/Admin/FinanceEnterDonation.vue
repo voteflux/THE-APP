@@ -57,6 +57,12 @@
             </div>
         </ui-section>
 
+        <StatusSuccess v-if="req.saveReq.isSuccess()">
+            Donation saved.
+        </StatusSuccess>
+
+        <Loading v-if="req.saveReq.isLoading()">Saving Donation...</Loading>
+
         <ui-section title="Recently Entered Donations">
             <Error v-if="req.donations.isFailed()">{{ req.donations.unwrapError() }}</Error>
             <Loading v-else-if="!req.donations.isSuccess()">Loading donations...</Loading>
@@ -79,7 +85,7 @@ import { UserV1Object, SortMethod, Donation as DonationT, DonationsResp, SM } fr
 import WebRequest from 'flux-lib/WebRequest';
 import FluxLogo from '@/components/common/FluxLogo.vue';
 import Loading from '@/components/Loading.vue';
-import { Error, UiSection, Donation, Paginate, EditableDate, AddressEditor, Section } from '@/components/common';
+import { Error, UiSection, Donation, Paginate, EditableDate, AddressEditor, Section, StatusSuccess, Loading } from '@/components/common';
 import { Auth, Paginated } from '@/lib/api';
 import { Req } from '@/lib/api';
 
@@ -102,7 +108,7 @@ const defaultDonation: DonationT = {
 }
 
 export default Vue.extend({
-    components: { FluxLogo, UiSection, Error, Loading, Paginate, Donation, EditableDate, AddressEditor, Section },
+    components: { FluxLogo, Loading, UiSection, Error, Loading, Paginate, Donation, EditableDate, AddressEditor, Section, StatusSuccess },
     props: {
         user: Object as () => Req<UserV1Object>,
         auth: Object as () => Auth

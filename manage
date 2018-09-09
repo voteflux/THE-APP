@@ -2,31 +2,41 @@
 
 set -e
 
+
+
+if [ "$REPOSITORY_URL" ]; then
+    echo 'Netlify detected'
+    echo -e "\n\n###\n\n"
+    env
+    echo -e "\n\n###\n\n"
+fi
+
+
 _error=false
 if python3 -m pip --version >/dev/null 2>&1; then
     echo 'Found pip3'
-    if [ "$REPOSITORY_URL" ]; then 
+    if [ "$REPOSITORY_URL" ]; then
         python3 -m pip install virtualenv
     fi
 else
     echo "Error: 'python3 -m pip' must be available on path"
     _error=true
 fi
-if python3 -m virtualenv --version >/dev/null 2>&1; then 
+if python3 -m virtualenv --version >/dev/null 2>&1; then
     echo 'Found virtualenv'
 else
     echo "Error: 'python3 -m virtualenv' must work"
     echo "try 'pip3 install virtualenv' or 'sudo apt install python3-virtualenv'"
     _error=true
 fi
-if which npm >/dev/null 2>&1; then 
+if which npm >/dev/null 2>&1; then
     echo 'Found npm'
 else
     echo "Error: npm must be available on path"
     echo "Please install Node v8 or higher"
     _error=true
 fi
-if tmux -V >/dev/null 2>&1; then 
+if tmux -V >/dev/null 2>&1; then
     echo 'Found tmux'
 else
     echo "WARNING: tmux must be available for './manage dev' commands"
@@ -34,18 +44,18 @@ else
 fi
 
 
-if $_error; then 
+if $_error; then
     exit 1
 fi
 
 
-if [ ! -e 'packages/api/sls-custom.yml' ]; then 
+if [ ! -e 'packages/api/sls-custom.yml' ]; then
     cp packages/api/sls-custom.yml.default packages/api/sls-custom.yml
     echo 'Please edit packages/api/sls-custom.yml if you intend to do any API work.'
 fi
 
 
-if [ ! -e "$HOME/.aws/credentials" ]; then 
+if [ ! -e "$HOME/.aws/credentials" ]; then
     mkdir -p ~/.aws
     cat <<EOF >> ~/.aws/credentials
 [default]

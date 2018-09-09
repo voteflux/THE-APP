@@ -4,5 +4,8 @@ const path = require('path')
 module.exports = {
   baseUrl: '/v/',
   outputDir: 'dist/v/',
-  lintOnSave: true
+  lintOnSave: true,
+  configureWebpack: {
+    mode: process.env.STAGE == "prod" ? "production" : "development",
+  }
 }

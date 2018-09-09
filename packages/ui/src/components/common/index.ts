@@ -1,5 +1,6 @@
 import Error from "./StatusError.vue";
 import Warning from "./StatusWarning.vue"
+import StatusSuccess from "./StatusSuccess.vue"
 import Row2 from "./Row2.vue";
 import Table2Cols from "./Table2Cols.vue";
 import UiSection from "./UiSection.vue";
@@ -13,7 +14,7 @@ import AddressEditor from './AddressEditor.vue'
 import Section from './Section.vue'
 
 export {
-    Error, Warning, Row2, Table2Cols, UiSection, Paginate, Donation, TableNCols, EditableText,
+    Error, Warning, StatusSuccess, Row2, Table2Cols, UiSection, Paginate, Donation, TableNCols, EditableText,
     EditableDate, EditableOpt, AddressEditor,
     Section
 };

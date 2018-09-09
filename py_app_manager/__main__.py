@@ -126,6 +126,7 @@ def deploy(stage, target, args):
 @click.argument('target', nargs=1, type=click.Choice(['ui', 'api', 'all']))
 @stage_option
 def build(target, stage):
+    os.environ["STAGE"] = stage
     logging.info("Building {} for {}".format(target, stage))
 
     def build_ui():
@@ -155,6 +156,9 @@ def dev(dev_target, stage):
     # if dev_target in {'api', 'all'}:
     #     # we need to ensure dynamodb is installed for API dev (note: currently not _actually_ required for anything... -- 9/9/2018)
     #     must_run("cd packages/api && node_modules/.bin/sls dynamodb install")
+
+    # `--stage` has special meaning with dev cmd (emulates a stage via api points (UI))
+    os.environ["STAGE"] = "dev"
 
     import libtmux
     api_port = 52700
@@ -188,7 +192,7 @@ def dev(dev_target, stage):
 
     lib_pane = run_dev_cmd('./packages/lib', 'npm run watch', 'dev-lib')
     if dev_target in {'ui', 'all'}:
-        ui_pane = run_dev_cmd('./packages/ui', "npm run serve", 'dev-ui')
+        ui_pane = run_dev_cmd('./packages/ui', "STAGE={} npm run serve".format(stage), 'dev-ui')
 
     if dev_target in {'api', 'all'}:
         # mongo dev server port: 53799
