@@ -12,7 +12,7 @@
                     Email:
                     <input v-model.trim="user.email" placeholder="name@example.com" type="email" name="email" />
                 </label>
-                <error v-show="errs.email.msg">
+                <error v-if="errs.email.msg">
                     {{ errs.email.msg }}
                 </error>
 
@@ -37,7 +37,7 @@ import Loading from "./Loading.vue";
 import { mkErrContainer } from "@/lib/errors";
 import { Error } from "./common/";
 import { MsgBus, M } from '@/messages';
-import WR from '@/lib/WebRequest';
+import WR from 'flux-lib/WebRequest';
 import Vue from "vue";
 
 enum Cs {
@@ -64,7 +64,7 @@ export default Vue.extend({
 
     methods: {
         checkEmail() {
-            this.errs.email.wipe();
+            this.errs.email = false
             this.state = Cs.SENDING_EMAIL;
             const _email = this.user.email;
             this.$flux.v1

@@ -30,10 +30,11 @@ import { Component, Vue } from "vue-property-decorator";
 import LoginForm from "./components/LoginForm.vue";
 import Loading from "./components/Loading.vue";
 import MenuBar from "./components/MenuBar.vue";
+import {Error} from "./components/common"
 import VueRouter from "vue-router";
 import { debug } from "util";
 import { M, MsgBus } from "./messages";
-import WR from './lib/WebRequest'
+import WR from 'flux-lib/WebRequest'
 import { UserV1Object, Auth } from "@/lib/api";
 
 // constants - for everything w/in this components scope
@@ -45,7 +46,7 @@ enum Cs {
 }
 
 export default /*class App extends Vue*/ Vue.extend({
-    components: { LoginForm, Loading, MenuBar },
+    components: { LoginForm, Loading, MenuBar, Error },
     data: () => ({
         req: {
             user: WR.NotRequested(),
@@ -137,6 +138,9 @@ export default /*class App extends Vue*/ Vue.extend({
 </script>
 
 <style lang="scss">
+@import "tachyons";
+@import '../node_modules/normalize.css/normalize.css';
+
 // app container styling
 #app {
     font-family: "Avenir", Helvetica, Arial, sans-serif;
@@ -165,7 +169,6 @@ export default /*class App extends Vue*/ Vue.extend({
 
 // main sitewide styling
 
-@import "tachyons";
 
 // not sure if we'll use this
 $btn-pri-color: #e3580d;
@@ -185,6 +188,12 @@ $btn-norm-color: #ddd;
     transition: box-shadow 0.3s ease-in-out;
 }
 
+.btn-transparent {
+    @extend .btn;
+    @extend .bn;
+    background-color: rgba( 0, 0, 0, 0.0 );
+}
+
 .btn:active:enabled {
     @extend .depressed-btn-shadow;
 }
@@ -195,6 +204,10 @@ a.btn {
 
 button {
     @extend .btn;
+}
+
+button .btn-transparent {
+    @extend .btn-transparent;
 }
 
 button:hover {

@@ -1,6 +1,5 @@
-
-const R = require('ramda')
 const handlerUtils = require('./handlerUtils')
+const R = require('ramda')
 
 const db = {};  // we will populate this obj later via DB.init(db)
 

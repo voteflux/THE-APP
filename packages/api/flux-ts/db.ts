@@ -1,3 +1,14 @@
+import { SortMethod } from './db';
+import { ThenArg } from 'flux-lib/types';
+
+import * as _R from 'ramda'
+
+import { MongoClient, FilterQuery, FindOneOptions } from 'mongodb'
+import  {ObjectID} from 'bson'
+
+import * as utils from './utils'
+import { DBV1, UserV1Object, PublicStats, DBV1Collections, collections, Donation } from 'flux-lib/types/db'
+
 /*
  * DB functions for Flux DB (both v1 and v2)
  *
@@ -8,15 +19,6 @@
  *
  */
 
-import * as _R from 'ramda'
-import {keys} from 'ts-transformer-keys'
-
-import { MongoClient } from 'mongodb'
-import  {ObjectID} from 'bson'
-
-import * as utils from './utils'
-
-
 const R = {
     ..._R,
     log: o => {
@@ -25,8 +27,15 @@ const R = {
     }
 }
 
+export { SortMethod } from 'flux-lib/types/db'
+const SM = SortMethod
 
-
+const renderSM = (sm: SortMethod): [[string, number]] => {
+    return (<{[k:string]:[[string, number]]}>{
+        [SM.TS]: [['ts', -1]],
+        [SM.ID]: [['_id', -1]]
+    })[sm || SM.TS]
+}
 
 /* DB Utils */
 
@@ -35,10 +44,9 @@ const cleanId = rawId => R.is(ObjectID, rawId) ? rawId : new ObjectID(rawId);
 
 /* DB Setup - v1 */
 
-
-const mongoUrl = process.env.MONGODB_URI || "mongodb://localhost:27017/flux"
+const mongoUrl = process.env.MONGODB_URI || "mongodb://localhost:52799/flux"
 // const dbName = R.last(mongoUrl.split('/'))
-let dbv1 = {};
+let dbv1 = {} as DBV1;
 
 
 /* DB Setup v2 - might never be used if we keep mongodb... */
@@ -54,6 +62,10 @@ const GETINFO_ID = 1
 const _rgx = (r) => ({'$regex': r})
 const _exists = {'$exists': true}
 const _set = s => ({'$set': s})
+const _push = e => ({'$push': e})
+const _lt = n => ({'$lt': n})
+const _gt = n => ({'$gt': n})
+const _eq = n => ({'$eq': n})
 const _upsert = {'upsert': true}
 const _notExists = {'$exists': false}
 const _onRoll = {onAECRoll: true}
@@ -63,6 +75,7 @@ const _userInState = s => {
     if (s == 'weirdstate') {
         return {
             '$nor': R.concat(
+                // @ts-ignore
                 R.map(ss => ({address: _rgx(utils.state_regex(ss))}), utils.all_states),
                 R.map(ss => ({addr_postcode: _rgx(utils.state_regex(ss))}), utils.all_states),
             )
@@ -79,8 +92,8 @@ const _needsValidating = {needsValidating: true}
 
 
 /* Helper to create DB v1 with accessors for our collections (e.g. `db.users.findOne(...)`) - makes it nicer to use */
-const mkDbV1 = () => new Promise((res, rej) => {
-    MongoClient.connect(mongoUrl, (err, client) => {
+export const mkDbV1 = (uri=mongoUrl): Promise<DBV1> => new Promise((res, rej) => {
+    MongoClient.connect(uri, (err, client) => {
         if (err !== null) {
             console.error(`mkDbV1 error: ${utils.j(err)}`)
             return rej(err);
@@ -88,12 +101,12 @@ const mkDbV1 = () => new Promise((res, rej) => {
 
         const rawDb = client.db();
 
-        const dbv1 = {rawDb, client}
-        const setCollection = (i) => { dbv1[i] = rawDb.collection(i) }
+        let _dbv1 = {rawDb, client}
+        const setCollection = (i) => { _dbv1[i] = rawDb.collection(i) }
         R.map(setCollection, collections);
         // console.info(`Created dbv1 obj w keys: ${utils.j(R.keys(dbv1))}`)
 
-        return res(dbv1);
+        return res({..._dbv1} as DBV1);
     })
 });
 
@@ -183,8 +196,9 @@ const count_volunteers = () => count_members(_volunteer)
 
 /* Finance */
 
-const getDonations = async (pageN = 0, limit = 10) =>
-    await dbv1.donations.find({}, {sort: [['ts', 1]], limit, skip: pageN * limit}).toArray()
+const getDonations = async (pageN = 0, limit = 10, sortMethod: SortMethod = SM.TS, query: FilterQuery<Donation> = {}): Promise<Donation[]> => {
+    return await dbv1.donations.find(query, {sort: renderSM(sortMethod), limit, skip: pageN * limit}).toArray()
+}
 
 const getDonationsN = async () =>
     await dbv1.donations.count()
@@ -209,9 +223,9 @@ const getUserFromUid = async userId => {
 
 // Role schema: {role: string, uids: uid[], _id}
 
-const getUserRoles = async userId => {
-    const _id = cleanId(userId)
-    const rolesAll = await dbv1.roles.find({'uids': _id}).toArray()
+const getUserRoles = async (userId): Promise<string[]> => {
+    const _uid = cleanId(userId)
+    const rolesAll = await dbv1.roles.find({'uids': _uid}).toArray()
     return R.map(R.prop('role'), rolesAll)
 }
 
@@ -219,18 +233,70 @@ const getUserRoles = async userId => {
  * Return a list of all roles along with the users that have each role.
  * @returns {{role: string, users: User[]}[]} List of all roles as an object with keys `role` and `users`. The `users` key is a list of user objects.
  */
-const getRoleAudit = async () => {
+const getRoleAudit = async (): Promise<{role: string, users: UserV1Object[]}[]> => {
     const rolesAll = await dbv1.roles.find({}).toArray()
-    const uniqueUserIDs = R.compose(R.uniq, R.reduce(R.concat, []), R.map(R.prop('uids')))(rolesAll)
+    // @ts-ignore
+    const uniqueUserIDs = R.compose(R.uniq, R.reduce(R.concat, []), R.map(R.prop('uids')))(rolesAll as Array<{uids: ObjectID}>)
+    // @ts-ignore
     const userMap = await Promise.all(R.map(uid => getUserFromUid(uid).then(u => [uid, u]), uniqueUserIDs)).then(R.fromPairs)
     return R.map(({role, uids}) => ({role, users: R.map(u => userMap[u], uids)}), rolesAll)
 }
+
+
+/* Generic Queues */
+
+export enum Qs {
+    Q_RECEIPTS = 'RECEIPTS'
+}
+
+
+const listAllQueues = async(): Promise<string[]> => {
+    return await dbv1.generic_queues.distinct('queue_enum', {})
+}
+
+const countQueue = async(queue_enum: Qs): Promise<number> => {
+    return await dbv1.generic_queues.count({queue_enum, in_progress: false, tries: {'$lt': 2}})
+}
+
+const addToQueue = async (queue_enum: Qs, doc): Promise<any> => {
+    return await dbv1.generic_queues.insertOne({
+        sent: false,
+        ts: utils.now(),
+        tries: 0,
+        send_log: [],
+        options: doc,
+        in_progress: false,
+        queue_enum
+    })
+}
+
+const getFromQueue = async (queue_enum: Qs): Promise<any> => {
+    return await dbv1.generic_queues.findOneAndUpdate({
+        queue_enum,
+        in_progress: false,
+        sent: false,
+        tries: _lt(2)
+    }, _set({in_progress: true}))
+}
+
+const updateQueue = async (queue_enum: Qs, doc, success, reason): Promise<any> => {
+    const updates = {
+        ..._set({
+            in_progress: false,
+            sent: success === true,
+            tries: doc['tries'] + 1
+        }),
+        ..._push({'send_log': `(${queue_enum}) SENT_${success ? 'GOOD' : 'FAIL'} @ ${utils.now()} : ${reason}`})
+    }
+    return await dbv1.generic_queues.findOneAndUpdate({ _id: doc._id }, updates)
+}
+
 
 /* STATS */
 
 
 const update_getinfo_stats = async () => {
-    getinfo = {
+    let getinfo = {
         id: GETINFO_ID,  //  getinfo ID
         n_members: await count_members(_onRoll),
         n_members_w_state_consent: await count_members(_onRoll, _stateConsent),
@@ -253,29 +319,35 @@ const update_getinfo_stats = async () => {
 }
 
 
-const update_public_stats = async (): PublicStats => {
-    const stats = {id: PUB_STATS_ID}
+const update_public_stats = async (): Promise<PublicStats> => {
+    const stats = <any>{id: PUB_STATS_ID}
 
-    const all_members = await find_members(_onRoll).project({timestamp: 1, address: 1, addr_postcode: 1, dobYear: 1}).toArray()
+    const all_members = (await find_members(_onRoll).project({timestamp: 1, address: 1, addr_postcode: 1, dobYear: 1}).toArray()) as any[]
     console.log(`Public Stats generator got ${all_members.length} members`)
 
-    stats.signup_times = R.compose(R.sort((a,b) => b - a), R.map(m => m.timestamp | 0), R.filter(m => m.timestamp !== undefined))(all_members)
+    // @ts-ignore
+    stats.signup_times = R.compose(R.sort((a:any,b:any) => b - a), R.map(m => m.timestamp | 0), R.filter((m: any) => m.timestamp !== undefined))(all_members)
     console.log(`SIGNUP_TIMES: N=${stats.signup_times.length}, ${stats.signup_times.toString().slice(0,300)}`)
 
-    stats.dob_years = R.compose(R.countBy(R.prop('dobYear')), R.filter(m => m.dobYear !== undefined))(all_members)
+    // @ts-ignore
+    stats.dob_years = R.compose(R.countBy(R.prop('dobYear')), R.filter((m: any) => m.dobYear !== undefined))(all_members)
 
     const pcs = R.compose(R.filter(R.compose(R.not, R.isNil)), R.map(utils.extractPostCode))(all_members)
+    // @ts-ignore
     stats.postcodes = R.countBy(R.identity, pcs);
 
+    // @ts-ignore
     stats.states = R.compose(R.countBy(R.identity), R.map(utils.stateFromPC))(pcs)
 
+    // @ts-ignore
     stats.state_dob_years = R.compose(R.map(R.countBy(R.identity)), R.map(R.map(R.last)), R.groupBy(R.head), R.map(m => [utils.extractState(m), m.dobYear || "1066"]))(all_members)
 
+    // @ts-ignore
     stats.state_signup_times = R.compose(R.map(R.sort((a,b) => a - b)), R.map(R.map(R.last)), R.groupBy(R.head), R.map(m => [utils.extractState(m), (m.timestamp || 0) | 0]))(all_members)
 
     stats.last_run = (Date.now()/1000) | 0
     await dbv1.public_stats.update({id: PUB_STATS_ID}, _set(stats), _upsert)
-    return stats
+    return stats as PublicStats
 }
 
 
@@ -283,36 +355,44 @@ const update_public_stats = async (): PublicStats => {
 
 
 // set exports + db object
-module.exports = {
-    init: async (dbObj) => {
-        const dbMethods = {
-            /* meta */
-            get_version,
-            /* members */
-            count_members,
-            n_members_by_state,
-            n_members_validated,
-            n_members_validated_state,
-            /* stats */
-            update_getinfo_stats,
-            update_public_stats,
-            /* personal / per member */
-            getUserFromS,
-            getUserFromUid,
-            getUidFromS,
-            getUserRoles,
-            /* finance */
-            getDonations,
-            getDonationsN,
-            /* admin */
-            getRoleAudit,
-        }
-        R.mapObjIndexed((f, fName) => { dbObj[fName] = f }, dbMethods);
-
-        dbv1 = await mkDbV1();
-        dbv2 = undefined;
-
-        dbObj.close = () => dbv1.client.close();
-        return
+export const init = async (dbObj, dbV1Uri = mongoUrl) => {
+    dbv1 = await mkDbV1(dbV1Uri);
+    dbv2 = undefined;
+    const dbMethods = {
+        dbv1, dbv2,
+        close: () => dbv1.client.close(),
+        /* meta */
+        get_version,
+        /* members */
+        count_members,
+        n_members_by_state,
+        n_members_validated,
+        n_members_validated_state,
+        /* stats */
+        update_getinfo_stats,
+        update_public_stats,
+        /* personal / per member */
+        getUserFromS,
+        getUserFromUid,
+        getUidFromS,
+        getUserRoles,
+        /* finance */
+        getDonations,
+        getDonationsN,
+        /* admin */
+        getRoleAudit,
+        /* queues */
+        listAllQueues,
+        countQueue,
+        addToQueue,
+        getFromQueue,
+        updateQueue,
     }
+
+    R.mapObjIndexed((f, fName) => { dbObj[fName] = f }, dbMethods);
+    return dbMethods
 }
+
+export default {init}
+
+export type DB = ThenArg<ReturnType<typeof init>>;

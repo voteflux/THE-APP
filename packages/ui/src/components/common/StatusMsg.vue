@@ -1,5 +1,6 @@
 <template>
-    <div class="db mh3 mv4 common" v-bind:class="getClass()">
+    <div v-if="visible == VISIBLE" class="db mh3 mv4 common relative" v-bind:class="getClass()">
+        <span class="pr2 pt2 top-0 right-0 absolute fr" @click="visible = HIDING">X</span>
         <div class="heading pl2 pt2 pr1">{{ getHeading() }}</div>
         <div class="err-text pl2 pb2 pr2">
             <slot></slot>
@@ -18,11 +19,19 @@ export enum Types {
     SUCCESS,
 }
 
+enum HideState {
+    VISIBLE,
+    HIDING,
+    HIDDEN
+}
+
 export default Vue.extend({
     props: ["type"],
     name: "error",
     data: () => ({
-        statusClass: Types.NULL
+        visible: HideState.VISIBLE,
+        statusClass: Types.NULL,
+        ...HideState
     }),
     methods: {
         getClass() {
@@ -44,6 +53,7 @@ export default Vue.extend({
     },
     mounted() {
         this.statusClass = this.$props.type || Types.NULL
+        this.visible = HideState.VISIBLE
     }
 });
 </script>

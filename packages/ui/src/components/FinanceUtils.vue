@@ -2,6 +2,12 @@
     <div>
         <flux-logo title="Finance Utils"/>
 
+        <ui-section title="Tools">
+            <ul class="ul-spaced">
+                <li><router-link :to="Routes.AdminFinanceDonationEntry">Donation Entry</router-link></li>
+            </ul>
+        </ui-section>
+
         <UiSection title="Donation Log">
             <Error v-if="req.donations.isFailed()">{{ req.donations.unwrapError() }}</Error>
             <Loading v-else-if="!req.donations.isSuccess()">Loading donations...</Loading>
@@ -22,8 +28,10 @@ import Vue from 'vue'
 import FluxLogo from '@/components/common/FluxLogo.vue';
 import Loading from '@/components/Loading.vue';
 import { Error, UiSection, Paginate, Donation } from '@/components/common';
-import WebRequest from '@/lib/WebRequest';
+import WebRequest from 'flux-lib/WebRequest';
 import { Auth, Paginated } from '@/lib/api';
+
+import Routes from '@/routes'
 
 export default Vue.extend({
     components: { FluxLogo, Error, Loading, UiSection, Paginate, Donation },
@@ -36,6 +44,7 @@ export default Vue.extend({
         },
         pageN: 0,
         limit: 50,
+        Routes
     }),
     methods: {
         getDonations(_pageN?:number, _limit?:number) {
@@ -46,7 +55,7 @@ export default Vue.extend({
         },
         changePage(dir: 'next' | 'prev'): void {
             if (dir === 'next') {
-
+                console.error('unimplemented...')
             } else if (dir === 'prev') {
 
             } else {

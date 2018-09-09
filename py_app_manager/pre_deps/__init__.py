@@ -21,7 +21,7 @@ def run_or(cmd, error_msg, verbose=False):
 
 def cmd_w_log(cmd, log_name, dir_offset="./"):
     assert dir_offset[-1] == "/"
-    fname = """.{l}.log""".format(l=log_name)
+    fname = """.flux-dev.{l}.log""".format(l=log_name)
     fpath = '{d}{f}'.format(d=dir_offset, f=fname)
     return (('mv {p} {p}.previous || true && ' + cmd + ''' 2>&1 | tee "{p}" ''').format(p=fpath), fname)
 
@@ -30,9 +30,13 @@ def get_git_head():
 
 def deps_up_to_date():
     if not os.path.isfile(mgr_setup_flag_file):
+        logging.debug("deps up to date false no file")
         return False
     with open(mgr_setup_flag_file, 'rb') as f:
-        return f.read() == get_git_head()
+        up_to_date = f.read() == get_git_head()
+        if not up_to_date:
+            logging.debug("deps up to date false git mismatch")
+        return up_to_date
 
 def set_deps_up_to_date():
     with open(mgr_setup_flag_file, 'wb') as f:

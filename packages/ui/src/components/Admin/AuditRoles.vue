@@ -27,7 +27,7 @@ import Routes from "@/routes"
 import Roles from "@/lib/roles";
 import { Auth, UserV1Object, RoleResp } from '@/lib/api';
 
-import WebRequest from "@/lib/WebRequest";
+import WebRequest from "flux-lib/WebRequest";
 
 import XLSX from 'xlsx';
 import * as R from 'ramda';

@@ -1,7 +1,7 @@
 import _Vue from "vue";
 
 import FluxLogo from "@/components/common/FluxLogo.vue"
-import { HasAddr, HasName } from "@/lib/lib";
+import { HasAddr, HasName } from "@/lib/api.d";
 
 
 export function FluxUtils(Vue: typeof _Vue /*, options?: any*/): void {
