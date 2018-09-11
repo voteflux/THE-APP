@@ -9,21 +9,29 @@ try:
     from git import Repo
 except ImportError as e:
     Repo = None
+repo = None
 
 from py_app_manager.pre_deps import *
 
 
 _deps_updated = False
 def ensure_deps(force=False):
-    global _deps_updated
+    global _deps_updated, repo
     if (force or not deps_up_to_date()) and not _deps_updated:
-        if Repo is not None and Repo('./').is_dirty():
-            logging.warning("⚠️ Repository is dirty; skipping reinstall of requirements!")
-        else:
+        def install_deps():
             must_run("python3 -m pip install -r requirements.txt")
             must_run("npm i")
             must_run("npx lerna bootstrap")
             set_deps_up_to_date()
+        if Repo is not None:
+            repo = Repo('./')
+            if repo.is_dirty():
+                logging.warning("⚠️ Repository is dirty; skipping reinstall of requirements!")
+            else:
+                logging.warning("⚠️ Detected repository but not dirty; installing requirements!")
+                install_deps()
+        else:
+            install_deps()
         _deps_updated = True
 
 
@@ -134,8 +142,7 @@ def build(target, stage):
             logging.info("Building for prod!")
             if 'IS_NETLIFY' in os.environ:
                 logging.info("Checking out most recent version tag")
-                git = Repo('./').git
-                git.checkout(os.environ['MOST_RECENT_TAG'])
+                must_run("git checkout {}".format(os.environ['MOST_RECENT_TAG']))
             else:
                 logging.info("Not on netlify - will not checkout most recent git tag")
 
