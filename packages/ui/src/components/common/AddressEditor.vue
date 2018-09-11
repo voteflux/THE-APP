@@ -68,7 +68,7 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import {Error} from '../common'
+import {Error} from '@c/common'
 import {MsgBus, M} from '@/messages'
 import WR from 'flux-lib/WebRequest'
 import WebRequest from 'flux-lib/WebRequest';

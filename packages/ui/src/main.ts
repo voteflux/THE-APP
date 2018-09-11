@@ -2,10 +2,10 @@ import Vue from "vue";
 import App from "./App.vue";
 
 import { library } from '@fortawesome/fontawesome-svg-core'
-import { faCoffee, faArrowLeft, faArrowCircleLeft, faPlusSquare, faMinusSquare } from '@fortawesome/free-solid-svg-icons'
+import { faCoffee, faArrowLeft, faArrowCircleLeft, faPlusSquare, faMinusSquare, faTimes, faSpinner } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
-library.add(faCoffee, faArrowCircleLeft, faPlusSquare, faMinusSquare)
+library.add(faCoffee, faArrowCircleLeft, faPlusSquare, faMinusSquare, faTimes, faSpinner)
 Vue.component('fa-icon', FontAwesomeIcon)
 
 // // eslint-disable-next-line
@@ -36,13 +36,13 @@ Vue.use(VueRouter);
 import ToggleButton from 'vue-js-toggle-button'
 Vue.use(ToggleButton)
 
-import Dashboard from "./components/Dashboard.vue";
-import UserValidation from "./components/UserValidation.vue";
-import UserDetailsMain from "./components/UserDetails";
-import UserRevocation from "./components/UserRevocation.vue";
-import FinanceUtils from "./components/FinanceUtils.vue";
-import AuditRoles from "./components/Admin/AuditRoles.vue";
-import FinanceEnterDonation from "./components/Admin/FinanceEnterDonation.vue";
+import Dashboard from "@c/Dashboard.vue";
+import UserValidation from "@c/UserValidation.vue";
+import UserDetailsMain from "@c/UserDetails";
+import UserRevocation from "@c/UserRevocation.vue";
+import FinanceUtils from "@c/FinanceUtils.vue";
+import AuditRoles from "@c/Admin/AuditRoles.vue";
+import FinanceEnterDonation from "@c/Admin/FinanceEnterDonation.vue";
 
 import R from "./routes";
 

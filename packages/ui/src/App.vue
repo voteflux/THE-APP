@@ -2,12 +2,12 @@
     <div id="app" class="w-100 w-90-m w-80-l center mb4">
         <notifications/>
 
-        <MenuBar class=""/>
-
         <transition name="fade" mode="out-in">
-            <Loading v-if="req.user.isLoading()" :key="IS_LOGGING_IN">
-                Checking login details...
-            </Loading>
+            <div v-if="req.user.isLoading()" :key="IS_LOGGING_IN" class="mt4" >
+                <Loading>
+                    Checking login details... ⏳
+                </Loading>
+            </div>
 
             <div v-else-if="req.user.isSuccess()" :key="IS_LOGGED_IN">
                 <transition name="fade" mode="out-in">
@@ -16,7 +16,7 @@
             </div>
 
             <div v-else :key="IS_NOT_LOGGED_IN">
-                <LoginForm/>
+                <LoginForm />
                 <Error v-if="req.user.isFailed()">
                     {{ req.user.unwrapError() }}
                 </Error>
@@ -27,15 +27,13 @@
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
-import LoginForm from "./components/LoginForm.vue";
-import Loading from "./components/Loading.vue";
-import MenuBar from "./components/MenuBar.vue";
-import {Error} from "./components/common"
+import LoginForm from "@c/LoginForm.vue";
+import {Loading, Error} from "@c/common"
 import VueRouter from "vue-router";
 import { debug } from "util";
 import { M, MsgBus } from "./messages";
 import WR from 'flux-lib/WebRequest'
-import { UserV1Object, Auth } from "@/lib/api";
+import { UserV1Object, Auth } from "@/lib/api"
 
 // constants - for everything w/in this components scope
 enum Cs {
@@ -46,7 +44,7 @@ enum Cs {
 }
 
 export default /*class App extends Vue*/ Vue.extend({
-    components: { LoginForm, Loading, MenuBar, Error },
+    components: { LoginForm, Loading, Error },
     data: () => ({
         req: {
             user: WR.NotRequested(),
@@ -77,7 +75,7 @@ export default /*class App extends Vue*/ Vue.extend({
             this.req.user = WR.Loading()
 
             this.$flux.auth.loadAuth().caseOf({
-                nothing: () => this.loginFailed("no authentication"),
+                nothing: () => this.loginFailed("Cannot find authentication token. Unable to log in."),
                 just: auth => {
                     this.auth = auth;
                     this.loadUser();
@@ -87,6 +85,7 @@ export default /*class App extends Vue*/ Vue.extend({
         loadUser() {
             this.req.user = WR.Loading()
             this.loadUserSilent()
+            this.getRoles()
         },
         loadUserSilent() {
             this.$flux.v1.getUserDetails(this.auth).then(r => {
@@ -113,7 +112,6 @@ export default /*class App extends Vue*/ Vue.extend({
     },
     created() {
         this.loadAuth();
-        this.getRoles();
 
         MsgBus.$on(M.REFRESH_AUTH, () => {
             this.loadAuth();
@@ -190,13 +188,16 @@ $btn-norm-color: #ddd;
 
 .btn-transparent {
     @extend .btn;
-    @extend .bn;
     background-color: rgba( 0, 0, 0, 0.0 );
 }
 
 .btn:active:enabled {
     @extend .depressed-btn-shadow;
 }
+
+// .btn:disabled {
+//     @extend .bn
+// }
 
 a.btn {
     @extend .no-underline;
@@ -317,5 +318,35 @@ input {
 }
 .child-bg-alt .row:nth-child(odd) {
     background-color: #f8f8f8;
+}
+
+// spin icons: animation
+.fa-spin {
+  -webkit-animation: fa-spin 2s infinite linear;
+  animation: fa-spin 2s infinite linear;
+}
+.fa-pulse {
+  -webkit-animation: fa-spin 1s infinite steps(8);
+  animation: fa-spin 1s infinite steps(8);
+}
+@-webkit-keyframes fa-spin {
+  0% {
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(359deg);
+    transform: rotate(359deg);
+  }
+}
+@keyframes fa-spin {
+  0% {
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(359deg);
+    transform: rotate(359deg);
+  }
 }
 </style>

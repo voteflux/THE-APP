@@ -129,23 +129,35 @@ def build(target, stage):
     os.environ["STAGE"] = stage
     logging.info("Building {} for {}".format(target, stage))
 
-    def build_ui():
-        logging.info("### BUILDING UI ###")
-        must_run("cd packages/ui && npm run build")
+    try:
+        if stage == "prod":
+            logging.info("Building for prod!")
+            if 'IS_NETLIFY' in os.environ:
+                logging.info("Checking out most recent version tag")
+                git = Repo('./').git
+                git.checkout(os.environ['MOST_RECENT_TAG'])
+            else:
+                logging.info("Not on netlify - will not checkout most recent git tag")
 
-    def build_api():
-        logging.info("### BUILDING API ###")
-        must_run("cd packages/api && npm run build --stage {stage}".format(stage=stage))
+        def build_ui():
+            logging.info("### BUILDING UI ###")
+            must_run("cd packages/ui && npm run build")
 
-    def build_all():
-        build_ui()
-        build_api()
+        def build_api():
+            logging.info("### BUILDING API ###")
+            must_run("cd packages/api && npm run build --stage {stage}".format(stage=stage))
 
-    return ({
-        'ui': build_ui,
-        'api': build_api,
-        'all': build_all
-    }[target])()
+        def build_all():
+            build_ui()
+            build_api()
+
+        return ({
+            'ui': build_ui,
+            'api': build_api,
+            'all': build_all
+        }[target])()
+    finally:
+        pass
 
 
 @cli.command()
@@ -190,6 +202,7 @@ def dev(dev_target, stage):
             opts = {} if active_pane is None else {'target': active_pane.id}
             return window.split_window(start_directory=dir, shell=to_run, vertical=vertical, **opts)
 
+    # uncomment the below if we need to compile flux-lib
     lib_pane = run_dev_cmd('./packages/lib', 'npm run watch', 'dev-lib')
     if dev_target in {'ui', 'all'}:
         ui_pane = run_dev_cmd('./packages/ui', "STAGE={} npm run serve".format(stage), 'dev-ui')
@@ -201,6 +214,8 @@ def dev(dev_target, stage):
         api_pane = run_dev_cmd('./packages/api', api_cmd, "dev-api", vertical=True, active_pane=mongo_pane)
         compile_pane = run_dev_cmd('./packages/api', 'npm run watch:build', 'api-watch', vertical=True)
         # mongo_pane.set_height(20)
+
+    window.select_layout('tiled')
 
     session.attach_session()
     kill_sessions()

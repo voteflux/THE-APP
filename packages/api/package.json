@@ -9,7 +9,7 @@
     "watch:build": "tsc-watch --onSuccess 'tsc-resolve'",
     "build": "tsc && sls package",
     "deploy": "npm run build && sls deploy",
-    "mongo-dev": "ts-node -r tsconfig-paths/register -O '{\"allowJs\":false,\"checkJs\":false}' ./dev_mongo_server.ts"
+    "mongo-dev": "./bin/kill-dev-mongod.sh && ts-node -r tsconfig-paths/register -O '{\"allowJs\":false,\"checkJs\":false}' ./dev_mongo_server.ts"
   },
   "watch": {
     "build": "./flux-ts/**/*.{ts,js}"

@@ -41,7 +41,7 @@ import assert from 'assert'
 
 import Vue from 'vue'
 import UserDetailsValid from "./UserDetailsValid.vue"
-import { UiSection, EditableText, EditableDate, EditableOpt, AddressEditor } from '../common'
+import { UiSection, EditableText, EditableDate, EditableOpt, AddressEditor } from '@c/common'
 
 import {MsgBus, M} from '../../messages'
 import { mkErrContainer } from "../../lib/errors"

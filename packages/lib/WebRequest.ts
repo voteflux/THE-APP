@@ -13,7 +13,7 @@ interface NetCases<D, E, R> {
 type PartialCases<D,E,R> = Partial<NetCases<D,E,R>>
 
 // define our types as <Error,Data> to match Either type order
-export default class WebRequest<E,D> {
+export class WebRequest<E,D> {
     /**
      * internal use only
      * @param tag
@@ -108,3 +108,6 @@ export default class WebRequest<E,D> {
 
     unwrapOr = this.unwrapOrDefault
 }
+
+export default WebRequest
+export const WS = WebRequest

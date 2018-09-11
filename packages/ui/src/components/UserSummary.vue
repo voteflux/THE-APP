@@ -22,7 +22,7 @@
 <script lang="ts">
 import Vue from "vue";
 import R from "../routes";
-import { Table2Cols } from "./common";
+import { Table2Cols } from "@c/common";
 import UserDetailsValid from "./UserDetails/UserDetailsValid.vue"
 
 export default Vue.extend({

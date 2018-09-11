@@ -4,18 +4,19 @@ set -e
 
 
 
-if [ "$REPOSITORY_URL" ]; then
+if [ "$NETLIFY_BUILD_BASE" ]; then
     echo 'Netlify detected'
     echo -e "\n\n###\n\n"
     env
     echo -e "\n\n###\n\n"
+    export IS_NETLIFY="true"
 fi
 
 
 _error=false
 if python3 -m pip --version >/dev/null 2>&1; then
     echo 'Found pip3'
-    if [ "$REPOSITORY_URL" ]; then
+    if [ "$NETLIFY_BUILD_BASE" ]; then
         python3 -m pip install virtualenv
     fi
 else
@@ -74,4 +75,6 @@ fi
 
 source .venv/bin/activate
 
-python3 -m py_app_manager "$@"
+export MOST_RECENT_TAG="$(git describe --abbrev=0)"
+
+python3 -m py_app_manager "$@"; exit "$?"

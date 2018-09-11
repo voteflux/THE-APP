@@ -12,9 +12,10 @@ import EditableDate from './EditableDate.vue'
 import EditableOpt from './EditableOpt.vue'
 import AddressEditor from './AddressEditor.vue'
 import Section from './Section.vue'
+import Loading from './Loading.vue'
 
 export {
     Error, Warning, StatusSuccess, Row2, Table2Cols, UiSection, Paginate, Donation, TableNCols, EditableText,
     EditableDate, EditableOpt, AddressEditor,
-    Section
+    Section, Loading
 };

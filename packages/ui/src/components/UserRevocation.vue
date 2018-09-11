@@ -46,9 +46,9 @@
 
 <script lang="ts">
 import Vue from "vue";
-import { UiSection } from "./common";
+import { UiSection } from "@c/common";
 import { mkErrContainer } from "../lib/errors";
-import { Error, Warning } from "./common";
+import { Error, Warning } from "@c/common";
 import { M, MsgBus } from "../messages";
 import R from "../routes";
 

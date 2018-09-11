@@ -138,6 +138,13 @@ functions:
           path: /v2/finance/addNewDonation
           method: post
           cors: true
+  donationAutoComplete:
+    handler: ${self:custom.handlers}/admin-finance.donationAutoComplete
+    events:
+      - http:
+          path: /v2/finance/donationAutoComplete
+          method: post
+          cors: true
   # admin/role requests
   getRoleAudit:
     handler: ${self:custom.handlers}/admin-roles.getRoleAudit

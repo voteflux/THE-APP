@@ -25,9 +25,9 @@
 <script lang="ts">
 const JSError = Error;
 import Vue from 'vue'
-import FluxLogo from '@/components/common/FluxLogo.vue';
-import Loading from '@/components/Loading.vue';
-import { Error, UiSection, Paginate, Donation } from '@/components/common';
+import FluxLogo from '@c/common/FluxLogo.vue';
+import Loading from '@c/common/Loading.vue';
+import { Error, UiSection, Paginate, Donation } from '@c/common';
 import WebRequest from 'flux-lib/WebRequest';
 import { Auth, Paginated } from '@/lib/api';
 

@@ -299,6 +299,10 @@ export class DBMethods extends DBCheckCache {
         return await this.dbv1.users.findOne({ _id });
     };
 
+    getUserFromEmail = async email => {
+        return await this.dbv1.users.findOne({ email });
+    }
+
 
     /* Finance */
 

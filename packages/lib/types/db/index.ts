@@ -77,24 +77,44 @@ export type DBV1 = {
 export type DBV2 = undefined
 
 
-export interface UserV1Object {
+export interface UserNameDeets {
     fname: string;
     mnames: string;
     sname: string;
+}
+
+export interface UserBasicContactDeets {
+    email: string,
+    contact_number: string,
+}
+
+export interface UserValidationDeets {
     detailsValid: boolean;
     validationReason: string;
+}
+
+export interface UserAddressDeets {
     addr_street: string;
     addr_suburb: string;
     addr_postcode: string;
     addr_street_no: string;
     addr_country: string;
-    timestamp: number;
+}
+
+export interface UserDobDeets {
     dobDay: number
     dobMonth: number
     dobYear: number
     dob: string
+}
+
+export interface UserV1Object extends UserDobDeets, UserAddressDeets, UserValidationDeets, UserBasicContactDeets {
+    timestamp: number;
     s: string
 }
+
+export interface UserForFinance extends UserAddressDeets, UserBasicContactDeets, UserNameDeets {}
+
 
 export enum SortMethod {
     TS,

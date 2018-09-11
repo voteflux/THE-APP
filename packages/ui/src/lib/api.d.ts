@@ -6,6 +6,7 @@ import { Auth } from './api';
 import { UserV1Object, SortMethod, Donation, DonationsResp, Paginated, RoleResp, PR } from 'flux-lib/types/db'
 import { Maybe } from "tsmonad/lib/src";
 import { StdV1, GetArbitraryPartial, } from 'flux-lib/types/db/api'
+import { UserForFinance } from 'flux-lib/types/db/index';
 
 export interface HasAddr {
     addr_street_no: string;
@@ -35,6 +36,7 @@ export interface FluxApiMethods {
         getRoles: (opts : Auth) => PR<{roles: string[]}>,
         getDonations: (opts : GetArbitraryPartial<Donation>) => PR<DonationsResp>,
         addNewDonation: (opts: {doc: Donation} & Auth) => PR<ER<boolean>>,
+        donationAutoComplete: (opts: Auth & {email: string}) => PR<ER<UserForFinance>>,
         getRoleAudit: (opts: Auth) => PR<RoleResp[]>,
     },
     utils: {
@@ -46,7 +48,8 @@ export interface FluxApiMethods {
         remove: () => void,
         sendSToAllFluxDomains: (s: string) => void,
         saveApiToken: (token: string) => void
-    }
+    },
+    $dev: boolean
 }
 
 declare module "vue/types/vue" {

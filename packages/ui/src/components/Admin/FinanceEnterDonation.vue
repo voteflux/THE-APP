@@ -5,24 +5,30 @@
         <ui-section title="Enter Donation">
             <form @submit="saveDonation()" class="flex flex-wrap">
                 <div class="w-50-l w-100">
-                    <label>email: <input type="text" placeholder="name@example.com" v-model="entry.email"/></label>
-                    <label>name: <input type="text" placeholder="Fname Mnames Sname" v-model="entry.name"/></label>
+                    <label>email:
+                        <fa-icon v-if="req.checkEmail.isLoading()" icon="spinner" class="fa-spin" />
+                        <input @change="checkEmail()" type="text" placeholder="name@example.com" v-model="entry.email"/>
+                    </label>
                     <label>branch: <input type="text" placeholder="/AUS" v-model="entry.branch"/></label>
-                    <label>amount ({{ entry.unit }}): <input type="number" placeholder="10.22" v-model.number="entry.amount" @change="updateRecentSimilar()"/></label>
+                    <label>
+                        amount ({{ entry.unit }}): {{ req.recentSimilar.isSuccess() ? `(${nSimilarDonations} similar)` : '' }}
+                        <input type="number" placeholder="10.22" v-model.number="entry.amount" @change="updateRecentSimilar()"/>
+                    </label>
                     <label>units: <input type="text" placeholder="AUD" v-model="entry.unit" /></label>
                     <editable-date name="Date" :initDate="initDate" :onSave="onDateSave" :autoSave="true" />
-                </div>
-                <div class="w-50-l w-100">
-                    <label>street: <input type="text" placeholder="42 Wallaby Way" v-model="entry.street"/></label>
-                    <label>city: <input type="text" placeholder="Sydney" v-model="entry.city"/></label>
-                    <label>state: <input type="text" placeholder="NSW" v-model="entry.state"/></label>
-                    <label>postcode: <input type="text" placeholder="2000" v-model="entry.postcode"/></label>
-                    <label>country: <input type="text" placeholder="Australia" v-model="entry.country"/></label>
                     <label>source: <select v-model="entry.payment_source">
                         <option value="eft" >Bank Transfer</option>
                         <option value="paypal">PayPal</option>
                         <option value="crypto">Cryptocurrency</option>
                     </select></label>
+                </div>
+                <div class="w-50-l w-100">
+                    <label>name: <input type="text" placeholder="Fname Mnames Sname" v-model="entry.name"/></label>
+                    <label>street: <input type="text" placeholder="42 Wallaby Way" v-model="entry.street"/></label>
+                    <label>city: <input type="text" placeholder="Sydney" v-model="entry.city"/></label>
+                    <label>state: <input type="text" placeholder="NSW" v-model="entry.state"/></label>
+                    <label>postcode: <input type="text" placeholder="2000" v-model="entry.postcode"/></label>
+                    <label>country: <input type="text" placeholder="Australia" v-model="entry.country"/></label>
                 </div>
             </form>
 
@@ -81,13 +87,13 @@
 const JSError = Error;
 import Vue from 'vue'
 import * as R from 'ramda'
-import { UserV1Object, SortMethod, Donation as DonationT, DonationsResp, SM } from 'flux-lib/types/db';
+import { UserV1Object, SortMethod, Donation as DonationT, DonationsResp, SM, UserForFinance } from 'flux-lib/types/db';
 import WebRequest from 'flux-lib/WebRequest';
-import FluxLogo from '@/components/common/FluxLogo.vue';
-import Loading from '@/components/Loading.vue';
-import { Error, UiSection, Donation, Paginate, EditableDate, AddressEditor, Section, StatusSuccess, Loading } from '@/components/common';
+import FluxLogo from '@c/common/FluxLogo.vue';
+import { Error, UiSection, Donation, Paginate, EditableDate, AddressEditor, Section, StatusSuccess, Loading } from '@c/common';
 import { Auth, Paginated } from '@/lib/api';
 import { Req } from '@/lib/api';
+import { eitherDo, ER } from 'flux-lib/types'
 
 const defaultDonation: DonationT = {
     ts: (new Date()).getTime() / 1000 | 0,
@@ -108,7 +114,7 @@ const defaultDonation: DonationT = {
 }
 
 export default Vue.extend({
-    components: { FluxLogo, Loading, UiSection, Error, Loading, Paginate, Donation, EditableDate, AddressEditor, Section, StatusSuccess },
+    components: { FluxLogo, Loading, UiSection, Error, Paginate, Donation, EditableDate, AddressEditor, Section, StatusSuccess },
     props: {
         user: Object as () => Req<UserV1Object>,
         auth: Object as () => Auth
@@ -118,17 +124,47 @@ export default Vue.extend({
             donations: WebRequest.NotRequested(),
             recentSimilar: WebRequest.NotRequested(),
             saveReq: WebRequest.NotRequested(),
+            checkEmail: WebRequest.NotRequested(),
         } as {
             donations: Req<DonationsResp>,
             recentSimilar: Req<DonationsResp>,
             saveReq: Req<{}>,
+            checkEmail: Req<ER<UserForFinance>>
         },
         initDate: new Date() as Date,
         entry: R.clone(defaultDonation) as DonationT,
         defaultDonation,
+        nSimilarDonations: 0,
         R
     }),
     methods: {
+        checkEmail() {
+            this.req.checkEmail = WebRequest.Loading()
+            this.$flux.v2.donationAutoComplete({ ...this.auth, email: this.entry.email })
+                .then(r => {
+                    this.req.checkEmail = r
+                    r.do({
+                        success: (eu: ER<UserForFinance>) => {
+                            const cases = {
+                                right: (u) => {
+                                    this.entry.name = [u.fname, u.mnames, u.sname].join(' ')
+                                    this.entry.street = [u.addr_street_no, u.addr_street].join(' ')
+                                    // @ts-ignore
+                                    this.entry.city = /.+?(?= \(.{2,3}\))/.exec(u.addr_suburb)[0] || u.addr_suburb || " "
+                                    // @ts-ignore
+                                    this.entry.state = /\((.*?)\)$/.exec(u.addr_suburb)[0] || " "
+                                    this.entry.country = u.addr_country || "Australia"
+                                    this.entry.postcode = u.addr_postcode || ""
+                                },
+                                left: (err) => {
+                                    console.log("Could not autocomplete email:", err)
+                                }
+                            }
+                            eitherDo(eu, cases)
+                        }
+                    })
+                })
+        },
         onDateSave(newDate: Date) {
             this.entry.ts = newDate.getTime() / 1000 | 0
             this.entry.date = newDate.toISOString()
@@ -139,7 +175,10 @@ export default Vue.extend({
         updateRecentSimilar() {
             this.req.recentSimilar = WebRequest.Loading()
             this.$flux.v2.getDonations({ ...this.auth, query: {amount: this.entry.amount}, sortMethod: SM.ID })
-                .then(r => this.req.recentSimilar = r)
+                .then(r => {
+                    this.req.recentSimilar = r
+                    this.nSimilarDonations = this.req.recentSimilar.unwrap().donations.length
+                })
         },
         saveDonation() {
             this.req.saveReq = WebRequest.Loading()
@@ -164,8 +203,6 @@ export default Vue.extend({
             }
         },
         logreq() {
-            console.log(this.req.recentSimilar)
-            console.log(this.req.recentSimilar.map(d => d.donations.length))
         }
     },
     mounted() {

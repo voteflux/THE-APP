@@ -18,9 +18,9 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import { UiSection, Warning, Error } from "../common";
-import Loading from '../Loading.vue'
-import {TableNCols} from '../common'
+import { UiSection, Warning, Error } from "@c/common";
+import Loading from '@c/common/Loading.vue'
+import {TableNCols} from '@c/common'
 import { extractProps } from '@/lib/process'
 
 import Routes from "@/routes"

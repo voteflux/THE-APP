@@ -1,6 +1,6 @@
 <template>
     <div>
-        <flux-logo title="Dashboard"/>
+        <flux-logo title="Dashboard" :showBack="false" />
 
         <UiSection title="Your Summary">
             <UserSummary :user='user'></UserSummary>
@@ -39,7 +39,7 @@ import Vue from "vue";
 import UserSummary from "./UserSummary.vue";
 import OrganiserUtils from "./OrganiserUtils.vue";
 import FinanceUtils from "./FinanceUtils.vue"
-import { UiSection, Warning } from "./common";
+import { UiSection, Warning } from "@c/common";
 
 import Routes from "../routes"
 import Roles from "../lib/roles";

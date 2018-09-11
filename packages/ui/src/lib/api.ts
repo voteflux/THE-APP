@@ -1,14 +1,16 @@
 import { FluxApiMethods } from './api.d';
 // all api calls should be written up as methods here (where the methods take the correct arguments)
 
+import * as R from 'ramda'
 import { Maybe, Either } from "tsmonad";
 import { VueConstructor, Vue } from "vue/types/vue";
 import { Http, HttpResponse } from "vue-resource/types/vue_resource";
 import { PluginObject } from "vue";
 // import io from "socket.io-client";
 
-import { UserV1Object, DonationsResp, RoleResp, Auth, PR } from "flux-lib/types/db"
+import { UserV1Object, DonationsResp, RoleResp, Auth, PR, UserForFinance } from "flux-lib/types/db"
 import WebRequest from 'flux-lib/WebRequest';
+import { ER } from 'flux-lib/types/index';
 export * from 'flux-lib/types/db'
 export * from 'flux-lib/types/db/api'
 
@@ -52,6 +54,15 @@ const apiRoots = () => {
 export function FluxApi(_Vue: VueConstructor, options?: any): void {
   const Vue = _Vue //as (VueConstructor & {http: Http});
 
+  const hn = location.host
+  const _isDev = R.any(s => hn.includes(s), [
+      "localhost",
+      "127.0.0.1",
+      ".netlify.com",
+      "ngrok.io",
+      "dev.app.flux.party"
+  ])
+
   const http = <Http>(<any>Vue).http;
 
   const roots = apiRoots()
@@ -89,6 +100,9 @@ export function FluxApi(_Vue: VueConstructor, options?: any): void {
       },
       addNewDonation(args) {
         return post(_api2('finance/addNewDonation'), args)
+      },
+      donationAutoComplete(opts: Auth & {email: string}): PR<ER<UserForFinance>> {
+        return post(_api2('finance/donationAutoComplete'), opts)
       },
       getRoleAudit({ s }): PR<RoleResp[]> {
         return post(_api2("admin/getRoleAudit"), { s })
@@ -168,7 +182,8 @@ export function FluxApi(_Vue: VueConstructor, options?: any): void {
           s
         );
       }
-    }
+    },
+    $dev: _isDev
   } as FluxApiMethods;
 
   return Vue.prototype.$flux

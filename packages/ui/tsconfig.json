@@ -18,7 +18,8 @@
       "node"
     ],
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["./src/*"],
+      "@c/*": ["./src/components/*"]
     }
   },
   "include": [

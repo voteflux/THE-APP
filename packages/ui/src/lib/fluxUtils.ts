@@ -1,6 +1,6 @@
 import _Vue from "vue";
 
-import FluxLogo from "@/components/common/FluxLogo.vue"
+import FluxLogo from "@c/common/FluxLogo.vue"
 import { HasAddr, HasName } from "@/lib/api.d";
 
 
