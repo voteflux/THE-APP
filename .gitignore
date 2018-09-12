@@ -28,3 +28,5 @@ packages/api/sls-custom.yml
 .dev_app_init_last
 .venv
 .vscode
+
+.circleci/run_locally.sh
