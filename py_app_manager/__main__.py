@@ -138,7 +138,7 @@ def test(stage, target, args):
 @click.option('--skip-tests', default=False, type=bool)
 @click.argument('target', nargs=1, type=click.Choice(['api']))
 @click.argument('args', nargs=-1)
-def deploy(stage, target, args):
+def deploy(stage, skip_tests, target, args):
     runner = CmdRunner(must_run)
     if target in {'api', 'all'}:
         runner.add('api', "cd packages/api && node_modules/.bin/sls deploy --stage {} {args}".format(stage, args=' '.join(args)))
