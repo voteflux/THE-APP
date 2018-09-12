@@ -15,12 +15,18 @@
                         <input type="number" placeholder="10.22" v-model.number="entry.amount" @change="updateRecentSimilar()"/>
                     </label>
                     <label>units: <input type="text" placeholder="AUD" v-model="entry.unit" /></label>
+                    <div v-if="entry.unit.toUpperCase() !== 'AUD'">
+                        <label>AUD value: <input type="number" placeholder="13.37" v-model.number="entry.extra_data.aud_value" /></label>
+                    </div>
                     <editable-date name="Date" :initDate="initDate" :onSave="onDateSave" :autoSave="true" />
                     <label>source: <select v-model="entry.payment_source">
                         <option value="eft" >Bank Transfer</option>
                         <option value="paypal">PayPal</option>
                         <option value="crypto">Cryptocurrency</option>
                     </select></label>
+                    <label>comment: (optional)
+                        <textarea v-model="entry.extra_data.comment" placeholder="Any relevant details we might want in future." />
+                    </label>
                 </div>
                 <div class="w-50-l w-100">
                     <label>name: <input type="text" placeholder="Fname Mnames Sname" v-model="entry.name"/></label>
@@ -37,7 +43,7 @@
                     <donation :donation="entry" />
                 </Section>
                 <div class="w-50 w-25-l pa2">
-                    <h3>Similar Donations ({{ logreq() || req.recentSimilar.map(d => d.donations.length).unwrapOr('...') }})</h3>
+                    <h3>Similar Donations ({{ req.recentSimilar.map(d => d.donations.length).unwrapOr('...') }})</h3>
                     <div v-if="req.recentSimilar.isSuccess()" class="f6">
                         <span v-for="(item, index) in req.recentSimilar.unwrap().donations" :key="index">
                             <Donation :donation="item" :small="true" class="mb1" />
@@ -73,11 +79,13 @@
             <Error v-if="req.donations.isFailed()">{{ req.donations.unwrapError() }}</Error>
             <Loading v-else-if="!req.donations.isSuccess()">Loading donations...</Loading>
             <div v-else>
-                <Paginate :page="req.donations.unwrap()" :on-page="(dir) => changePage(dir)">
+                <DonationTable :donations="req.donations.unwrap().donations" />
+
+                <!-- <Paginate :page="req.donations.unwrap()" :on-page="(dir) => changePage(dir)">
                     <div class="mv2" v-for="donation in req.donations.unwrap().donations" :key="donation.id">
                         <Donation :donation="donation" />
                     </div>
-                </Paginate>
+                </Paginate> -->
             </div>
         </ui-section>
     </div>
@@ -90,7 +98,7 @@ import * as R from 'ramda'
 import { UserV1Object, SortMethod, Donation as DonationT, DonationsResp, SM, UserForFinance } from 'flux-lib/types/db';
 import WebRequest from 'flux-lib/WebRequest';
 import FluxLogo from '@c/common/FluxLogo.vue';
-import { Error, UiSection, Donation, Paginate, EditableDate, AddressEditor, Section, StatusSuccess, Loading } from '@c/common';
+import { Error, UiSection, Donation, Paginate, EditableDate, AddressEditor, Section, StatusSuccess, Loading, DonationTable } from '@c/common';
 import { Auth, Paginated } from '@/lib/api';
 import { Req } from '@/lib/api';
 import { eitherDo, ER } from 'flux-lib/types'
@@ -108,13 +116,16 @@ const defaultDonation: DonationT = {
     state: '',
     country: 'Australia',
     payment_source: 'eft',
-    extra_data: {},
+    extra_data: {
+        comment: '',
+        aud_value: 0
+    },
     date: new Date().toISOString(),
     id: 'n/a'
 }
 
 export default Vue.extend({
-    components: { FluxLogo, Loading, UiSection, Error, Paginate, Donation, EditableDate, AddressEditor, Section, StatusSuccess },
+    components: { FluxLogo, Loading, UiSection, Error, Paginate, Donation, EditableDate, AddressEditor, Section, StatusSuccess, DonationTable },
     props: {
         user: Object as () => Req<UserV1Object>,
         auth: Object as () => Auth
@@ -174,7 +185,7 @@ export default Vue.extend({
         },
         updateRecentSimilar() {
             this.req.recentSimilar = WebRequest.Loading()
-            this.$flux.v2.getDonations({ ...this.auth, query: {amount: this.entry.amount}, sortMethod: SM.ID })
+            this.$flux.v2.getDonations({ ...this.auth, limit: 100, query: {amount: this.entry.amount}, sortMethod: SM.ID })
                 .then(r => {
                     this.req.recentSimilar = r
                     this.nSimilarDonations = this.req.recentSimilar.unwrap().donations.length
@@ -189,20 +200,9 @@ export default Vue.extend({
         },
         getDonations(_pageN?:number, _limit?:number) {
             const pageN = _pageN || 0
-            const limit = _limit || 10
+            const limit = _limit || 9999
             this.req.donations = WebRequest.Loading()
             this.$flux.v2.getDonations({...this.$props.auth, pageN, limit, sortMethod: SortMethod.ID}).then(r => this.req.donations = r)
-        },
-        changePage(dir: 'next' | 'prev'): void {
-            if (dir === 'next') {
-                console.error('unimplemented...')
-            } else if (dir === 'prev') {
-                console.error('unimplemented...')
-            } else {
-                throw new JSError(<any>('Should have recieved one of "next" or "prev" for `dir` but got ' + (<any>dir).toString()))
-            }
-        },
-        logreq() {
         }
     },
     mounted() {

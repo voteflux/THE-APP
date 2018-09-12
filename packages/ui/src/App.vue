@@ -168,6 +168,12 @@ export default /*class App extends Vue*/ Vue.extend({
 // main sitewide styling
 
 
+ul.ul-spaced li {
+    margin-top: 10px;
+}
+
+/* BUTTONS */
+
 // not sure if we'll use this
 $btn-pri-color: #e3580d;
 $btn-norm-color: #ddd;
@@ -298,6 +304,8 @@ button.tool-btn:disabled {
 button.tool-btn:disabled:hover {
 }
 
+/* INPUTS */
+
 .input {
     display: inline-block;
     @extend .pa2;
@@ -306,6 +314,14 @@ button.tool-btn:disabled:hover {
 
 input {
     @extend .input;
+}
+
+textarea {
+    @extend .input;
+}
+
+select {
+    @extend .input
 }
 
 .inputGroup .input {

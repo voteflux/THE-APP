@@ -12,7 +12,7 @@ except ImportError as e:
 repo = None
 
 from py_app_manager.pre_deps import *
-
+from py_app_manager.cmd_runner import CmdRunner
 
 _deps_updated = False
 def ensure_deps(force=False):
@@ -33,6 +33,10 @@ def ensure_deps(force=False):
         else:
             install_deps()
         _deps_updated = True
+
+
+def export(env_name, env_value):
+    os.environ[env_name] = env_value
 
 
 # check we're in the correct directory
@@ -119,22 +123,33 @@ def mgr_set_up_to_date():
 
 @cli.command()
 @stage_option
+@click.argument('target', nargs=1, type=click.Choice(['api', 'ui', 'all']))
+@click.argument('args', nargs=-1)
+def test(stage, target, args):
+    export("STAGE", stage)
+    runner = CmdRunner(must_run)
+    if target in {'api', 'all'}:
+        runner.add('api tests', 'cd packages/api && npm run test -- --stage {s} {args}'.format(s=stage, args=' '.join(args)))
+    runner.run()
+
+
+@cli.command()
+@stage_option
+@click.option('--skip-tests', default=False, type=bool)
 @click.argument('target', nargs=1, type=click.Choice(['api']))
 @click.argument('args', nargs=-1)
 def deploy(stage, target, args):
-    (to_run, _add) = ([], lambda n, a: to_run.append((n, a)))
+    runner = CmdRunner(must_run)
     if target in {'api', 'all'}:
-        _add('api', lambda: must_run("cd packages/api && node_modules/.bin/sls deploy --stage %s %s" % (stage, ' '.join(list(args)))))
-    list([(print("Running:", n), f()) for (n, f) in to_run])
-
-
+        runner.add('api', "cd packages/api && node_modules/.bin/sls deploy --stage {} {args}".format(stage, args=' '.join(args)))
+    runner.run()
 
 
 @cli.command()
 @click.argument('target', nargs=1, type=click.Choice(['ui', 'api', 'all']))
 @stage_option
 def build(target, stage):
-    os.environ["STAGE"] = stage
+    export("STAGE", stage)
     logging.info("Building {} for {}".format(target, stage))
 
     try:
@@ -197,6 +212,7 @@ def dev(dev_target, stage):
     def run_dev_cmd(dir, cmd, name, active_pane=None, vertical=False):
         nonlocal session, window, log_files
         (to_run, l) = cmd_w_log(cmd, name, dir_offset='../../')
+        to_run = "printf '\033]2;%s\033\\' '{title}'; ".format(title=name) + to_run
         to_run += "; echo -e '\\n\\n' && /usr/bin/read -p 'Press enter to terminate all...' && tmux kill-session -t main"
         log_files.append(l)
         if session is None:
@@ -217,10 +233,10 @@ def dev(dev_target, stage):
     if dev_target in {'api', 'all'}:
         # mongo dev server port: 53799
         mongo_pane = run_dev_cmd('./packages/api', 'npm run mongo-dev', "mongo-dev", vertical=False)
-        api_cmd = "node_modules/.bin/sls offline start --stage dev --noEnvironment --port %d" % (api_port,)
+        api_cmd = "npm run watch -- --stage dev --port %d" % (api_port,)
         api_pane = run_dev_cmd('./packages/api', api_cmd, "dev-api", vertical=True, active_pane=mongo_pane)
-        compile_pane = run_dev_cmd('./packages/api', 'npm run watch:build', 'api-watch', vertical=True)
-        # mongo_pane.set_height(20)
+        # don't need to run tsc on the api atm
+        # compile_pane = run_dev_cmd('./packages/api', 'npm run watch:build', 'api-watch', vertical=True)
 
     window.select_layout('tiled')
 

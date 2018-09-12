@@ -63,6 +63,8 @@
     "tsconfig-paths": "^3.5.0",
     "typescript": "^3.0.3",
     "vue-cli-plugin-ts-paths": "0.0.4",
+    "vue-good-table": "^2.14.0",
+    "vue-table-component": "^2.0.0-alpha.1",
     "vue-template-compiler": "^2.5.13"
   },
   "babel": {

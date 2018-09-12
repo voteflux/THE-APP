@@ -1,22 +1,12 @@
 <template>
     <div>
-        <flux-logo title="Finance Utils"/>
+        <flux-logo title="Donation Log"/>
 
-        <ui-section title="Tools">
-            <ul class="ul-spaced">
-                <li><router-link :to="Routes.AdminFinanceDonationEntry">Donation Entry</router-link></li>
-            </ul>
-        </ui-section>
-
-        <UiSection title="Donation Log">
+        <UiSection title="Donations">
             <Error v-if="req.donations.isFailed()">{{ req.donations.unwrapError() }}</Error>
             <Loading v-else-if="!req.donations.isSuccess()">Loading donations...</Loading>
             <div v-else>
-                <Paginate :page="req.donations.unwrap()" :on-page="(dir) => changePage(dir)">
-                    <div class="mv2" v-for="donation in req.donations.unwrap().donations" :key="donation.id">
-                        <Donation :donation="donation" />
-                    </div>
-                </Paginate>
+                <DonationTable :donations="req.donations.unwrap().donations" />
             </div>
         </UiSection>
     </div>
@@ -27,14 +17,14 @@ const JSError = Error;
 import Vue from 'vue'
 import FluxLogo from '@c/common/FluxLogo.vue';
 import Loading from '@c/common/Loading.vue';
-import { Error, UiSection, Paginate, Donation } from '@c/common';
+import { Error, UiSection, DonationTable } from '@c/common';
 import WebRequest from 'flux-lib/WebRequest';
 import { Auth, Paginated } from '@/lib/api';
 
 import Routes from '@/routes'
 
 export default Vue.extend({
-    components: { FluxLogo, Error, Loading, UiSection, Paginate, Donation },
+    components: { FluxLogo, Error, Loading, UiSection, DonationTable },
     props: {
         auth: Object as () => Auth,
     },
@@ -51,7 +41,8 @@ export default Vue.extend({
             const pageN = _pageN || this.pageN
             const limit = _limit || this.limit
             this.req.donations = WebRequest.Loading()
-            this.$flux.v2.getDonations({...this.$props.auth, pageN, limit}).then(r => this.req.donations = r)
+            this.$flux.v2.getDonations({...this.$props.auth, pageN, limit})
+                .then(r => this.req.donations = r)
         },
         changePage(dir: 'next' | 'prev'): void {
             if (dir === 'next') {

@@ -125,23 +125,31 @@ export const SM = SortMethod
 
 export interface Paginated {pageN: number, limit: number, total: number}
 
-export const DonationRT = t.type({
-    name: t.string,
-    street: t.string,
-    city: t.string,
-    state: t.string,
-    postcode: t.string,
-    country: t.string,
-    branch: t.string,
-    ts: t.number,
-    date: t.string,
-    amount: t.number,
-    unit: t.string,
-    email: t.string,
-    payment_source: t.string,
-    id: t.string,
-    extra_data: t.union([t.object, t.undefined]),
-})
+export const DonationRT = t.intersection([
+    t.type({
+        name: t.string,
+        street: t.string,
+        city: t.string,
+        state: t.string,
+        postcode: t.string,
+        country: t.string,
+        branch: t.string,
+        ts: t.number,
+        date: t.string,
+        amount: t.number,
+        unit: t.string,
+        email: t.string,
+        payment_source: t.string,
+        id: t.string,
+        extra_data: t.partial({
+            comment: t.string,
+            aud_value: t.number
+        })
+    }),
+    t.partial({
+        _id: t.string,
+    })
+])
 export type Donation = t.TypeOf<typeof DonationRT>
 
 export interface DonationsResp {donations: Donation[], totalDonations: number, pageN: number, limit: number, sortMethod: number}

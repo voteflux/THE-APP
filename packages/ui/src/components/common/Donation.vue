@@ -6,11 +6,29 @@
                 ID: <span>{{donation.id}}</span>
             </div>
             <div>
-                Name: <strong>{{donation.name}}</strong>
+                Name: <strong class="d-name">{{donation.name}}</strong>
             </div>
             <div>
-                Date: <strong>{{donation.date}}</strong> (<small>{{donation.ts}}</small>)
+                Date: <strong class="d-date">{{donation.date}}</strong> (<small>{{donation.ts}}</small>)
             </div>
+        </div>
+
+        <!-- row version -->
+        <div v-else-if="row" class="flex flex-row pa1 donation-row">
+            <span>{{ donation.id }}</span>
+            <span>{{ donation.name }}</span>
+            <span>{{ donation.email }}</span>
+            <span>{{ donation.ts }}</span>
+            <span>{{ donation.date }}</span>
+            <span>{{ donation.source }}</span>
+            <span>{{ donation.amount }}</span>
+            <span>{{ donation.unit }}</span>
+            <span>{{ donation.branch }}</span>
+            <span>{{ donation.street }}</span>
+            <span>{{ donation.city }}</span>
+            <span>{{ donation.state }}</span>
+            <span>{{ donation.postcode }}</span>
+            <span>{{ donation.country }}</span>
         </div>
 
         <!-- large version -->
@@ -20,7 +38,7 @@
                     ID: <code>{{ donation.id }}</code>
                 </div>
                 <div class="dib mr4">
-                    Date: {{ donation.date }} (<small><code>{{ donation.ts }}</code></small>)
+                    Date: <strong class="d-date">{{ donation.date }}</strong> (<small><code>{{ donation.ts }}</code></small>)
                 </div>
                 <div class="dib mr4">
                     Source: {{ donation.payment_source }}
@@ -28,7 +46,7 @@
             </div>
             <div class="flex mb2 flex-wrap">
                 <div class="dib mr4">
-                    Amount: <code>{{ donation.amount }} {{ donation.unit }}</code>
+                    Amount: <code class="">{{ donation.amount }} {{ donation.unit }}</code>
                 </div>
                 <div class="dib mr4">
                     Branch: <code>{{ donation.branch }}</code>
@@ -36,7 +54,7 @@
             </div>
             <div class="flex mb2">
                 <div class="dib mr4">
-                    <strong>Name:</strong>&nbsp;<code>{{ donation.name }}</code> (<code>{{ donation.email }}</code>)
+                    Name:&nbsp;<strong class="d-name"><code>{{ donation.name }}</code></strong>&nbsp;<small class="d-email">(<code>{{ donation.email }}</code>)</small>
                 </div>
             </div>
             <div class="flex mb2">
@@ -68,6 +86,24 @@ export default Vue.extend({
 <style lang="scss" scoped>
 @import "tachyons";
 
+.d-name {
+    @extend .green;
+}
 
+.d-date {
+    @extend .blue;
+}
+
+.d-email {
+    @extend .orange;
+}
+
+.donation-row {
+
+}
+
+.donation-row span {
+    // @extend .bl1
+}
 
 </style>

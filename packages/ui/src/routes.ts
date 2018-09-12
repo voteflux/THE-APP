@@ -3,8 +3,9 @@ export default {
     Dashboard: "/",
     ValidateSelf: "/membership/validation",
     MembershipRevocation: "/membership/revoke",
-    FinanceUtils: "/admin/finance",
-    AdminFinanceDonationEntry: "/admin/finance/receipts/entry",
+    FinanceMenu: "/admin/finance",
+    FinanceDonationLog: "/admin/finance/donations",
+    FinanceDonationEntry: "/admin/finance/donations/entry",
     AdminAuditRoles: "/admin/auditRoles",
 
 };
