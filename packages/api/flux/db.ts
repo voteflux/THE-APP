@@ -44,7 +44,7 @@ const cleanId = rawId => (R.is(ObjectID, rawId) ? rawId : new ObjectID(rawId));
 
 /* DB Setup - v1 */
 
-const mongoUrl = process.env.MONGODB_URI || "mongodb://localhost:53799/flux";
+const mongoUrl = process.env.MONGODB_URI
 // const dbName = R.last(mongoUrl.split('/'))
 let dbv1 = {} as DBV1;
 
