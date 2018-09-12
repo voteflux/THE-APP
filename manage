@@ -10,7 +10,6 @@ if [ "$NETLIFY_BUILD_BASE" ]; then
     export IS_NETLIFY="true"
 else
     echo "Detected: not on netlify"
-    env
 fi
 
 

@@ -16,6 +16,9 @@ jobs:
 
     working_directory: ~/repo
 
+    environment:
+      STAGE: dev
+
     steps:
       - checkout
 
@@ -23,8 +26,6 @@ jobs:
       - restore_cache:
           keys:
           - v1-dependencies-{{ checksum "package.json" }}
-          # fallback to using the latest cache if no exact match is found
-          - v1-dependencies-
 
       - run: sudo apt-get update
       - run: pwd
@@ -46,12 +47,11 @@ jobs:
       - run: pwd
       - run: ls -al
       - run: cat $BASH_ENV
-      - run: ./manage deploy api --stage dev
+      - run: ./manage deploy api --stage "$STAGE"
 
       - save_cache:
           paths:
             - node_modules
+            - packages/**/node_modules
+            - .venv
           key: v1-dependencies-{{ checksum "package.json" }}
-
-      # run tests!
-      - run: yarn test
