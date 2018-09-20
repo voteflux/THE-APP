@@ -8,9 +8,6 @@ if [ "$NETLIFY_BUILD_BASE" ]; then
     env
     echo -e "\n\n###\n\n"
     export IS_NETLIFY="true"
-    mkdir -p $HOME/.ssh
-    touch $HOME/.ssh/known_hosts
-    ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
     git remote add origin $(echo "https://$REPOSITORY_URL" | sed 's/\.com:/.com\//g' | sed 's/git@//g')
     git fetch --tags origin
 else
