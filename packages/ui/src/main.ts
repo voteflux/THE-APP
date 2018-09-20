@@ -44,10 +44,15 @@ import UserValidation from "@c/UserValidation.vue";
 import UserDetailsMain from "@c/UserDetails";
 import UserRevocation from "@c/UserRevocation.vue";
 import * as Finance from "@c/Finance";
+import * as Volunteers from "@c/Volunteers"
+import * as Candidates from "@c/Candidates"
 import AuditRoles from "@c/Admin/AuditRoles.vue";
 import FinanceEnterDonation from "@c/Finance/FinanceEnterDonation.vue";
 
 import R from "./routes";
+
+import {UiSection} from "@c/common";
+Vue.component('ui-section', UiSection)
 
 const routes = [
     { path: R.Dashboard, component: Dashboard },
@@ -58,6 +63,8 @@ const routes = [
     { path: R.FinanceMenu, component: Finance.Menu },
     { path: R.FinanceDonationEntry, component: Finance.EnterDonation },
     { path: R.FinanceDonationLog, component: Finance.DonationLog },
+    { path: R.VolunteerDashboard, component: Volunteers.Dashboard },
+    { path: R.CandidateDashboard, component: Candidates.Dashboard },
     { path: "*", redirect: "/" }
 ];
 

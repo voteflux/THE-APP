@@ -47,28 +47,18 @@ import {MsgBus, M} from '../../messages'
 import { mkErrContainer } from "../../lib/errors"
 
 
-const afterSave = fullUserDeetsR => {
-    fullUserDeetsR.do({
-        failed: e => { throw e },
-        success: fullUserDeets => {
-            MsgBus.$emit(M.GOT_USER_DETAILS, fullUserDeets)
-        }
-    })
-};
-
-
 export default Vue.extend({
     components: { EditableText, EditableDate, EditableOpt, AddressEditor, UserDetailsValid, UiSection },
-    props: ["user"],
+    props: ["user", 'auth'],
     data: () => ({
     }),
     methods: {
         savePropFactory(prop) {
             return (newValue) => {
-                assert(prop != 's')
-                const toSave = {s: this.$props.user.s, [prop]: newValue}
+                assert(prop != 's' && prop != 'authToken')
+                const toSave = { [prop]: newValue, ...this.auth }
                 return this.$flux.v1.saveUserDetails(toSave)
-                    .then(afterSave);
+                    .then(this.$flux.utils.onGotUserObj);
             }
         },
 
@@ -86,7 +76,7 @@ export default Vue.extend({
             const dobMonth = newDob.getMonth() + 1
             const dobYear = newDob.getFullYear()
             const dob = newDob.toISOString()
-            return this.$flux.v1.saveUserDetails({dobDay, dobMonth, dobYear, dob, s: this.$props.user.s}).then(afterSave)
+            return this.$flux.v1.saveUserDetails({dobDay, dobMonth, dobYear, dob, s: this.$props.user.s}).then(this.$flux.utils.onGotUserObj)
         }
     }
 })

@@ -26,13 +26,17 @@
             </ul>
         </ui-section>
 
-        <ui-section title="Volunteer Tools">
-            <div v-if="user.volunteer === true">
+        <ui-section title="Volunteer / Candidature">
+            <Section title="Profiles" :noCollapse="true" class="child-bg-alt" >
+                <EditableOpt class="row" name="I'm willing to stand as a candidate" :value="user.candidature_federal" :onSave="savePropFactory('candidature_federal')" />
+                <EditableOpt class="row" name="I'd like to volunteer" :value="user.volunteer" :onSave="savePropFactory('volunteer')" />
+            </Section>
 
-            </div>
-            <div v-else>
-                To enable volunteer tools, please check the volunteer box on your <router-link :to="Routes.EditUserDetails">details</router-link> page.
-            </div>
+            <ul>
+                <li v-if="user.volunteer === true"><router-link class="db ma1" :to="Routes.VolunteerDashboard">Volunteer Portal</router-link></li>
+                <li v-if="user.candidature_federal === true"><router-link class="db ma1" :to="Routes.CandidateDashboard">Candidate Portal</router-link></li>
+            </ul>
+
         </ui-section>
 
         <ui-section title="Log Out">
@@ -44,24 +48,27 @@
 
 
 <script lang="ts">
+import assert from 'assert'
 import Vue from "vue";
 import UserSummary from "./UserSummary.vue";
 import OrganiserUtils from "./OrganiserUtils.vue";
 import FinanceUtils from "./FinanceUtils.vue"
-import { UiSection, Warning } from "@c/common";
+import { UiSection, Warning, Section, EditableOpt } from "@c/common";
 
 import Routes from "../routes"
 import Roles from "../lib/roles";
 
 import {M, MsgBus} from "../messages"
 import WebRequest from "flux-lib/WebRequest";
+import { Auth } from 'flux-lib/types';
 
 export default Vue.extend({
     name: "Dashboard",
-    components: { UserSummary, UiSection, Warning },
+    components: { UserSummary, UiSection, Warning, Section, EditableOpt },
     props: {
         user: Object,
         roles: WebRequest,
+        auth: Object as () => Auth
     },
     data: () => ({
         Roles,
@@ -75,7 +82,16 @@ export default Vue.extend({
                 return rs.unwrap().includes(r) || rs.unwrap().includes("admin")
             }
             return false
-        }
+        },
+
+        savePropFactory(prop) {
+            return (newValue) => {
+                assert(prop != 's' && prop != 'authToken')
+                const toSave = { [prop]: newValue, ...this.$props.auth }
+                return this.$flux.v1.saveUserDetails(toSave)
+                    .then(this.$flux.utils.onGotUserObj);
+            }
+        },
     }
 });
 </script>

@@ -11,8 +11,10 @@ import { PluginObject } from "vue";
 import { UserV1Object, DonationsResp, RoleResp, Auth, PR, UserForFinance } from "flux-lib/types/db"
 import WebRequest from 'flux-lib/WebRequest';
 import { ER } from 'flux-lib/types/index';
+import { MsgBus, M } from '../messages';
 export * from 'flux-lib/types/db'
 export * from 'flux-lib/types/db/api'
+
 
 export interface CheckEmailResp {
   doOnboarding: boolean;
@@ -137,6 +139,14 @@ export function FluxApi(_Vue: VueConstructor, options?: any): void {
       captchaImgUrl(session) {
         return _api1("au/captcha_img/" + session);
       },
+      onGotUserObj(fullUserDeetsR) {
+        fullUserDeetsR.do({
+            failed: e => { throw e },
+            success: fullUserDeets => {
+                MsgBus.$emit(M.GOT_USER_DETAILS, fullUserDeets)
+            }
+        })
+      }
     },
 
     auth: {

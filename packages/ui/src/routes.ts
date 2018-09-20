@@ -8,4 +8,6 @@ export default {
     FinanceDonationEntry: "/admin/finance/donations/entry",
     AdminAuditRoles: "/admin/auditRoles",
 
+    VolunteerDashboard: "/volunteers",
+    CandidateDashboard: "/candidates",
 };

@@ -3,7 +3,7 @@ import Vue from "vue";
 import {SError} from './errors'
 import WebRequest from "flux-lib/WebRequest";
 import { Auth } from './api';
-import { UserV1Object, SortMethod, Donation, DonationsResp, Paginated, RoleResp, PR } from 'flux-lib/types/db'
+import { UserV1Object, SortMethod, Donation, DonationsResp, Paginated, RoleResp, PR, R } from 'flux-lib/types/db'
 import { Maybe } from "tsmonad/lib/src";
 import { StdV1, GetArbitraryPartial, } from 'flux-lib/types/db/api'
 import { UserForFinance } from 'flux-lib/types/db/index';
@@ -40,6 +40,7 @@ export interface FluxApiMethods {
         getRoleAudit: (opts: Auth) => PR<RoleResp[]>,
     },
     utils: {
+        onGotUserObj: (r: R<UserV1Object>) => void,
         [method: string]: (...args: any[]) => any
     },
     auth: {
