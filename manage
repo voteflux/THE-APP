@@ -11,7 +11,7 @@ if [ "$NETLIFY_BUILD_BASE" ]; then
     mkdir -p $HOME/.ssh
     touch $HOME/.ssh/known_hosts
     ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts
-    git remote add origin $(echo "$REPOSITORY_URL" | sed 's/ssh/https/g' | sed 's/\.com:/.com\//g' | sed 's/git@//g')
+    git remote add origin $(echo "https://$REPOSITORY_URL" | sed 's/\.com:/.com\//g' | sed 's/git@//g')
     git fetch --tags origin
 else
     echo "Detected: not on netlify"
