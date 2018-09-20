@@ -60,7 +60,7 @@ Virtually everything should be done through the python app manager script (`./ma
 
 ## `./manage` - the "do everything" tool for dev/building/etc
 
-`./manage` is a bash script wrapping a small python module. 
+`./manage` is a bash script wrapping a small python module.
 
 In general you use it like `./manage [cmd] [args...] [--flags...]`, though run `./manage help` or `./manage [cmd] --help` if you ever get stuck.
 
@@ -88,7 +88,7 @@ This is the meat of the build script. The script runs sort of like this:
 * check for conditions in which to skip dependency installs (if the repository is dirty, basically -- presumably this means it's a dev environment which means we don't need to install deps)
 * install python3 deps, then npm deps (which is just `lerna` to start with), then have `lerna` set up the dependencies for each package
 * do normal python imports for any libraries which are part of our dependencies
-* interpret arguments and run dev/build commands, etc 
+* interpret arguments and run dev/build commands, etc
 
 ### Adding dependencies
 
@@ -118,3 +118,5 @@ If you haven't used `tmux` before: it's pretty nice (an advanced version of `scr
 ### Updating production
 
 Production is updated when a new version tag is added using `lerna publish` - leave this to @XertroV for the moment.
+
+Note: if you've been doing anything with tags outside `lerna` you might need to `git push --tags` so CI detects the latest version.

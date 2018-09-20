@@ -81,7 +81,7 @@ echo -e "\n\n⚠️ Most recent tag: $MOST_RECENT_TAG\n"
 echo -e "\tgit describe:"
 git describe
 echo -e "\n\tgit describe --tags $(git rev-list --tags):"
-git describe --tags $(git rev-list --tags)
+git describe --tags $(git rev-list --tags) --always
 echo -e "\n\n⚠️ About to run app-manager ⚠️\n"
 
 python3 -m py_app_manager "$@"; exit "$?"
