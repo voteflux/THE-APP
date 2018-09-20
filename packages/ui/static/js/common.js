@@ -2,6 +2,17 @@ var hn = window.location.hostname
 var __DEBUG_COMMON__ = hn == 'localhost' || hn == '127.0.0.1'
 var __DEV_COMMON__ = hn == "flux-api-dev.herokuapp.com" || hn == "dev.app.flux.party" || __DEBUG_COMMON__
 
+
+function isDefinitelyProduction() {
+    var isProdDomain =
+        window.location.hostname === "members.flux.party" ||
+        window.location.hostname === "app.flux.party" ||
+        window.location.hostname === "admin.flux.party"
+
+    return isProdDomain
+}
+
+
 // http://stackoverflow.com/questions/5448545/how-to-retrieve-get-parameters-from-javascript
 function getParam(val) {
     var result = undefined,

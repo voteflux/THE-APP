@@ -23,7 +23,7 @@ app.controller('FluxController', function($scope, $log, $rootScope, $http, $wind
     flux.input = { regoWarn : {}, };
 
     flux.isProd = () => {
-        return window.location.hostname === "members.flux.party";
+        return isDefinitelyProduction()
     }
 
     flux.rego = {
