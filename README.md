@@ -114,3 +114,7 @@ If you haven't used `tmux` before: it's pretty nice (an advanced version of `scr
 * **API**:
   * adjust vars in `./packages/api/sls-custom.yaml` (only once; based on `sls-default-custom.yaml`)
   * `./manage deploy --stage dev`
+
+### Updating production
+
+Production is updated when a new version tag is added using `lerna publish` - leave this to @XertroV for the moment.
