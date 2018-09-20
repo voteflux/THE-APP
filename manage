@@ -80,12 +80,16 @@ source .venv/bin/activate
 export MOST_RECENT_TAG="$(git describe --abbrev=0)"
 
 echo -e "\n\n⚠️ Most recent tag: $MOST_RECENT_TAG\n"
-echo -e "\tgit describe:"
-git describe
-echo -e "\tgit rev-list --tags | head -n 10:"
-git rev-list --tags | head -n 10
-echo -e '\n\tgit describe --tags $(git rev-list --tags) --always | head -n 10:'
-git describe --tags $(git rev-list --tags) --always | head -n 10
+
+if [ "$IS_NETLIFY" ]; then
+    echo -e "\tgit describe:"
+    git describe
+    echo -e "\tgit rev-list --tags | head -n 10:"
+    git rev-list --tags | head -n 10
+    echo -e '\n\tgit describe --tags $(git rev-list --tags) --always | head -n 10:'
+    git describe --tags $(git rev-list --tags) --always | head -n 10
+fi
+
 echo -e "\n\n⚠️ About to run app-manager ⚠️\n"
 
 python3 -m py_app_manager "$@"; exit "$?"

@@ -124,10 +124,10 @@ def mgr_set_up_to_date():
 def install_npm_deps(target, deps, dev=False):
     logging.warning("⚠️ dependencies will be installed one at a time. (It's a lerna thing)")
     runner = CmdRunner(must_run)
-    lerna_pkg = '' if target == 'all' else target
+    lerna_pkg = '' if target == 'all' else '--scope={}'.format(target)
     dev_flag = "--dev" if dev else ""
     for d in deps:
-        runner.add('Installing node dependency `{d}` for `{pkg}`'.format(d=d, pkg=target), 'npx lerna add {d} {pkg} {dev}'.format(d=d, pkg=lerna_pkg, dev=def_flag))
+        runner.add('Installing node dependency `{d}` for `{pkg}`'.format(d=d, pkg=target), 'npx lerna add {d} {pkg} {dev}'.format(d=d, pkg=lerna_pkg, dev=dev_flag))
     runner.run()
 
 
@@ -239,8 +239,8 @@ def dev(dev_target, stage):
     def run_dev_cmd(dir, cmd, name, active_pane=None, vertical=False):
         nonlocal session, window, log_files
         (to_run, l) = cmd_w_log(cmd, name, dir_offset='../../')
-        to_run = "printf '\033]2;%s\033\\' '{title}'; ".format(title=name) + to_run
-        to_run += "; echo -e '\\n\\n' && /usr/bin/read -p 'Press enter to terminate all...' && tmux kill-session -t main"
+        to_run = "printf '\033]2;%s\033\\' '{title}'; endsess(){{ /usr/bin/read -p 'Press enter to terminate all...' && tmux kill-session -t main }} ; trap 'endsess' SIGINT SIGTERM; ".format(title=name) + to_run
+        to_run += "; echo -e '\\n\\n' && endsess "
         log_files.append(l)
         if session is None:
             session = server.new_session(session_name="main", start_directory=dir, window_command=to_run)

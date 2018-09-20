@@ -26,6 +26,15 @@
             </ul>
         </ui-section>
 
+        <ui-section title="Volunteer Tools">
+            <div v-if="user.volunteer === true">
+
+            </div>
+            <div v-else>
+                To enable volunteer tools, please check the volunteer box on your <router-link :to="Routes.EditUserDetails">details</router-link> page.
+            </div>
+        </ui-section>
+
         <ui-section title="Log Out">
             <button class="" v-on:click="MsgBus.$emit(M.LOGOUT)">Log Out Now</button>
         </ui-section>

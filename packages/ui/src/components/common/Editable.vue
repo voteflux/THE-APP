@@ -101,10 +101,10 @@ const Editable = Vue.extend({
         },
 
         _doSave() {
-            this.state = this.autoSave ? Cs.SAVING : Cs.EDITING
+            this.state = Cs.SAVING
             return this.$props.onSave()
                 .then(() => {
-                    this.state = this.autoSave ? Cs.DISPLAY : Cs.EDITING
+                    this.state = Cs.DISPLAY
                 }).catch(e => {
                     this.state = Cs.ERROR
                     this.err = this.$err(e)
