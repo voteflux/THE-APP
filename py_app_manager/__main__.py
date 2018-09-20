@@ -182,9 +182,9 @@ def build(target, stage):
             logging.info("Building for prod!")
             if 'IS_NETLIFY' in os.environ:
                 logging.info("Checking out most recent version tag")
-                reset_checkout_ref = os.environ.get('BRANCH', 'master')
+                # reset_checkout_ref = os.environ.get('BRANCH', 'master')
                 real_checkout_tag = os.environ['MOST_RECENT_TAG']
-                must_run("git reset --hard {} && git checkout {}".format(reset_checkout_ref, real_checkout_tag))
+                must_run("git checkout {}".format(real_checkout_tag))
             else:
                 logging.info("Not on netlify - will not checkout most recent git tag")
 
