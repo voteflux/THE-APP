@@ -8,6 +8,7 @@ if [ "$NETLIFY_BUILD_BASE" ]; then
     env
     echo -e "\n\n###\n\n"
     export IS_NETLIFY="true"
+    git pull
 else
     echo "Detected: not on netlify"
 fi
