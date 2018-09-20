@@ -74,7 +74,7 @@ except Exception as e:
 
 import click
 stage_option = click.option('--stage', type=click.Choice(['prod', 'staging', 'dev']), default='dev')
-
+type_pkg_choice = click.Choice(['api', 'ui', 'lib', 'all'])
 
 @click.group()
 @click.option("--debug/--no-debug", default=False)
@@ -119,6 +119,31 @@ def mgr_add_dep(ctx, pkgs):
 @cli.command()
 def mgr_set_up_to_date():
     set_deps_up_to_date()
+
+
+def install_npm_deps(target, deps, dev=False):
+    logging.warning("⚠️ dependencies will be installed one at a time. (It's a lerna thing)")
+    runner = CmdRunner(must_run)
+    lerna_pkg = '' if target == 'all' else target
+    dev_flag = "--dev" if dev else ""
+    for d in deps:
+        runner.add('Installing node dependency `{d}` for `{pkg}`'.format(d=d, pkg=target), 'npx lerna add {d} {pkg} {dev}'.format(d=d, pkg=lerna_pkg, dev=def_flag))
+    runner.run()
+
+
+@cli.command()
+@click.argument('target', nargs=1, type=type_pkg_choice)  # help='Package to add dependency to',
+@click.argument('dependencies', nargs=-1)  # help='NPM packages to add as dependencies'
+@click.option('--dev', default=False, type=bool, help="Install as devDependency")
+def addto(target, dependencies, dev):
+    install_npm_deps(target, dependencies, dev)
+
+
+@cli.command()
+@click.argument('dependencies', nargs=-1)  # help='NPM packages to add as dependencies'
+@click.option('--dev', default=False, type=bool, help="Install as devDependency")
+def add(dependencies, dev):
+    install_npm_deps('all', dependencies, dev)
 
 
 @cli.command()
