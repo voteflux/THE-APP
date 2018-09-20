@@ -119,4 +119,4 @@ If you haven't used `tmux` before: it's pretty nice (an advanced version of `scr
 
 Production is updated when a new version tag is added using `lerna publish` - leave this to @XertroV for the moment.
 
-Note: if you've been doing anything with tags outside `lerna` you might need to `git push --tags` so CI detects the latest version.
+Note: if you've been doing anything with tags outside `lerna` you might need to `git push origin [tag-name]` or `git push --follow-tags` so CI detects the latest version. (Also, maybe `git config --global push.followTags true` to set the global git config to do this)
