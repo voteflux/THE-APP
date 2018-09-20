@@ -9,6 +9,8 @@ import { ObjectID } from "bson";
 import * as utils from "./utils";
 import { DBV1, UserV1Object, PublicStats, DBV1Collections, collections, Donation, DBV2 } from "flux-lib/types/db";
 import DBCheckCache from "./db/cache";
+import { NdaStatus, NdaStage } from 'flux-lib/types/db/vols';
+import { NullableBoolean } from "aws-sdk/clients/xray";
 
 /*
  * DB functions for Flux DB (both v1 and v2)
@@ -302,6 +304,16 @@ export class DBMethods extends DBCheckCache {
     getUserFromEmail = async email => {
         return await this.dbv1.users.findOne({ email });
     }
+
+    /* Volunteer Calls */
+
+    getNdaStatus = async (_id): Promise<NdaStatus | null> => await this.dbv1.volNdaStatus.findOne({ uid: _id })
+
+    insertFreshNdaPdfAndSig = async (_id, pdf, sig): Promise<NdaStatus | null> => {
+        await this.dbv1.volNdaStatus.updateOne({ uid: _id }, _set({ pdfDataUri: pdf, signatureDataUri: sig, stage: NdaStage.AWAITING_APPROVAL }), { upsert: true })
+        return await this.getNdaStatus(_id)
+    }
+
 
 
     /* Finance */

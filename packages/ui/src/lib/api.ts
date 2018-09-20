@@ -9,11 +9,13 @@ import { PluginObject } from "vue";
 // import io from "socket.io-client";
 
 import { UserV1Object, DonationsResp, RoleResp, Auth, PR, UserForFinance } from "flux-lib/types/db"
+import { NdaStatus } from "flux-lib/types/db/vols"
 import WebRequest from 'flux-lib/WebRequest';
 import { ER } from 'flux-lib/types/index';
 import { MsgBus, M } from '../messages';
 export * from 'flux-lib/types/db'
 export * from 'flux-lib/types/db/api'
+export * from 'flux-lib/types/db/vols'
 
 
 export interface CheckEmailResp {
@@ -108,6 +110,12 @@ export function FluxApi(_Vue: VueConstructor, options?: any): void {
       },
       getRoleAudit({ s }): PR<RoleResp[]> {
         return post(_api2("admin/getRoleAudit"), { s })
+      },
+      getNdaStatus(args): PR<NdaStatus> {
+        return post(_api2("volunteers/getNdaStatus"), args)
+      },
+      submitNdaPdfAndSignature(args: Auth & {pdf: string, sig: string}): PR<NdaStatus> {
+        return post(_api2("volunteers/submitNdaPdfAndSignature"), args)
       }
     },
 

@@ -9,5 +9,7 @@ export default {
     AdminAuditRoles: "/admin/auditRoles",
 
     VolunteerDashboard: "/volunteers",
+    // VolunteerSignNDA: "/volunteers/sign-nda",
+
     CandidateDashboard: "/candidates",
 };

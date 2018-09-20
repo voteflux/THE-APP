@@ -1,5 +1,7 @@
 import Vue from "vue";
-import App from "./App.vue";
+
+import Vuex from 'vuex'
+Vue.use(Vuex)
 
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { faCoffee, faArrowLeft, faArrowCircleLeft, faPlusSquare, faMinusSquare, faTimes, faSpinner } from '@fortawesome/free-solid-svg-icons'
@@ -39,6 +41,13 @@ Vue.use(VueRouter);
 import ToggleButton from 'vue-js-toggle-button'
 Vue.use(ToggleButton)
 
+import vueSignature from "vue-signature"
+Vue.use(vueSignature)
+
+
+import App from "./App.vue";
+
+
 import Dashboard from "@c/Dashboard.vue";
 import UserValidation from "@c/UserValidation.vue";
 import UserDetailsMain from "@c/UserDetails";
@@ -51,8 +60,11 @@ import FinanceEnterDonation from "@c/Finance/FinanceEnterDonation.vue";
 
 import R from "./routes";
 
-import {UiSection} from "@c/common";
+import {UiSection, Loading, Error, Warning} from "@c/common";
 Vue.component('ui-section', UiSection)
+Vue.component('loading', Loading)
+Vue.component('error', Error)
+Vue.component('warning', Warning)
 
 const routes = [
     { path: R.Dashboard, component: Dashboard },
@@ -64,13 +76,17 @@ const routes = [
     { path: R.FinanceDonationEntry, component: Finance.EnterDonation },
     { path: R.FinanceDonationLog, component: Finance.DonationLog },
     { path: R.VolunteerDashboard, component: Volunteers.Dashboard },
+    // { path: R.VolunteerSignNDA, component: Volunteers.SignNDA },
     { path: R.CandidateDashboard, component: Candidates.Dashboard },
     { path: "*", redirect: "/" }
 ];
 
 const router = new VueRouter({ routes });
 
+import { store } from './store'
+
 new Vue({
     router,
+    store,
     render: h => h(App)
 }).$mount("#app");

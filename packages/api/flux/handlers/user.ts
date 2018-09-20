@@ -1,5 +1,5 @@
-import { DB } from './../db';
 'use strict';
+import { DB } from './../db';
 const handlerUtils = require('./handlerUtils')
 
 const R = require('ramda')

@@ -2,6 +2,7 @@ export * from './stats'
 export * from './api'
 import { Collection } from 'mongodb'
 import * as t from 'io-ts'
+import { NdaStatus } from './vols';
 
 // when adding a collection add to list of strings below too
 export interface DBV1Collections {
@@ -33,7 +34,8 @@ export interface DBV1Collections {
     rate_limits: Collection<any>,
     rego_forms_collected: Collection<any>,
     streets: Collection<any>,
-    suburb: Collection<any>
+    suburb: Collection<any>,
+    volNdaStatus: Collection<NdaStatus>
 }
 
 // no easy way to keep the type and this list in sync :/
@@ -67,6 +69,7 @@ export const collections = [
     "rego_forms_collected",
     "streets",
     "suburb",
+    "volNdaStatus",
 ]
 
 export type DBV1 = {
@@ -108,7 +111,7 @@ export interface UserDobDeets {
     dob: string
 }
 
-export interface UserV1Object extends UserDobDeets, UserAddressDeets, UserValidationDeets, UserBasicContactDeets {
+export interface UserV1Object extends UserDobDeets, UserAddressDeets, UserValidationDeets, UserBasicContactDeets, UserNameDeets {
     timestamp: number;
     s: string
 }

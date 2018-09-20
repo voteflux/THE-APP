@@ -123,6 +123,21 @@ functions:
           path: /v2/user/getRoles
           method: post
           cors: true
+  # volunteer requests
+  getNdaStatus:
+    handler: ${self:custom.handlers}/vols.getNdaStatus
+    events:
+      - http:
+          path: /v2/volunteers/getNdaStatus
+          method: post
+          cors: true
+  submitNdaPdfAndSignature:
+    handler: ${self:custom.handlers}/vols.submitNdaPdfAndSignature
+    events:
+      - http:
+          path: /v2/volunteers/submitNdaPdfAndSignature
+          method: post
+          cors: true
   # admin/finance requests
   getDonations:
     handler: ${self:custom.handlers}/admin-finance.getDonations

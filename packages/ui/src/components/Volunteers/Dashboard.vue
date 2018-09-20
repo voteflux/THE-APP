@@ -5,7 +5,7 @@
         <flux-logo title="Volunteers Dashboard" />
 
         <ui-section title="Nondisclosure (Required to access member details)">
-            <NdaStatusAndCta />
+            <NdaStatusAndCta :user="user" :auth="auth" />
         </ui-section>
 
     </div>
@@ -14,9 +14,10 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import {NdaStatusAndCta} from './NDA'
+import { NdaStatusAndCta } from './NDA'
 
 export default Vue.extend({
-    components: {NdaStatusAndCta, }
+    components: {NdaStatusAndCta, },
+    props: ['user', 'auth']
 })
 </script>
