@@ -87,3 +87,4 @@ git describe --tags $(git rev-list --tags) --always | head -n 10
 echo -e "\n\n⚠️ About to run app-manager ⚠️\n"
 
 python3 -m py_app_manager "$@"; exit "$?"
+
