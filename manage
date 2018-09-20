@@ -8,7 +8,8 @@ if [ "$NETLIFY_BUILD_BASE" ]; then
     env
     echo -e "\n\n###\n\n"
     export IS_NETLIFY="true"
-    git fetch --tags
+    git remote add origin "$REPOSITORY_URL"
+    git fetch --tags origin
 else
     echo "Detected: not on netlify"
 fi
