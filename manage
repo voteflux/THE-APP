@@ -8,6 +8,8 @@ if [ "$NETLIFY_BUILD_BASE" ]; then
     env
     echo -e "\n\n###\n\n"
     export IS_NETLIFY="true"
+    # not sure what's going on here, but ssh complains
+    ssh-keygen -R github.com
     git remote add origin "$REPOSITORY_URL"
     git fetch --tags origin
 else
