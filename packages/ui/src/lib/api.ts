@@ -39,16 +39,25 @@ const mkErr = (path: string) => <r>(err: HttpResponse): WebRequest<string, r> =>
 };
 
 // todo: check API paths against diff
+const localDev = { v2: "http://localhost:52700/v2/", v1: "https://flux-api-dev.herokuapp.com/", prod: false }
+const remoteDev = { v2: "https://dev.api.flux.party/v2/", v1: "https://flux-api-dev.herokuapp.com/", prod: false }
+const remoteProd = { v2: "https://api.flux.party/v2/", v1: "https://api.voteflux.org/", prod: true }
 const apiRoots = () => {
     switch (window.location.hostname) {
         case "127.0.0.1":
         case "localhost":
-            return { v2: "http://localhost:52700/v2/", v1: "https://flux-api-dev.herokuapp.com/", prod: false };
+            return localDev
         case "dev.app.flux.party":
         case "flux-app-dev.netlify.com":
-            return { v2: "https://dev.api.flux.party/v2/", v1: "https://flux-api-dev.herokuapp.com/", prod: false };
+            return remoteDev
+        case "app.flux.party":
+        case "members.flux.party":
+        case "api.voteflux.org":
+            return remoteProd
         default:
-            return { v2: "https://api.flux.party/v2/", v1: "https://api.voteflux.org/", prod: true };
+            if (window.location.hostname.includes("flux-app-dev.netlify.com"))
+                return remoteDev
+            return remoteProd;
     }
 };
 
