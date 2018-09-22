@@ -28,7 +28,7 @@
             </UiSection>
 
             <UiSection title="Membership Options">
-                <EditableOpt class="row" name="I'm willing to stand as a candidate" :value="user.candidature_federal" :onSave="savePropFactory('candidature_federal')" />
+                <EditableOpt class="row" name="I'm interested in standing as a candidate" :value="user.candidature_federal" :onSave="savePropFactory('candidature_federal')" />
                 <EditableOpt class="row" name="I'd like to volunteer" :value="user.volunteer" :onSave="savePropFactory('volunteer')" />
                 <EditableOpt class="row" name="Recieve SMSs?" trueName="None" falseName="All" :value="user.smsOptOut" :useDropdown="true" :default="false" :onSave="savePropFactory('smsOptOut')" />
             </UiSection>

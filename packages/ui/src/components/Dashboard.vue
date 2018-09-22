@@ -28,7 +28,7 @@
 
         <ui-section title="Volunteer / Candidature">
             <Section title="Profiles" :noCollapse="true" class="child-bg-alt" >
-                <EditableOpt class="row" name="I'm willing to stand as a candidate" :value="user.candidature_federal" :onSave="savePropFactory('candidature_federal')" />
+                <EditableOpt class="row" name="I'm interested in standing as a candidate" :value="user.candidature_federal" :onSave="savePropFactory('candidature_federal')" />
                 <EditableOpt class="row" name="I'd like to volunteer" :value="user.volunteer" :onSave="savePropFactory('volunteer')" />
             </Section>
 

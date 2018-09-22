@@ -4,7 +4,7 @@ import {SError} from './errors'
 import WebRequest from "flux-lib/WebRequest";
 import { Auth } from './api';
 import { UserV1Object, SortMethod, Donation, DonationsResp, Paginated, RoleResp, PR, R } from 'flux-lib/types/db'
-import { NdaStatus } from 'flux-lib/types/db/vols'
+import { NdaStatus, NdaDraftCommit, GenerateDraftNdaReq } from 'flux-lib/types/db/vols';
 import { Maybe } from "tsmonad/lib/src";
 import { StdV1, GetArbitraryPartial, } from 'flux-lib/types/db/api'
 import { UserForFinance } from 'flux-lib/types/db/index';
@@ -41,6 +41,7 @@ export interface FluxApiMethods {
         getRoleAudit: (opts: Auth) => PR<RoleResp[]>,
         getNdaStatus: (opts: Auth) => PR<NdaStatus>,
         submitNdaPdfAndSignature: (args: Auth & {pdf: string, sig: string}) => PR<NdaStatus>,
+        generateDraftPdf: (auth: Auth, args: GenerateDraftNdaReq) => PR<NdaDraftCommit>,
     },
     utils: {
         onGotUserObj: (r: R<UserV1Object>) => void,

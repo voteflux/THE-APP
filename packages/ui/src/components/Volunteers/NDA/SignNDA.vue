@@ -1,7 +1,10 @@
 <template>
 
     <center class="mt3">
-        <p> Please sign in the box below: </p>
+        <p>
+            Please sign in the box below:<br>
+            <small class="em">Note: nothing is saved to our servers without your permission.</small>
+        </p>
         <vueSignature class="ba db" ref="signature" :sigOption="sigOpts" :w="'500px'" :h="'320px'"></vueSignature>
         <div class="mt4 flex flex-row items-center justify-around" style="max-width: 500px;">
             <button @click="clear()">Clear</button>

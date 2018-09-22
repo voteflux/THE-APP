@@ -5,7 +5,7 @@
 
         <div v-else-if="req.ndaStatus.isSuccess()">
             <div v-if="req.ndaStatus.unwrap().stage === NdaStage.AWAITING_APPROVAL">
-                <p>Your NDA subbmission is awaiting approval by a Flux staff member.</p>
+                <p>Your NDA submission is awaiting approval by a Flux staff member.</p>
                 <div class="flex flex-row justify-around w-100">
                     <button @click="redoSubmission()">Redo or update submission</button>
                     <button @click="showSignedNda()">Show Signed NDA</button>
@@ -41,15 +41,20 @@
                                 <button class="mh2" @click="reviewFinalPdf()">Generate Signed NDA and Finalize</button>
                             </div>
                         </div>
-                        <iframe width="100%" style="min-height: 60vh; height: 60vh" v-if="showPdf" :src="pdfURL.valueOr('')" />
+                        <iframe width="100%" style="min-height: 50vh; height: 50vh" v-if="showPdf" :src="pdfURL.valueOr('')" />
                     </Section>
 
                     <Section v-else-if="wizardStage === WIZ.S3_REVIEW" title="Review NDA" :noCollapse="true" >
-                        <iframe width="100%" style="min-height: 60vh; height: 60vh" v-if="showPdf" :src="pdfURL.valueOr('')" />
-                        <div class="flex flex-row justify-around w-100 ma3">
-                            <button @click="reviewNegative()">Go Back</button>
-                            <button @click="reviewPositive()">Submit NDA to Flux</button>
+                        <Error v-if="req.ndaDraft.isFailed()">{{ req.ndaDraft.unwrapError() }}</Error>
+                        <div v-else-if="req.ndaDraft.isSuccess()">
+                            <iframe width="100%" style="min-height: 60vh; height: 60vh" v-if="showPdf" :src="pdfURL.valueOr('')" />
+                            <div class="flex flex-row justify-around w-100 ma3">
+                                <button @click="reviewNegative()">Go Back</button>
+                                <button @click="reviewPositive()">Submit NDA to Flux</button>
+                            </div>
+                            <warning>Submitting the NDA to Flux will save it to our servers</warning>
                         </div>
+                        <Loading v-else>Loading signed NDA for review...</Loading>
                     </Section>
 
                     <Loading v-else-if="wizardStage === WIZ.S4_SUBMITTING">Submitting NDA...</Loading>
@@ -63,16 +68,16 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import pdf from 'vue-pdf'
-import {genPdf} from './generatePdf'
+import {genPdf} from 'flux-lib/pdfs/nda/generatePdf'
 import { UserV1Object, Auth } from 'flux-lib/types';
 import routes from '@/routes'
 import { Maybe } from 'tsmonad';
-import { yourSignaturePlaceholder } from './imageUris';
+import { yourSignaturePlaceholder } from 'flux-lib/pdfs/nda/imageUris';
 import { Error, Loading, Section } from "@c/common"
 import WebRequest from 'flux-lib/WebRequest';
-import { NdaStage } from 'flux-lib/types/db/vols'
+import { NdaStage, NdaDraftCommit, GenerateDraftNdaResp } from 'flux-lib/types/db/vols';
 import SignNDA from './SignNDA.vue'
+import { R as Req } from 'flux-lib/types/db';
 
 
 enum WIZ {
@@ -95,7 +100,8 @@ export default Vue.extend({
 
     data: () => ({
         req: {
-            ndaStatus: WebRequest.NotRequested()
+            ndaStatus: WebRequest.NotRequested(),
+            ndaDraft: WebRequest.NotRequested() as Req<GenerateDraftNdaResp>,
         },
         pdfBytes: new Uint8Array(0),
         pdfURL: Maybe.nothing(),
@@ -103,16 +109,18 @@ export default Vue.extend({
         NdaStage,
         wizardStage: WIZ.S0_UNREAD,
         WIZ,
-    }),
+    } as {
+        req: { ndaDraft: Req<NdaDraftCommit> }
+    } & any),
 
     computed: {
-        signatureImage() {
+        signatureImage(): string {
             return this.$store.state.vol.ndaSignature.valueOr(yourSignaturePlaceholder)
         },
-        signatureIsSet() {
+        signatureIsSet(): boolean {
             return (this.$store.state.vol.ndaSignature as Maybe<string>).caseOf({ nothing: () => false, just: () => true})
         },
-        showPdf() {
+        showPdf(): boolean {
             return this.pdfURL.caseOf({nothing: () => false, just: () => true})
         }
     },
@@ -131,6 +139,7 @@ export default Vue.extend({
 
         redoSubmission() {
             this.req.ndaStatus = WebRequest.Success({ stage: NdaStage.NOT_STARTED })
+            this.generatePdf({ useDefaultSig: false })
         },
 
         showSignedNda() {
@@ -149,8 +158,14 @@ export default Vue.extend({
         },
 
         reviewFinalPdf() {
-            this.generatePdf()
+            this.req.ndaDraft = WebRequest.Loading()
             this.wizardStage = WIZ.S3_REVIEW
+            this.$flux.v2.generateDraftPdf(this.auth, { sigPng: this.signatureImage })
+                .then(r => {
+                    this.req.ndaDraft = r
+                    this.pdfURL = Maybe.just(r.unwrap().pdfData)
+                    this.$nextTick(() => console.log(r.unwrap()))
+                })
         },
 
         reviewNegative() {
@@ -162,11 +177,11 @@ export default Vue.extend({
             this.wizardStage = WIZ.S4_SUBMITTING
             const pdf = this.pdfURL.valueOr('')
             this.pdfURL = Maybe.nothing()
-            this.$flux.v2.submitNdaPdfAndSignature({ ...this.auth, pdf, sig: this.signatureImage})
-                .then(() => {
-                    this.wizardStage = WIZ.S0_UNREAD
-                    this.loadNdaStatus()
-                })
+            // this.$flux.v2.submitNdaPdfAndSignature({ ...this.auth, pdf, sig: this.signatureImage})
+            //     .then(() => {
+            //         this.wizardStage = WIZ.S0_UNREAD
+            //         this.loadNdaStatus()
+            //     })
         },
 
         loadNdaStatus() {

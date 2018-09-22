@@ -4,10 +4,10 @@ import Vuex from 'vuex'
 Vue.use(Vuex)
 
 import { library } from '@fortawesome/fontawesome-svg-core'
-import { faCoffee, faArrowLeft, faArrowCircleLeft, faPlusSquare, faMinusSquare, faTimes, faSpinner } from '@fortawesome/free-solid-svg-icons'
+import { faCoffee, faArrowLeft, faArrowCircleLeft, faPlusSquare, faMinusSquare, faTimes, faSpinner, faSave } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
-library.add(faCoffee, faArrowCircleLeft, faPlusSquare, faMinusSquare, faTimes, faSpinner)
+library.add(faCoffee, faArrowCircleLeft, faPlusSquare, faMinusSquare, faTimes, faSpinner, faSave)
 Vue.component('fa-icon', FontAwesomeIcon)
 
 // import { TableComponent, TableColumn } from 'vue-table-component';

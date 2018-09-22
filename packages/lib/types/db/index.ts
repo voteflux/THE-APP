@@ -2,7 +2,8 @@ export * from './stats'
 export * from './api'
 import { Collection } from 'mongodb'
 import * as t from 'io-ts'
-import { NdaStatus } from './vols';
+import { NdaStatus, NdaDraftCommit } from './vols';
+
 
 // when adding a collection add to list of strings below too
 export interface DBV1Collections {
@@ -35,7 +36,8 @@ export interface DBV1Collections {
     rego_forms_collected: Collection<any>,
     streets: Collection<any>,
     suburb: Collection<any>,
-    volNdaStatus: Collection<NdaStatus>
+    volNdaDraftCommits: Collection<NdaDraftCommit>,
+    volNdaStatus: Collection<NdaStatus>,
 }
 
 // no easy way to keep the type and this list in sync :/

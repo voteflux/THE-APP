@@ -9,8 +9,7 @@ import { ObjectID } from "bson";
 import * as utils from "./utils";
 import { DBV1, UserV1Object, PublicStats, DBV1Collections, collections, Donation, DBV2 } from "flux-lib/types/db";
 import DBCheckCache from "./db/cache";
-import { NdaStatus, NdaStage } from 'flux-lib/types/db/vols';
-import { NullableBoolean } from "aws-sdk/clients/xray";
+import { NdaStatus, NdaStage, NdaDraftCommit } from 'flux-lib/types/db/vols';
 
 /*
  * DB functions for Flux DB (both v1 and v2)
@@ -46,7 +45,7 @@ const cleanId = rawId => (R.is(ObjectID, rawId) ? rawId : new ObjectID(rawId));
 
 /* DB Setup - v1 */
 
-const mongoUrl = process.env.MONGODB_URI
+const mongoUrl: string = process.env.MONGODB_URI || "MONGO_URI NOT SET"
 // const dbName = R.last(mongoUrl.split('/'))
 let dbv1 = {} as DBV1;
 
@@ -90,7 +89,7 @@ export const _volunteer = { volunteer: true };
 export const _needsValidating = { needsValidating: true };
 
 /* Helper to create DB v1 with accessors for our collections (e.g. `db.users.findOne(...)`) - makes it nicer to use */
-export const mkDbV1 = (uri = mongoUrl): Promise<DBV1> =>
+export const mkDbV1 = (uri: string = mongoUrl): Promise<DBV1> =>
     new Promise((res, rej) => {
         MongoClient.connect(
             uri,
@@ -307,14 +306,27 @@ export class DBMethods extends DBCheckCache {
 
     /* Volunteer Calls */
 
+    // status of a member
     getNdaStatus = async (_id): Promise<NdaStatus | null> => await this.dbv1.volNdaStatus.findOne({ uid: _id })
 
-    insertFreshNdaPdfAndSig = async (_id, pdf, sig): Promise<NdaStatus | null> => {
-        await this.dbv1.volNdaStatus.updateOne({ uid: _id }, _set({ pdfDataUri: pdf, signatureDataUri: sig, stage: NdaStage.AWAITING_APPROVAL }), { upsert: true })
-        return await this.getNdaStatus(_id)
+    // record nda
+    insertFreshNdaPdfAndSig = async (_id, pdf, sig): Promise<NdaStatus> => {
+        const ndaStatusToSet = { pdfDataUri: pdf, signatureDataUri: sig, stage: NdaStage.AWAITING_APPROVAL }
+        await this.dbv1.volNdaStatus.updateOne({ uid: _id }, _set(ndaStatusToSet), { upsert: true })
+        return ndaStatusToSet
     }
 
+    // draft NDA
+    commitDraftNda = async (uid, pdfHash, sigHash, acceptSig): Promise<NdaDraftCommit> => {
+        const draftCommit = { uid, pdfHash, sigHash, ts: utils.now(), acceptSig }
+        await this.dbv1.volNdaDraftCommits.insertOne(draftCommit)
+        return draftCommit
+    }
 
+    acceptDraftNda = async (uid, pdfHash, sigHash): Promise<NdaStatus> => {
+
+        return await this.dbv1.vol
+    }
 
     /* Finance */
 

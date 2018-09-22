@@ -5,6 +5,8 @@ import sys, os, json, logging, subprocess
 logging.basicConfig(level=logging.INFO)
 
 from contextlib import suppress
+from collections import defaultdict
+
 try:
     from git import Repo
 except ImportError as e:
@@ -76,6 +78,8 @@ import click
 stage_option = click.option('--stage', type=click.Choice(['prod', 'staging', 'dev']), default='dev')
 type_pkg_choice = click.Choice(['api', 'ui', 'lib', 'all'])
 
+render_target = lambda target: defaultdict(lambda: target, {'all': '', 'lib': 'flux-lib'})[target]
+
 @click.group()
 @click.option("--debug/--no-debug", default=False)
 def cli(debug):
@@ -124,7 +128,8 @@ def mgr_set_up_to_date():
 def install_npm_deps(target, deps, dev=False):
     logging.warning("⚠️ dependencies will be installed one at a time. (It's a lerna thing)")
     runner = CmdRunner(must_run)
-    lerna_pkg = '' if target == 'all' else '--scope={}'.format(target)
+    scope = render_target(target)
+    lerna_pkg = '' if scope == '' else '--scope={}'.format(scope)
     dev_flag = "--dev" if dev else ""
     for d in deps:
         runner.add('Installing node dependency `{d}` for `{pkg}`'.format(d=d, pkg=target), 'npx lerna add {d} {pkg} {dev}'.format(d=d, pkg=lerna_pkg, dev=dev_flag))
