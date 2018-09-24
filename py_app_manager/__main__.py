@@ -232,40 +232,55 @@ def dev(dev_target, stage):
     ui_port = 32710
     TMP_SESSION = 'tmp-session'
     server = libtmux.Server(socket_name='flux-app-tmux-session')
+    # server.cmd('set -g destroy-unattached off')
+    server.cmd('set-option -g default-shell /bin/bash')
+    session = server.new_session(session_name="main", start_directory='./', window_command="sleep 1")
+    session.set_option('mouse', 'on')
+    # session.set_option('destroy-unattached', 'off')
+    # session.set_option('remain-on-exit', 'on')
+    print(session)
 
     def kill_sessions():
         with suppress(Exception):
-            for s in server.list_sessions():
-                s.kill_session()
+            try:
+                for s in server.list_sessions():
+                    print(s)
+                    print(s.show_option('default-shell'))
+                    s.kill_session()
+            except Exception as e:
+                print('got an exception killing tmux sessions:', e)
 
-    kill_sessions()
-
-    server = libtmux.Server(socket_name='flux-app-tmux-session')
-    server.new_session(session_name=TMP_SESSION, window_command="sleep 2; exit")
-    session = None
-    window = None
+    # kill_sessions()
+    # session = None
+    # window = None
+    window = session.list_windows()[0]
+    print(session.list_windows())
     log_files = []
 
     def run_dev_cmd(dir, cmd, name, active_pane=None, vertical=False):
         nonlocal session, window, log_files
         (to_run, l) = cmd_w_log(cmd, name, dir_offset='../../')
-        to_run = "printf '\033]2;%s\033\\' '{title}'; endsess(){{ /usr/bin/read -p 'Press enter to terminate all...' && tmux kill-session -t main }} ; trap 'endsess' SIGINT SIGTERM; ".format(title=name) + to_run
+        to_run = "printf '\\033]2;\%s\\033\\' '{title}'; endsess(){{ read -p 'Press enter to terminate all...' && tmux kill-session -t main; }} ; trap 'endsess' SIGINT SIGTERM; ".format(title=name) + to_run
         to_run += "; echo -e '\\n\\n' && endsess "
+        print(name, to_run)
         log_files.append(l)
         if session is None:
             session = server.new_session(session_name="main", start_directory=dir, window_command=to_run)
-            session.set_option('mouse', 'on')
+            print(session)
             # session.set_option('remain-on-exit', 'on')
             window = session.list_windows()[0]
             return window.attached_pane
         else:
-            opts = {} if active_pane is None else {'target': active_pane.id}
-            return window.split_window(start_directory=dir, shell=to_run, vertical=vertical, **opts)
+            return window.split_window(start_directory=dir, shell=to_run, vertical=vertical)
+
 
     # uncomment the below if we need to compile flux-lib
     # lib_pane = run_dev_cmd('./packages/lib', 'npm run watch', 'dev-lib')
     if dev_target in {'ui', 'all'}:
         ui_pane = run_dev_cmd('./packages/ui', "STAGE={} npm run serve".format(stage), 'dev-ui')
+
+    print(session.list_windows())
+    print(session.list_windows())
 
     if dev_target in {'api', 'all'}:
         # mongo dev server port: 53799

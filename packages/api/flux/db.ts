@@ -324,8 +324,8 @@ export class DBMethods extends DBCheckCache {
     }
 
     acceptDraftNda = async (uid, pdfHash, sigHash): Promise<NdaStatus> => {
-
-        return await this.dbv1.vol
+        // return await this.dbv1.vol
+        return {} as any
     }
 
     /* Finance */
