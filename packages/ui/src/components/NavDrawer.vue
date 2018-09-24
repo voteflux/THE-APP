@@ -60,7 +60,7 @@ export default Vue.extend({
                 const filteredItems = Ramda.filter(([role, link]) => this.hasRole(role), permissionedItems)
                 const extraItems = Ramda.map(([r,i]) => i, filteredItems)
 
-                return Ramda.concat(this.items, extraItems)
+                return Ramda.concat(this.items as NavItemRec[], extraItems)
             }
             return this.items
         },

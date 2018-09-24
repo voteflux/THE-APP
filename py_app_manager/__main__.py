@@ -238,7 +238,6 @@ def dev(dev_target, stage):
     session.set_option('mouse', 'on')
     # session.set_option('destroy-unattached', 'off')
     # session.set_option('remain-on-exit', 'on')
-    print(session)
 
     def kill_sessions():
         with suppress(Exception):

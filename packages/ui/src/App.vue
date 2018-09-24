@@ -72,7 +72,7 @@ export default /*class App extends Vue*/ Vue.extend({
         getRoles() {
             this.req.roles = WR.Loading();
             this.$flux.v2.getRoles(this.auth).then(r => {
-                this.req.roles = r.map(({roles}) => roles)
+                this.req.roles = r
                 r.do({
                     failed: (e, errObj) => {
                         // todo: handle failed roles check
