@@ -2,7 +2,7 @@
     <v-navigation-drawer clipped :value="value" @input="updateInput" enable-resize-watcher app>
         <v-toolbar flat>The Flux App</v-toolbar>
         <v-list>
-            <NavItem v-for="item in navItems" :key="item.name" :item="item" />
+            <NavItem v-for="item in navItems()" :key="item.name" :item="item" />
         </v-list>
     </v-navigation-drawer>
 </template>
@@ -45,8 +45,11 @@ export default Vue.extend({
         _value: false
     }),
     computed: {
+    },
+    methods: {
         navItems() {
             if (this.roles.isSuccess()) {
+                // @ts-ignore
                 return Ramda.concat(this.items, [{
                     name: "Admin",
                     items: Ramda.map(([r,i]) => i, Ramda.filter(([role, link]) => this.hasRole(role), [
@@ -56,9 +59,7 @@ export default Vue.extend({
                 }])
             }
             return this.items
-        }
-    },
-    methods: {
+        },
         updateInput(newVal) {
             this.$emit("input", newVal)
         },

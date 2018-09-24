@@ -8,7 +8,7 @@ import { Http, HttpResponse, HttpOptions } from "vue-resource/types/vue_resource
 import { PluginObject } from "vue";
 // import io from "socket.io-client";
 
-import { UserV1Object, DonationsResp, RoleResp, Auth, PR, UserForFinance } from "flux-lib/types/db";
+import { UserV1Object, DonationsResp, RoleResp, Auth, PR, UserForFinance, RolesResp } from "flux-lib/types/db";
 import { NdaStatus, NdaDraftCommit, GenerateDraftNdaReq } from "flux-lib/types/db/vols";
 import WebRequest from "flux-lib/WebRequest";
 import { ER } from "flux-lib/types/index";
@@ -102,7 +102,7 @@ export function FluxApi(_Vue: VueConstructor, options?: any): void {
             checkEmailToOnboard({ email }): PR<any> {
                 return post(_api2("user/check_email"), { email });
             },
-            getRoles({ s }): PR<{ roles: string[] }> {
+            getRoles({ s }): PR<RolesResp> {
                 return post(_api2("user/getRoles"), { s });
             },
             getDonations(args): PR<DonationsResp> {

@@ -67,13 +67,14 @@ import Roles from "../lib/roles";
 import {M, MsgBus} from "../messages"
 import WebRequest from "flux-lib/WebRequest";
 import { Auth } from 'flux-lib/types';
+import { Req, RolesResp } from 'flux-lib/types/db'
 
 export default Vue.extend({
     name: "Dashboard",
     components: { UserSummary, UiSection, Warning, Section, EditableOpt },
     props: {
         user: Object,
-        roles: WebRequest,
+        roles: Object as () => Req<RolesResp>,
         auth: Object as () => Auth
     },
     data: () => ({
@@ -83,15 +84,15 @@ export default Vue.extend({
     }),
     methods: {
         hasRole(r) {
-            const rs = this.$props.roles
+            const rs: Req<RolesResp> = this.$props.roles
             if (rs.isSuccess()) {
-                return rs.unwrap().includes(r) || rs.unwrap().includes("admin")
+                return rs.unwrap().roles.includes(r) || rs.unwrap().roles.includes("admin")
             }
             return false
         },
 
         showAdmin() {
-            return this.roles.isSuccess() && this.roles.unwrap().length > 0
+            return this.roles.isSuccess() && this.roles.unwrap().roles.length > 0
         },
 
         savePropFactory(prop) {
