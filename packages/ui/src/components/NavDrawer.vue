@@ -11,7 +11,7 @@
 import Vue from "vue";
 import * as Ramda from 'ramda'
 
-import NavItem from './NavItem.vue'
+import NavItem, { NavItemRec } from './NavItem.vue'
 import R from '@/routes'
 import { Req } from 'flux-lib/types/db/api'
 import { RolesResp } from 'flux-lib/types/db'
@@ -49,24 +49,28 @@ export default Vue.extend({
     methods: {
         navItems() {
             if (this.roles.isSuccess()) {
-                // @ts-ignore
-                return Ramda.concat(this.items, [{
-                    name: "Admin",
-                    items: Ramda.map(([r,i]) => i, Ramda.filter(([role, link]) => this.hasRole(role), [
-                        [Roles.FINANCE, { name: "Finance", route: R.FinanceMenu }],
-                        [Roles.ADMIN, { name: "Audit Roles", route: R.AdminAuditRoles }]
-                    ]))
-                }])
+                const permissionedItems: [string, NavItemRec][] = [
+                    [Roles.FINANCE, { name: "Finance", items: [
+                        { name: "Donation Log", route: R.FinanceDonationLog },
+                        { name: "Donation Entry (Manual)", route: R.FinanceDonationEntry}
+                    ]}],
+                    [Roles.ADMIN, { name: "Admin", items: [{ name: "Audit Roles", route: R.AdminAuditRoles }] }],
+                ]
+
+                const filteredItems = Ramda.filter(([role, link]) => this.hasRole(role), permissionedItems)
+                const extraItems = Ramda.map(([r,i]) => i, filteredItems)
+
+                return Ramda.concat(this.items, extraItems)
             }
             return this.items
         },
         updateInput(newVal) {
             this.$emit("input", newVal)
         },
-        hasRole(r) {
+        hasRole(r: string) {
             const rs = this.$props.roles
             if (rs.isSuccess()) {
-                return rs.unwrap().includes(r) || rs.unwrap().includes("admin")
+                return rs.unwrap().roles.includes(r) || rs.unwrap().roles.includes("admin")
             }
             return false
         },

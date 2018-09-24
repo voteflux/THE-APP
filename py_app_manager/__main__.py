@@ -4,6 +4,7 @@
 import sys, os, json, logging, subprocess
 logging.basicConfig(level=logging.INFO)
 
+from time import sleep
 from contextlib import suppress
 from collections import defaultdict
 
@@ -19,7 +20,7 @@ from py_app_manager.cmd_runner import CmdRunner
 _deps_updated = False
 def ensure_deps(force=False):
     global _deps_updated, repo
-    if (force or not deps_up_to_date()) and not _deps_updated:
+    if force or (not deps_up_to_date() and not _deps_updated):
         def install_deps():
             must_run("python3 -m pip install -r requirements.txt")
             must_run("npm i")
@@ -27,14 +28,14 @@ def ensure_deps(force=False):
             set_deps_up_to_date()
         if Repo is not None:
             repo = Repo('./')
-            if repo.is_dirty():
+            if repo.is_dirty() and not force:
                 logging.warning("⚠️ Repository is dirty; skipping reinstall of requirements!")
             else:
                 logging.warning("⚠️ Detected repository but not dirty; installing requirements!")
                 install_deps()
         else:
             install_deps()
-        _deps_updated = True
+        _deps_updated = True and not force
 
 
 def export(env_name, env_value):
@@ -229,14 +230,16 @@ def dev(dev_target, stage):
     import libtmux
     api_port = 52700
     ui_port = 32710
+    TMP_SESSION = 'tmp-session'
     server = libtmux.Server(socket_name='flux-app-tmux-session')
+    _tmp_session = server.new_session(session_name=TMP_SESSION)
 
     def kill_sessions():
         with suppress(Exception):
             for s in server.list_sessions():
                 s.kill_session()
 
-    kill_sessions()
+    # kill_sessions()
     session = None
     window = None
     log_files = []
@@ -272,6 +275,7 @@ def dev(dev_target, stage):
 
     window.select_layout('tiled')
 
+    _tmp_session.kill_session()
     session.attach_session()
     kill_sessions()
     print("Log files: ", ', '.join(log_files))

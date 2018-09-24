@@ -35,7 +35,7 @@ type NavItemH1I = {
 type NavItemH2I = {
     items: NavItemRec[]
 } & _NavItemH
-type NavItemRec = NavItemH1I | NavItemH2I
+export type NavItemRec = NavItemH1I | NavItemH2I
 
 const isSingle = (n: any): n is NavItemH1I => !!n.route
 const isSublist = (n: any): n is NavItemH2I => !!n.items
