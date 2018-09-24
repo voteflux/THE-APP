@@ -232,14 +232,14 @@ def dev(dev_target, stage):
     ui_port = 32710
     TMP_SESSION = 'tmp-session'
     server = libtmux.Server(socket_name='flux-app-tmux-session')
-    _tmp_session = server.new_session(session_name=TMP_SESSION)
+    server.new_session(session_name=TMP_SESSION, window_command="sleep 2; exit")
 
     def kill_sessions():
         with suppress(Exception):
             for s in server.list_sessions():
                 s.kill_session()
 
-    # kill_sessions()
+    kill_sessions()
     session = None
     window = None
     log_files = []
@@ -275,7 +275,6 @@ def dev(dev_target, stage):
 
     window.select_layout('tiled')
 
-    _tmp_session.kill_session()
     session.attach_session()
     kill_sessions()
     print("Log files: ", ', '.join(log_files))
