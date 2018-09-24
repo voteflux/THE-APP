@@ -10,6 +10,8 @@ Ultimately you'll need these in your path: `python3`, `pip3`, `virtualenv`, `npm
 
 Running `./manage` will set up dependencies and show you available commands.
 
+After you've set up your dev environment, run `git clone https://github.com/voteflux/THE-APP && cd THE-APP`. You'll then be able to run `./manage`, etc.
+
 ### Windows
 
 (WIP)
@@ -22,10 +24,10 @@ Running `./manage` will set up dependencies and show you available commands.
 
 ### Ubuntu
 
-* Install required packages: `sudo apt update && sudo apt install -y python3 python3-pip python3-virtualenv tmux`
+* Install required packages: `sudo apt update && sudo apt install -y curl python3 python3-pip python3-virtualenv tmux git build-essential`
   * note: there might be trouble on ubuntu 16.04 and below wrt to python3, though I'm not certain of that. Please create an isssue if you have trouble with python3 deps
 * If you don't have nodejs v8+ installed already: [install NVM](#install-nvm)
-* Should be all ready to go
+* Should be all ready to go after that
 
 ### MacOS
 
@@ -40,7 +42,7 @@ Running `./manage` will set up dependencies and show you available commands.
 * Ensure your .bashrc or .zshrc is configured correctly with `nvm` as per the last few lines of output when you run the above script.
 * In a new terminal run:
   * `nvm install 8`
-  * `nvm label default 8`
+  * `nvm alias default 8`
   * `nvm use default`
 * Done
 

@@ -71,7 +71,7 @@ fi
 
 if [ ! -d '.venv' ]; then
     echo "Creating virtualenv"
-    python3 -m virtualenv .venv
+    python3 -m virtualenv .venv --python=python3
     echo "Created virtualenv in .venv"
 fi
 
