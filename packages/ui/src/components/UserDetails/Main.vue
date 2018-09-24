@@ -1,7 +1,5 @@
 <template>
     <div>
-        <h2>Your Details</h2>
-
         <UserDetailsValid :user="user" />
 
         <div class="child-bg-alt tl">

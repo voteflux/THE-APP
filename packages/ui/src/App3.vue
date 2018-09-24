@@ -1,5 +1,4 @@
 <template>
-<template>
     <div id="app" class="w-100">
         <notifications/>
         <transition name="fade" mode="out-in">

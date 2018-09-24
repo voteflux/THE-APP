@@ -47,9 +47,7 @@ export default Vue.extend({
         save() {
             // @ts-ignore
             const sig = this.$refs.signature.save('image/png')
-            // this.$refs.signature.save('image/jpeg')
             this.$store.commit(VolFs.setNda, sig)
-            // this.$router.push({ path: routes.VolunteerDashboard })
             this.onSave(sig)
         }
     }

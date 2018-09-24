@@ -1,6 +1,5 @@
 <template>
-<template>
-    <div id="app" class="w-100">
+    <v-app id="app" class="w-100">
         <notifications/>
         <transition name="fade" mode="out-in">
             <div v-if="req.user.isLoading()" :key="IS_LOGGING_IN" class="mt4" >
@@ -10,17 +9,12 @@
             </div>
 
             <div v-else-if="req.user.isSuccess()" :key="IS_LOGGED_IN">
-                <Layout>
-                    <Header>
-                        <flux-logo :title="this.$store.state.nav.title" />
-                    </Header>
-                    <Content>
-                        <transition name="fade" mode="out-in">
-                            <router-view :auth="auth" :user="req.user.unwrap()" :roles="req.roles"/>
-                        </transition>
-                    </Content>
-                    <Footer>Flux Footer</Footer>
-                </Layout>
+                <v-toolbar class="">
+                    <flux-logo :title="getPageTitle()" />
+                </v-toolbar>
+                <transition name="fade" mode="out-in">
+                    <router-view :auth="auth" :user="req.user.unwrap()" :roles="req.roles" />
+                </transition>
             </div>
 
             <div v-else :key="IS_NOT_LOGGED_IN">
@@ -30,7 +24,7 @@
                 </Error>
             </div>
         </transition>
-    </div>
+    </v-app>
 </template>
 
 <script lang="ts">
@@ -42,6 +36,8 @@ import { debug } from "util";
 import { M, MsgBus } from "./messages";
 import WR from 'flux-lib/WebRequest'
 import { UserV1Object, Auth } from "@/lib/api"
+import { Routes, pageTitle } from './routes'
+import { AppFs } from './store/app'
 
 // constants - for everything w/in this components scope
 enum Cs {
@@ -63,6 +59,9 @@ export default /*class App extends Vue*/ Vue.extend({
         ...Cs
     }),
     methods: {
+        getPageTitle() {
+            return pageTitle(this.$route.path as Routes)
+        },
         getRoles() {
             this.req.roles = WR.Loading();
             this.$flux.v2.getRoles(this.auth).then(r => {
@@ -139,6 +138,8 @@ export default /*class App extends Vue*/ Vue.extend({
 
         this.$on(M.LOGOUT, this.logout)
         MsgBus.$on(M.LOGOUT, this.logout)
+
+        this.$store.commit(AppFs.initHistoryCount)
     }
 });
 </script>

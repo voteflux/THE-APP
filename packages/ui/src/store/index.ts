@@ -2,16 +2,16 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 Vue.use(Vuex)
 
-import * as Volunteers from './volunteers'
+import * as Vols from './volunteers'
+import * as App from './app'
 
 export const store = new Vuex.Store({
     state: {
-        ...Volunteers.state,
-        nav: {
-            title: "TITLE NOT SET"
-        }
-    } as Volunteers.VolState & {},
+        ...Vols.state,
+        ...App.state,
+    } as Vols.VolState & App.AppState,
     mutations: {
-        ...Volunteers.mutations,
-    } as Volunteers.VolMuts & {}
+        ...Vols.mutations,
+        ...App.mutations,
+    } as Vols.VolMuts & App.AppMuts
 })

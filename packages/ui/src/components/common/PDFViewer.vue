@@ -20,7 +20,7 @@ export const PDFViewer = Vue.extend({
     computed: {
         showPdf(): boolean {
             console.log(this.pdfMaybe)
-            return this.$props.pdfMaybe.isJust()
+            return Maybe.isJust(this.$props.pdfMaybe)
         },
         pdf(): string {
             return this.$props.pdfMaybe.valueOrThrow()

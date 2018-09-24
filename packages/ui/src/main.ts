@@ -6,17 +6,21 @@ Vue.use(Vuex)
 import VueRouter from "vue-router";
 Vue.use(VueRouter);
 
-import iView from 'iview';
-import 'iview/dist/styles/iview.css';
-import locale from 'iview/dist/locale/en-US';
-Vue.use(iView, { locale });
-
+// todo: phase out fontawesime now we have veutify
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { faCoffee, faArrowLeft, faArrowCircleLeft, faPlusSquare, faMinusSquare, faTimes, faSpinner, faSave } from '@fortawesome/free-solid-svg-icons'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 
 library.add(faCoffee, faArrowCircleLeft, faPlusSquare, faMinusSquare, faTimes, faSpinner, faSave)
 Vue.component('fa-icon', FontAwesomeIcon)
+
+
+import Vuetify from 'vuetify'
+import 'vuetify/dist/vuetify.min.css'
+
+Vue.use(Vuetify, {
+  iconfont: 'md',
+})
 
 // import { TableComponent, TableColumn } from 'vue-table-component';
 // Vue.component('sortable-table', TableComponent)
@@ -88,9 +92,11 @@ const routes = [
 
 const router = new VueRouter({ routes });
 
+
 import { store } from './store'
 import 'roboto-fontface/css/roboto/roboto-fontface.css'
 import 'material-design-icons-iconfont/dist/material-design-icons.css'
+
 
 new Vue({
     router,

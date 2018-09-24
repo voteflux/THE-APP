@@ -1,5 +1,5 @@
 <template>
-    <Alert :type="myType" closable> <!--  v-if="visible == VISIBLE" class="db mh3 mv4 common relative" v-bind:class="getClass()"> -->
+    <v-alert :type="myType()" dismissible :value="true"> <!--  v-if="visible == VISIBLE" class="db mh3 mv4 common relative" v-bind:class="getClass()"> -->
         <!-- <span class="pr2 pt2 top-0 right-0 absolute fr" @click="visible = HIDING">
             <fa-icon icon="times" />
         </span> -->
@@ -10,14 +10,13 @@
         <div class="err-text pl2 pb2 pr2">
             <slot />
         </div> -->
-    </Alert>
+    </v-alert>
 </template>
 
 <script lang="ts">
 import Vue from "vue";
 
 export enum Types {
-    NULL = "null",
     ERROR = "error",
     WARNING = "warning",
     INFO = "info",
@@ -39,12 +38,12 @@ export default Vue.extend({
         ...HideState
     }),
     computed: {
-        myType() {
-            const t = this.statusClass
-            return t == "info" ? undefined : t
-        }
     },
     methods: {
+        myType() {
+            const t = this.statusClass
+            return t
+        },
         getClass() {
             return {}
             // return {
@@ -56,10 +55,10 @@ export default Vue.extend({
         },
         getHeading() {
             return {
-                [Types.ERROR]: "Error:",
-                [Types.WARNING]: "Warning:",
-                [Types.INFO]: "Info:",
-                [Types.SUCCESS]: "Success:",
+                [Types.ERROR]: "Error: ",
+                [Types.WARNING]: "Warning: ",
+                [Types.INFO]: "Info: ",
+                [Types.SUCCESS]: "Success: ",
             }[this.statusClass] || ""
         }
     },

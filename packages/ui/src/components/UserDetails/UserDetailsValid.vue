@@ -1,14 +1,14 @@
 <template>
     <div>
         <div v-if="user.needsValidating">
-            <h4 class="blue">
-                Your details need validating. Please <router-link :to="R.ValidateSelf">click here</router-link> to do so.
+            <h4 class="">
+                ⚠️ Your details need validating. Please <router-link :to="R.ValidateSelf">click here</router-link> to do so.
             </h4>
         </div>
 
         <!-- If a user doesn't need validating and their details are invalid then they need to change their details -->
         <div v-else-if="!user.detailsValid">
-            <h4 class="red">Your details are not able to be validated against the electoral roll.</h4>
+            <h4 class="">💥 Your details are not able to be validated against the electoral roll.</h4>
             <p>Reason: {{ user.validationReason }}</p>
             <!-- <p>Please <router-link :to="R.EditUserDetails">update your details</router-link>.</p> -->
             <p>Please <router-link :to="R.EditUserDetails">update your details</router-link>.</p>
@@ -19,7 +19,7 @@
 
         <!-- don't need validating, and details are valid -->
         <div v-else>
-            <h4 class="green">Your details are valid. Thanks ☺️</h4>
+            <h4 class="">Your details are valid. Thanks ☺️</h4>
         </div>
     </div>
 </template>

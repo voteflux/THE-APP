@@ -1,7 +1,5 @@
 <template>
     <div>
-        <flux-logo title="Dashboard" :showBack="false" />
-
         <UiSection title="Your Summary">
             <UserSummary :user='user'></UserSummary>
         </UiSection>

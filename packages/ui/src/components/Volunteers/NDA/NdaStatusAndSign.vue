@@ -80,7 +80,7 @@ import { Maybe } from 'tsmonad';
 import { yourSignaturePlaceholder } from 'flux-lib/pdfs/nda/imageUris';
 import { Error, Loading, Section, PDFViewer } from "@c/common"
 import WebRequest from 'flux-lib/WebRequest';
-import { NdaStage, NdaDraftCommit, GenerateDraftNdaResp } from 'flux-lib/types/db/vols';
+import { NdaStage, NdaDraftCommit, GenerateDraftNdaResp, NdaStatus } from 'flux-lib/types/db/vols'
 import SignNDA from './SignNDA.vue'
 import { R as Req } from 'flux-lib/types/db';
 
@@ -145,7 +145,7 @@ export default Vue.extend({
 
         redoSubmission() {
             this.req.ndaStatus = WebRequest.Success({ stage: NdaStage.NOT_STARTED })
-            this.generatePdf({ useDefaultSig: false })
+            this.generatePdf({ useDefaultSig: true })
         },
 
         showSignedNda() {
@@ -193,7 +193,7 @@ export default Vue.extend({
             this.pdfURL = Maybe.nothing()
             this.req.ndaStatus = WebRequest.Loading()
             return this.$flux.v2.getNdaStatus(this.auth).then(r => {
-                this.req.ndaStatus = r
+                this.req.ndaStatus = r as Req<NdaStatus>
                 return r
             })
         }

@@ -7,9 +7,9 @@
         </div>
         <h2 class="flex items-center justify-between">
             <!-- <img src="/img/flux-text-logo.svg" class="h1 v-mid ml2"> -->
-            <span class="">
-                <!-- &mdash; --> {{ title }}
-            </span>
+            <transition name="fade" mode="out-in">
+                <!-- &mdash; --> <span>{{ title }}</span>
+            </transition>
         </h2>
         <span>&nbsp;</span>
     </div>

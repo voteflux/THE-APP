@@ -104,7 +104,8 @@ export default Vue.extend({
                 deliver_session: ({ session }) => {
                     this.session = session;
                     this.state = Cs.AWAITING_CAPTCHA;
-                    this.$nextTick(() => (<HTMLElement>this.$refs.captcha).focus())
+                    if (this.$refs.captcha)
+                        this.$nextTick(() => (<HTMLElement>this.$refs.captcha).focus())
                     this.captchaImg = this.$flux.utils.captchaImgUrl(session);
                     this.sessionImg = new Image();
                     this.sessionImg.src = this.captchaImg;
