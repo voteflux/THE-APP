@@ -17,9 +17,20 @@ Vue.component('fa-icon', FontAwesomeIcon)
 
 import Vuetify from 'vuetify'
 import 'vuetify/dist/vuetify.min.css'
+import colors from 'vuetify/es5/util/colors'
 
 Vue.use(Vuetify, {
-  iconfont: 'md',
+    iconfont: 'md',
+    // https://vuetifyjs.com/en/theme-generator
+    theme: {
+        primary: colors.blue.darken1,
+        secondary: colors.blue.lighten3,
+        accent: colors.amber.darken4,
+        error: colors.red.base,
+        warning: colors.yellow.darken3,
+        info: colors.blue.base,
+        success: colors.green.base
+      }
 })
 
 // import { TableComponent, TableColumn } from 'vue-table-component';
@@ -74,6 +85,8 @@ Vue.component('ui-section', UiSection)
 Vue.component('loading', Loading)
 Vue.component('error', Error)
 Vue.component('warning', Warning)
+import NavDrawer from '@c/NavDrawer.vue'
+Vue.component('nav-drawer', NavDrawer)
 
 const routes = [
     { path: R.Dashboard, component: Dashboard },

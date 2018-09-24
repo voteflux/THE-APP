@@ -3,7 +3,7 @@ import Vue from "vue";
 import {SError} from './errors'
 import WebRequest from "flux-lib/WebRequest";
 import { Auth } from './api';
-import { UserV1Object, SortMethod, Donation, DonationsResp, Paginated, RoleResp, PR, R } from 'flux-lib/types/db'
+import { UserV1Object, SortMethod, Donation, DonationsResp, Paginated, RoleResp, PR, R, RolesResp } from 'flux-lib/types/db'
 import { NdaStatus, NdaDraftCommit, GenerateDraftNdaReq } from 'flux-lib/types/db/vols';
 import { Maybe } from "tsmonad/lib/src";
 import { StdV1, GetArbitraryPartial, } from 'flux-lib/types/db/api'
@@ -34,7 +34,7 @@ export interface FluxApiMethods {
         getStreets: (country: string, postcode: string, suburb: string) => PR<{streets: string[]}>,
     },
     v2: {
-        getRoles: (opts : Auth) => PR<{roles: string[]}>,
+        getRoles: (opts : Auth) => PR<RolesResp>,
         getDonations: (opts : GetArbitraryPartial<Donation>) => PR<DonationsResp>,
         addNewDonation: (opts: {doc: Donation} & Auth) => PR<ER<boolean>>,
         donationAutoComplete: (opts: Auth & {email: string}) => PR<ER<UserForFinance>>,

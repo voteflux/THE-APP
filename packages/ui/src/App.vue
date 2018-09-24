@@ -9,12 +9,18 @@
             </div>
 
             <div v-else-if="req.user.isSuccess()" :key="IS_LOGGED_IN">
-                <v-toolbar class="">
+                <v-toolbar fixed app>
+                    <v-toolbar-side-icon :outline="false" @click.stop="navOpen = !navOpen" />
                     <flux-logo :title="getPageTitle()" />
                 </v-toolbar>
-                <transition name="fade" mode="out-in">
-                    <router-view :auth="auth" :user="req.user.unwrap()" :roles="req.roles" />
-                </transition>
+                <nav-drawer v-model="navOpen" :roles="req.roles" />
+                <v-content>
+                    <v-container fluid>
+                        <transition name="fade" mode="out-in">
+                            <router-view class="" :auth="auth" :user="req.user.unwrap()" :roles="req.roles" />
+                        </transition>
+                    </v-container>
+                </v-content>
             </div>
 
             <div v-else :key="IS_NOT_LOGGED_IN">
@@ -56,6 +62,7 @@ export default /*class App extends Vue*/ Vue.extend({
         },
         auth: undefined as any & Auth,
         user: {} as any,
+        navOpen: null as null | boolean,
         ...Cs
     }),
     methods: {

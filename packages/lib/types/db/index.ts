@@ -160,3 +160,5 @@ export type Donation = t.TypeOf<typeof DonationRT>
 export interface DonationsResp {donations: Donation[], totalDonations: number, pageN: number, limit: number, sortMethod: number}
 
 export interface RoleResp {role: string, users: UserV1Object[]}
+
+export interface RolesResp {roles: string[]}
