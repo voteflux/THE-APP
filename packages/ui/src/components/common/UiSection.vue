@@ -1,6 +1,6 @@
 <template>
     <div class="mt2 tl">
-        <h2 class="us-heading bb ph2 pt3" v-bind:class="genClasses()">{{ title }}</h2>
+        <h2 class="us-heading" v-bind:class="genClasses()">{{ dangerZoneWarning() }}{{ title }}</h2>
         <div class="ph2 us-body">
             <slot></slot>
         </div>
@@ -16,10 +16,15 @@ export default Vue.extend({
         isDangerZone() {
             return (this.$props.dangerZone && this.$props.dangerZone === true)
         },
+        dangerZoneWarning() {
+            if (this.dangerZone)
+                return "⚠️ "
+            return ""
+        },
 
         genClasses() {
             return {
-                "us-danger-zone": this.isDangerZone()
+                "us-danger-zone": false // this.isDangerZone()
             }
         }
     }

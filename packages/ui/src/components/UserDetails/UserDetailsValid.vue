@@ -2,7 +2,7 @@
     <div>
         <div v-if="user.needsValidating">
             <h4 class="">
-                ⚠️ Your details need validating. Please <router-link :to="R.ValidateSelf">click here</router-link> to do so.
+                ⚠️ Your details need validating. <v-btn color="info" @click="$router.push(R.ValidateSelf)" small>validate now</v-btn>
             </h4>
         </div>
 

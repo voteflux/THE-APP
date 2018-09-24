@@ -19,13 +19,13 @@
             <h3>Revocation</h3>
             <transition name="fade" mode="out-in">
                 <div v-if="state == AT_START" :key="AT_START">
-                    <button class="danger-btn db" v-on:click="startRevocation()">Revoke my Membership</button>
+                    <v-btn color="error" v-on:click="startRevocation()">Revoke my Membership</v-btn>
                 </div>
                 <div v-else-if="state == CONFIMATION" :key="CONFIMATION">
                     <h4>Please confirm by filling out:</h4>
                     <label class="db">Your Email ({{ user.email }})</label><br>
                     <input class="db" type="email" v-model="formEmail" placeholder="confirm your email"/>
-                    <button class="mt2 danger-btn db" :disabled="formEmail !== user.email" v-on:click="confirmRevocation()">Revoke my Membership</button>
+                    <v-btn color="error" class="mt2" :disabled="formEmail !== user.email" v-on:click="confirmRevocation()">Revoke my Membership</v-btn>
                 </div>
                 <div v-else-if="state == CONFIRMATION_2" :key="CONFIRMATION_2">
                     <h4>Last Step:</h4>

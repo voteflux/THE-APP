@@ -4,7 +4,9 @@
             <UserSummary :user='user'></UserSummary>
         </UiSection>
 
-        <UiSection v-if="roles.isSuccess() && roles.unwrap().length > 0" title="Admin Utilities">
+        <v-divider />
+
+        <!-- <UiSection v-if="showAdmin()" title="Admin Utilities">
             <warning>This section is under active development</warning>
             <ul class="ul-spaced">
                 <li v-if="hasRole(Roles.ADMIN)">Admin utils link will go here when done</li>
@@ -14,7 +16,9 @@
                 <li v-if="hasRole(Roles.COMMS)">Comms utils link will go here when done</li>
                 <li v-if="hasRole(Roles.REGO_OFFICER)">Rego Officer utils link will go here when done</li>
             </ul>
+
         </UiSection>
+        <v-divider v-if="showAdmin()" /> -->
 
         <ui-section title="Member Tools">
             <ul class="ul-spaced">
@@ -24,7 +28,9 @@
             </ul>
         </ui-section>
 
-        <ui-section title="Volunteer / Candidature">
+        <v-divider />
+
+        <!-- <ui-section title="Volunteer / Candidature">
             <Section title="Profiles" :noCollapse="true" class="child-bg-alt" >
                 <EditableOpt class="row" name="I'm interested in standing as a candidate" :value="user.candidature_federal" :onSave="savePropFactory('candidature_federal')" />
                 <EditableOpt class="row" name="I'd like to volunteer" :value="user.volunteer" :onSave="savePropFactory('volunteer')" />
@@ -37,8 +43,10 @@
 
         </ui-section>
 
+        <v-divider /> -->
+
         <ui-section title="Log Out">
-            <button class="" v-on:click="MsgBus.$emit(M.LOGOUT)">Log Out Now</button>
+            <v-btn color="warning" v-on:click="MsgBus.$emit(M.LOGOUT)">Log Out Now</v-btn>
         </ui-section>
 
     </div>
@@ -80,6 +88,10 @@ export default Vue.extend({
                 return rs.unwrap().includes(r) || rs.unwrap().includes("admin")
             }
             return false
+        },
+
+        showAdmin() {
+            return this.roles.isSuccess() && this.roles.unwrap().length > 0
         },
 
         savePropFactory(prop) {

@@ -17,7 +17,7 @@
                 <v-content>
                     <v-container fluid>
                         <transition name="fade" mode="out-in">
-                            <router-view class="" :auth="auth" :user="req.user.unwrap()" :roles="req.roles" />
+                            <router-view :auth="auth" :user="req.user.unwrap()" :roles="req.roles" />
                         </transition>
                     </v-container>
                 </v-content>
