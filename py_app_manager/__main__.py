@@ -232,7 +232,6 @@ def dev(dev_target, stage):
     ui_port = 32710
     TMP_SESSION = 'tmp-session'
     server = libtmux.Server(socket_name='flux-app-tmux-session')
-    server.new_session(session_name=TMP_SESSION, window_command="sleep 2; exit")
 
     def kill_sessions():
         with suppress(Exception):
@@ -240,6 +239,9 @@ def dev(dev_target, stage):
                 s.kill_session()
 
     kill_sessions()
+
+    server = libtmux.Server(socket_name='flux-app-tmux-session')
+    server.new_session(session_name=TMP_SESSION, window_command="sleep 2; exit")
     session = None
     window = None
     log_files = []
