@@ -20,6 +20,7 @@ export type NdaStatus = {
     stage: NdaStage,
     signatureDataUri: string,
     pdfDataUri: string,
+    comment?: string
 }
 
 

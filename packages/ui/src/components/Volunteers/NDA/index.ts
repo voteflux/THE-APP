@@ -1,1 +1,1 @@
-export { default as NdaStatusAndCta } from "./NdaStatusAndCta.vue"
+export { default as NdaStatusAndSign } from "./NdaStatusAndSign.vue"

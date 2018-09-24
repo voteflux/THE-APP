@@ -4,7 +4,7 @@ const BbPromise = require("bluebird");
 
 module.exports = BbPromise.try(() => {
     return {
-        mode: process.env.STAGE == "prod" ? "production" : "development",
+        mode: "production", // always use production for tree-shaking stuff atm  // process.env.STAGE == "prod" ? "production" : "development",
         entry: slsw.lib.entries,
         target: "node",
         plugins: [

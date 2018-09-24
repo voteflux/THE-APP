@@ -7,6 +7,9 @@ import * as Volunteers from './volunteers'
 export const store = new Vuex.Store({
     state: {
         ...Volunteers.state,
+        nav: {
+            title: "TITLE NOT SET"
+        }
     } as Volunteers.VolState & {},
     mutations: {
         ...Volunteers.mutations,

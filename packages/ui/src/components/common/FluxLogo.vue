@@ -1,19 +1,17 @@
 <template>
-    <div class="flex flex-row justify-between items-center mt4">
-        <p class="h2 v-btm absolute f5 tl underline" @click="goBack()" v-if="showBack">
-            <fa-icon icon="arrow-circle-left"/> Back
-        </p>
-        <div class="w-100">
-            <h2 class="h2 center">
-                <span class="h-inherit dib v-mid nowrap">
-                    <img src="/img/flux-mark-optimised.svg" class="h-inherit dib v-mid">
-                    <img src="/img/flux-text-logo.svg" class="h-50 dib v-mid ml2">
-                </span>
-                &mdash;
-                <span class="dib v-mid">{{ title }}</span>
-            </h2>
+    <div class="w-100 flex flex-row align-left items-left">
+        <div class="f5 flex items-center" @click="goBack()" v-if="showBack">
+            <fa-icon icon="arrow-circle-left"/>
+            <span class="ml1 underline">Back</span>
+            <img src="/img/flux-mark-optimised.svg" class="h2 ml3">
         </div>
-        <div class="absolute fr"></div>
+        <h2 class="flex items-center justify-between">
+            <!-- <img src="/img/flux-text-logo.svg" class="h1 v-mid ml2"> -->
+            <span class="">
+                <!-- &mdash; --> {{ title }}
+            </span>
+        </h2>
+        <span>&nbsp;</span>
     </div>
 </template>
 

@@ -21,7 +21,7 @@ const utils = require('../utils')
 
 const toExport = {} as any
 
-toExport.getNdaStatus = (db: DB, ...args) => {
+toExport.getStatus = (db: DB, ...args) => {
     return require('./auth')(db).user(async (event, context, {user}): Promise<NdaStatus> => {
         const {_id} = user;
 
@@ -43,7 +43,7 @@ toExport.getNdaStatus = (db: DB, ...args) => {
 }
 
 
-toExport.submitNdaPdfAndSignature = (db: DB, ...args) => {
+toExport.submitForReview = (db: DB, ...args) => {
     return require('./auth')(db).user(async (event, context, {user}): Promise<NdaStatus> => {
         const {_id} = user;
         const {pdf, sig} = event.body;
@@ -125,7 +125,7 @@ export const generateDraft = async (event, ctx) =>
                 pdfHash,
                 sigHash,
                 pdfData: uri
-            } as any
+            }
         }
     ))(event, ctx)
 

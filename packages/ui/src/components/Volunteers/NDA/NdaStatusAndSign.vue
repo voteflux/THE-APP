@@ -7,23 +7,28 @@
             <div v-if="req.ndaStatus.unwrap().stage === NdaStage.AWAITING_APPROVAL">
                 <p>Your NDA submission is awaiting approval by a Flux staff member.</p>
                 <div class="flex flex-row justify-around w-100">
-                    <button @click="redoSubmission()">Redo or update submission</button>
-                    <button @click="showSignedNda()">Show Signed NDA</button>
+                    <i-button @click="redoSubmission()">Redo or update submission</i-button>
+                    <Button @click="showSignedNda()">Show Signed NDA</Button>
                 </div>
-                <iframe width="100%" style="min-height: 60vh; height: 60vh" v-if="showPdf" :src="pdfURL.valueOr('')" />
+                <PDFViewer :pdfMaybe="pdfURL" />
             </div>
             <div v-else-if="req.ndaStatus.unwrap().stage === NdaStage.APPROVED">
                 Your NDA submission has been accepted by Flux. You are now eligable to apply for access to member details.
             </div>
             <div v-else-if="req.ndaStatus.unwrap().stage === NdaStage.NOT_APPROVED">
                 Your NDA submission has been rejected. A Flux staff member should have made contact regarding this; please liaise with them, or email steerco@voteflux.org if this is otherwise unexplained.
+
+                <p v-if="req.ndaStatus.unwrap().comment">
+                    A comment was left:
+                    <div class="ba pa1"> {{ req.ndaStatus.unwrap().comment }} </div>
+                </p>
             </div>
 
             <div v-else-if="req.ndaStatus.unwrap().stage === NdaStage.NOT_STARTED">
                 <transition name="fade" mode="out-in">
                     <Section title="Confidentiality Agreement" :noCollapse="true" v-if="wizardStage === WIZ.S0_UNREAD">
                         <p>Step 1: Read the confidentiality agreement below, then press next.</p>
-                        <iframe width="100%" style="min-height: 60vh; height: 60vh" v-if="showPdf" :src="pdfURL.valueOr('')" />
+                        <PDFViewer :pdfMaybe="pdfURL" />
                         <button @click="makeNewSig()">Next: Sign NDA</button>
                     </Section>
 
@@ -41,13 +46,13 @@
                                 <button class="mh2" @click="reviewFinalPdf()">Generate Signed NDA and Finalize</button>
                             </div>
                         </div>
-                        <iframe width="100%" style="min-height: 50vh; height: 50vh" v-if="showPdf" :src="pdfURL.valueOr('')" />
+                        <PDFViewer :pdfMaybe="pdfURL" />
                     </Section>
 
                     <Section v-else-if="wizardStage === WIZ.S3_REVIEW" title="Review NDA" :noCollapse="true" >
                         <Error v-if="req.ndaDraft.isFailed()">{{ req.ndaDraft.unwrapError() }}</Error>
                         <div v-else-if="req.ndaDraft.isSuccess()">
-                            <iframe width="100%" style="min-height: 60vh; height: 60vh" v-if="showPdf" :src="pdfURL.valueOr('')" />
+                            <PDFViewer :pdfMaybe="pdfDraft" />
                             <div class="flex flex-row justify-around w-100 ma3">
                                 <button @click="reviewNegative()">Go Back</button>
                                 <button @click="reviewPositive()">Submit NDA to Flux</button>
@@ -73,7 +78,7 @@ import { UserV1Object, Auth } from 'flux-lib/types';
 import routes from '@/routes'
 import { Maybe } from 'tsmonad';
 import { yourSignaturePlaceholder } from 'flux-lib/pdfs/nda/imageUris';
-import { Error, Loading, Section } from "@c/common"
+import { Error, Loading, Section, PDFViewer } from "@c/common"
 import WebRequest from 'flux-lib/WebRequest';
 import { NdaStage, NdaDraftCommit, GenerateDraftNdaResp } from 'flux-lib/types/db/vols';
 import SignNDA from './SignNDA.vue'
@@ -91,7 +96,7 @@ enum WIZ {
 
 
 export default Vue.extend({
-    components: { Loading, Error, Section, SignNDA },
+    components: { Loading, Error, Section, SignNDA, PDFViewer },
 
     props: {
         user: Object as () => UserV1Object,
@@ -105,6 +110,7 @@ export default Vue.extend({
         },
         pdfBytes: new Uint8Array(0),
         pdfURL: Maybe.nothing(),
+        pdfDraft: Maybe.nothing(),
         R: routes,
         NdaStage,
         wizardStage: WIZ.S0_UNREAD,
@@ -163,14 +169,13 @@ export default Vue.extend({
             this.$flux.v2.generateDraftPdf(this.auth, { sigPng: this.signatureImage })
                 .then(r => {
                     this.req.ndaDraft = r
-                    this.pdfURL = Maybe.just(r.unwrap().pdfData)
-                    this.$nextTick(() => console.log(r.unwrap()))
+                    this.pdfDraft = Maybe.just(r.unwrap().pdfData)
                 })
         },
 
         reviewNegative() {
             this.wizardStage = WIZ.S2_UNSUBMITTED
-            this.pdfURL = Maybe.nothing()
+            this.pdfDraft = Maybe.nothing()
         },
 
         reviewPositive() {

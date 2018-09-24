@@ -258,7 +258,7 @@ def dev(dev_target, stage):
             return window.split_window(start_directory=dir, shell=to_run, vertical=vertical, **opts)
 
     # uncomment the below if we need to compile flux-lib
-    lib_pane = run_dev_cmd('./packages/lib', 'npm run watch', 'dev-lib')
+    # lib_pane = run_dev_cmd('./packages/lib', 'npm run watch', 'dev-lib')
     if dev_target in {'ui', 'all'}:
         ui_pane = run_dev_cmd('./packages/ui', "STAGE={} npm run serve".format(stage), 'dev-ui')
 

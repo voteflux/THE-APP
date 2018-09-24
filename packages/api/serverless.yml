@@ -124,15 +124,15 @@ functions:
           method: post
           cors: true
   # volunteer requests
-  getNdaStatus:
-    handler: ${self:custom.handlers}/vols.getNdaStatus
+  ndaGetStatus:
+    handler: ${self:custom.handlers}/vols.getStatus
     events:
       - http:
           path: /v2/volunteers/nda/getStatus
           method: post
           cors: true
-  submitNdaPdfAndSignature:
-    handler: ${self:custom.handlers}/vols.submitNdaPdfAndSignature
+  ndaSubmitForReview:
+    handler: ${self:custom.handlers}/vols.submitForReview
     events:
       - http:
           path: /v2/volunteers/nda/submitPdfAndSig
