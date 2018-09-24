@@ -1,7 +1,5 @@
 <template>
     <div>
-        <flux-logo title="Finance Menu"/>
-
         <ui-section title="Menu">
             <ul class="ul-spaced">
                 <li><router-link :to="Routes.FinanceDonationLog">Donation Log</router-link></li>

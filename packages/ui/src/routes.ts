@@ -26,7 +26,7 @@ export const pageTitle = (route: Routes) => {
         [R.FinanceMenu]: "Finance Utilities",
         [R.FinanceDonationLog]: "Donation Log",
         [R.FinanceDonationEntry]: "Add a Donation",
-        [R.AdminAuditRoles]: "Role (v1) Audit",
+        [R.AdminAuditRoles]: "Role Audit (v1)",
         [R.VolunteerDashboard]: "Volunteer Dashboard",
         [R.CandidateDashboard]: "Candidate Dashboard",
     })[route] || _e()
