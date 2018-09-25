@@ -259,7 +259,7 @@ def dev(dev_target, stage):
     def run_dev_cmd(dir, cmd, name, active_pane=None, vertical=False):
         nonlocal session, window, log_files
         (to_run, l) = cmd_w_log(cmd, name, dir_offset='../../')
-        to_run = "printf '\\033]2;\%s\\033\\' '{title}'; endsess(){{ read -p 'Press enter to terminate all...' && tmux kill-session -t main; }} ; trap 'endsess' SIGINT SIGTERM; ".format(title=name) + to_run
+        to_run = "printf '\\033]2;\%s\\033\\' '{title}'; _r(){{ if [ -e /usr/bin/read ]; then /usr/bin/read \"$@\"; else read \"$@\"; fi }}; endsess(){{ _r -p 'Press enter to terminate all...' && tmux kill-session -t main; }} ; trap 'endsess' SIGINT SIGTERM; ".format(title=name) + to_run
         to_run += "; echo -e '\\n\\n' && endsess "
         print(name, to_run)
         log_files.append(l)
