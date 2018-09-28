@@ -40,7 +40,6 @@
     "mongodb": "^3.0.6",
     "ramda": "^0.25.0",
     "ts-jest": "^23.10.1",
-    "tsmonad": "^0.8.0",
     "tweetnacl": "^1.0.0",
     "tweetnacl-ts": "^1.0.2",
     "tweetnacl-util": "^0.15.0"

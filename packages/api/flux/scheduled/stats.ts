@@ -1,5 +1,5 @@
 import { DB } from './../db';
-const handlerUtils = require('./handlerUtils')
+const handlerUtils = require('../handlers/handlerUtils')
 const R = require('ramda')
 
 module.exports.genStatsGetinfo = async (db, event, context) => {

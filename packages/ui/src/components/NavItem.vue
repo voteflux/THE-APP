@@ -1,5 +1,12 @@
 <template>
-    <component v-bind:is="thisComponent()" :sub-group="isSublist() && !isRoot" :no-action="isSublist()" :value="getValue()" v-on="getOnHandlers()" >
+    <component
+        v-bind:is="thisComponent()"
+        :sub-group="isSublist() && !isRoot"
+        :no-action="isSublist()"
+        :value="getValue()"
+        v-on="getOnHandlers()"
+        v-bind="tlcAttrs()"
+    >
         <v-list-tile v-if="isSublist()" slot="activator">
             <v-list-tile-action v-if="item.icon">
                 <v-icon v-text="item.icon" />
@@ -35,10 +42,15 @@ type NavItemH1I = {
 type NavItemH2I = {
     items: NavItemRec[]
 } & _NavItemH
-export type NavItemRec = NavItemH1I | NavItemH2I
+type NavItemH3I = {
+    href: string
+}
+export type NavItemRec = NavItemH1I | NavItemH2I | NavItemH3I
 
-const isSingle = (n: any): n is NavItemH1I => !!n.route
+const isRouteLink = (n: any): n is NavItemH1I => !!n.route
 const isSublist = (n: any): n is NavItemH2I => !!n.items
+const isHrefLink = (n: any): n is NavItemH3I => !!n.href
+const isSingle = (n: any): n is NavItemH1I | NavItemH3I => isRouteLink(n) || isHrefLink(n)
 
 export default Vue.extend({
     name: 'NavItem',
@@ -53,16 +65,28 @@ export default Vue.extend({
         }
     },
     methods: {
+        tlcAttrs() {
+            return {
+                ...(isHrefLink(this.item) ? { href: this.item.href } : {})
+            }
+        },
+        isRouteLink() { return isRouteLink(this.item) },
         isSingle() { return isSingle(this.item) },
         isSublist() { return isSublist(this.item) },
+        isHrefLink() { return isHrefLink(this.item) },
         thisComponent() { return this.isSublist() ? 'v-list-group' : 'v-list-tile' },
         getValue() {
-            return (isSingle(this.item) && this.$route.path === this.item.route) // || this.isSublist()   // returning true for a list will start it open
+            return (isRouteLink(this.item) && this.$route.path === this.item.route) // || this.isSublist()   // returning true for a list will start it open
         },
         getOnHandlers() {
-            const onClick = isSingle(this.item) ? { click: () => { this.$router.push((this.item as NavItemH1I).route) }} : {}
+            const gOnClick = () => {
+                if (isRouteLink(this.item))
+                    return { click: () => { this.$router.push((this.item as NavItemH1I).route) } }
+                return {}
+            }
+
             return {
-                ...onClick
+                ...gOnClick()
             }
         },
     },

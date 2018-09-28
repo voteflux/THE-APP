@@ -1,3 +1,4 @@
+import _Either, {Either, left, right} from 'fp-ts/lib/Either'
 import * as t from 'io-ts'
 import * as R from 'ramda'
 import sha256 from 'fast-sha256';
@@ -5,7 +6,7 @@ import nacl from 'tweetnacl'
 
 import { HashRT } from './data'
 import { concatUint8a, u8Eq, base64ToUint8a, uint8aToBase64, strToUint8a, uint8aToStr } from '../../utils'
-import { Either } from 'fp-ts/lib/Either';
+import { runEitherPredicates } from '../../utils/either';
 
 
 /**
@@ -13,6 +14,9 @@ import { Either } from 'fp-ts/lib/Either';
  *
  * Valid messages are _signed_ using an Ed25519 keypair.
  * The associate public key is authorized via a JWT token.
+ *
+ * To create signed messages use `createSignedReq`
+ * To validate signed messages use `isSignedReqValid`
  *
  * Two types of signed messages:
  * - No aux (just payload)
@@ -64,6 +68,7 @@ type SignedAuxPart = t.TypeOf<typeof SignedAuxPartRT>
 
 export const SignedReqNoValidationRT = t.intersection([
     t.type({
+        path: t.string,
         payload: PayloadRT,
         ecSig: EcSigBase64RT,
         publicKey: PubKeyBase64RT,
@@ -74,16 +79,60 @@ export const SignedReqNoValidationRT = t.intersection([
 export type SignedReqNoValidation = t.TypeOf<typeof SignedReqNoValidationRT>
 
 
-type SignedReqParamd<Ty extends string | Uint8Array> = {nonce: Ty, publicKey: Ty, ecSig: Ty} & Partial<{ auxHash: Ty }> & (Ty extends string ? {payload: Payload, aux?: Payload} : {szPayload: Uint8Array, aux?: Uint8Array})
+type ReqTy = string | Uint8Array
+
+type PreSignReq<Ty extends ReqTy> =
+    {path: string, auxHash?: Ty}
+    & (Ty extends string ? {payload: Payload, aux?: Payload} : {szPayload: Uint8Array, aux?: Uint8Array})
+
+type SignedFragment<Ty extends ReqTy> = { publicKey: Ty, ecSig: Ty, nonce: Ty }
+
+type SignedReq<Ty extends ReqTy> =
+    SignedFragment<Ty> & PreSignReq<Ty>
+
+type PossiblySignedReq<Ty extends ReqTy> =
+    Partial<SignedFragment<Ty>> & PreSignReq<Ty>
+
+type MinMsgForPacking = {path: string, nonce: Uint8Array, szPayload: Uint8Array, auxHash?: Uint8Array}
+export type CompleteSignedReqBin = SignedReq<Uint8Array>
+export type CompleteSignedReq = SignedReq<string>
+
+export type SignedReqCreationOpts = {
+    path: string,
+    secretKey: Uint8Array,
+    szPayload: Uint8Array,
+    auxHash?: Uint8Array,
+    aux?: Uint8Array
+}
 
 
-export const convertBase64SignedReq = (opts: SignedReqParamd<string>): SignedReqParamd<Uint8Array> => {
-    const ret: SignedReqParamd<Uint8Array> = {
-        nonce: base64ToUint8a(opts.nonce),
-        publicKey: base64ToUint8a(opts.publicKey),
-        ecSig: base64ToUint8a(opts.ecSig),
-        szPayload: _szPayload(opts.payload)
+
+export const SignedReqJsRT = t.refinement(SignedReqNoValidationRT, (opts: SignedReqNoValidation) => {
+    if (!!opts.aux !== !!opts.auxHash) {  // if opts.aux and opts.auxHash truthiness differs - error
+        throw Error("Problem with message authentication: bboth 'aux' and 'auxHash' must be preset if either is.")
     }
+    return isSignedReqValid(opts)
+})
+export type SignedReqJs = t.TypeOf<typeof SignedReqJsRT>
+
+
+
+/**
+ * convert a signed request in base64 format to binary (Uint8Array) format
+ */
+type ConvUnion<R extends ReqTy> = SignedReq<R> | PossiblySignedReq<R>
+export function convertBase64SignedReq(opts: SignedReq<string>): SignedReq<Uint8Array>;
+export function convertBase64SignedReq(opts: PossiblySignedReq<string>): PossiblySignedReq<Uint8Array>;
+export function convertBase64SignedReq(opts: any): any {
+    const ret = {} as PossiblySignedReq<Uint8Array>
+    if (opts.publicKey && opts.ecSig) {
+        ret.publicKey = base64ToUint8a(opts.publicKey)
+        ret.ecSig = base64ToUint8a(opts.ecSig)
+    }
+    ret.path = opts.path
+    ret.nonce = base64ToUint8a(opts.nonce)
+    ret.szPayload = _szPayload(opts.payload)
+
     if (opts.auxHash !== undefined)
         ret.auxHash = base64ToUint8a(opts.auxHash)
     if (opts.aux)
@@ -91,65 +140,94 @@ export const convertBase64SignedReq = (opts: SignedReqParamd<string>): SignedReq
     return ret
 }
 
-export const convertUint8aSignedReq = (opts: SignedReqParamd<Uint8Array>): SignedReqParamd<string> => {
-    const ret = {
+
+/**
+ * convert a signed request in binary (Uint8Array) format to base64 format
+ */
+export function convertUint8aSignedReq(opts: SignedReq<Uint8Array>): SignedReq<string>;
+export function convertUint8aSignedReq(opts: PossiblySignedReq<Uint8Array>): PossiblySignedReq<string>;
+export function convertUint8aSignedReq(opts: any): any {
+    const ret: any = {
+        path: opts.path,
         nonce: uint8aToBase64(opts.nonce),
-        publicKey: uint8aToBase64(opts.publicKey),
-        ecSig: uint8aToBase64(opts.ecSig),
         payload: _unszPayload(opts.szPayload)
-    } as SignedReqParamd<string>
+    }
     if (opts.auxHash)
         ret.auxHash = uint8aToBase64(opts.auxHash)
     if (opts.aux)
         ret.aux = _unszPayload(opts.aux)
-    return ret
+    if (opts.publicKey && opts.ecSig) {
+        ret.publicKey = uint8aToBase64(opts.publicKey)
+        ret.ecSig = uint8aToBase64(opts.ecSig)
+        return ret as SignedReq<string>
+    }
+    return ret as PossiblySignedReq<string>
 }
 
 
 
-type MinMsgForPacking = {nonce: Uint8Array, szPayload: Uint8Array, auxHash?: Uint8Array}
-export type ReadyToValidatedSignedReq = {publicKey: Uint8Array, ecSig: Uint8Array, aux?: Uint8Array} & MinMsgForPacking
-
-
+const _lenPrefixAndPadUi8a = (xs: Uint8Array) =>
+    // we use 4 bytes to prefix the length of xs, and also pad to a multiple of 4 bytes
+    R.reduce(concatUint8a, new Uint8Array(0), [uint32ToUint8a(xs.length), xs, padTo4B(xs.length)])
 
 export const mkPackedMsgForSigning = (opts: MinMsgForPacking) => {
     const auxHash = opts.auxHash || new Uint8Array(0)
-    const szPayload = opts.szPayload
 
+    // we pad all blobs (bar the nonce) with a 4b length, then insert the blob, then pad to a multiple of 4b
     return R.reduce(concatUint8a, new Uint8Array(0), [
-        opts.nonce,                         // 16b, divisible by 4
-        uint32ToUint8a(auxHash.length),     // 4b
-        auxHash,                            // usually 0b or 32b
-        padTo4B(auxHash.length),            // pad auxHash if it's not divisible by 4
-        uint32ToUint8a(szPayload.length),   // 4b
-        szPayload,                          // arbitrary many bytes
-        padTo4B(szPayload.length),          // pad szPayload so it's divisible by 4
+        opts.nonce,
+        _lenPrefixAndPadUi8a(strToUint8a(opts.path)),
+        _lenPrefixAndPadUi8a(auxHash),
+        _lenPrefixAndPadUi8a(opts.szPayload),
     ])
 }
 
-export const isSignedReqValid = (opts: ReadyToValidatedSignedReq): boolean => {
-    const msg = mkPackedMsgForSigning(opts)
-
-    return opts.nonce.length === 16
-        && opts.publicKey.length === 32
-        && opts.ecSig.length === 64
-        && nacl.sign.detached.verify(msg, opts.ecSig, opts.publicKey)
+export const isSignedReqValid = (opts: CompleteSignedReq): boolean => {
+    const _opts = convertBase64SignedReq(opts)
+    return isSignedReqValidBin(_opts)
 }
 
-export type SignedReqCreationOpts = {secretKey: Uint8Array, szPayload: Uint8Array, auxHash?: Uint8Array, aux?: Uint8Array}
-export const createSignedReq = (opts: SignedReqCreationOpts): ReadyToValidatedSignedReq => {
-    const nonce = nacl.randomBytes(16)
-    const kp = nacl.sign.keyPair.fromSeed(opts.secretKey)
+export const isSignedReqValidBin = (opts: CompleteSignedReqBin): boolean => {
+    return validationIssuesBin(opts).isRight()
+}
 
-    const msg = mkPackedMsgForSigning({ szPayload: opts.szPayload, auxHash: opts.auxHash, nonce })
-    const ecSig = nacl.sign.detached(msg, kp.secretKey)
+export const validationIssues = (opts: CompleteSignedReq): Either<string, {}> =>
+    validationIssuesBin(convertBase64SignedReq(opts))
+
+export const validationIssuesBin = (opts: CompleteSignedReqBin): Either<string, {}> => {
+    const msg = mkPackedMsgForSigning(opts)
+
+
+    if (opts.auxHash && opts.aux) {
+        if (!u8Eq(opts.auxHash, sha256(opts.aux)))
+            return left("Invalid checksum calculated for auxillary data.")
+    }
+
+    const predicates: [() => boolean, string][] = [
+        [ () => opts.nonce.length !== 16, "Bad nonce length" ],
+        [ () => opts.publicKey.length !== 32, "Bad publicKey length" ],
+        [ () => opts.ecSig.length !== 64, "Bad ecSig length" ],
+        [ () => nacl.sign.detached.verify(msg, opts.ecSig, opts.publicKey), "Crypto Signature Invalid" ]
+    ]
+
+    return runEitherPredicates(predicates)
+}
+
+
+export const createSignedReqBinary = (opts: PreSignReq<Uint8Array>, secretSeed: Uint8Array): CompleteSignedReqBin => {
+    const nonce = nacl.randomBytes(16)
+    const {secretKey, publicKey} = nacl.sign.keyPair.fromSecretKey(secretSeed)
+    const {path, szPayload, auxHash} = opts
+
+    const msg = mkPackedMsgForSigning({ path, szPayload, auxHash, nonce })
+    const ecSig = nacl.sign.detached(msg, secretKey)
 
     const ret = {
         nonce,
-        publicKey: kp.publicKey,
+        publicKey,
         ecSig,
-        szPayload: opts.szPayload,
-    } as ReadyToValidatedSignedReq
+        szPayload,
+    } as CompleteSignedReqBin
 
     if (opts.auxHash) ret.auxHash = opts.auxHash
     if (opts.aux) ret.aux = opts.aux
@@ -157,35 +235,25 @@ export const createSignedReq = (opts: SignedReqCreationOpts): ReadyToValidatedSi
     return ret
 }
 
+export const createSignedReq = (opts: PreSignReq<string>, secretSeed: Uint8Array): SignedReq<string> => {
+    const binOpts = convertBase64SignedReq(opts)
+    const signedBin = createSignedReqBinary(binOpts, secretSeed)
+    const signedOpts = convertUint8aSignedReq(signedBin)
+    return signedOpts
+}
+
 
 export const _szPayload = (payload: Payload) => strToUint8a(JSON.stringify(payload, null, 0))
 export const _unszPayload = (payloadSz: Uint8Array) => JSON.parse(uint8aToStr(payloadSz))
 
 
-// export const SignedReqRT = t.refinement(SignedReqNoValidationRT, (fields) => {
-//         return isSignedReqValid({ ...convertBase64SignedReq(fields), szPayload: _szPayload(fields.payload) })
-// })
-// export interface SignedReq extends t.TypeOf<typeof SignedReqRT> {}
-
-
-
-export const SignedReqRT = t.refinement(SignedReqNoValidationRT, (opts: SignedReqNoValidation) => {
-    if (!!opts.aux !== !!opts.auxHash) {  // if opts.aux and opts.auxHash truthiness differs - error
-        throw Error("Problem with message authentication: bboth 'aux' and 'auxHash' must be preset if either is.")
-    }
-
-    const binSignedReq = convertBase64SignedReq(opts)
-    if (binSignedReq.auxHash && binSignedReq.aux) {
-        if (!u8Eq(binSignedReq.auxHash as Uint8Array, sha256(binSignedReq.aux as Uint8Array)))
-            throw Error("Invalid checksum calculated for auxillary data.")
-    }
-
-    return isSignedReqValid(binSignedReq)
-})
-export type SignedReq = t.TypeOf<typeof SignedReqRT>
-
 
 const sortKeyValPairs = (pairs: [string, any][]) => R.sort((p1, p2): number => p1[0] < p2[0] ? -1 : (p1[0] > p2[0] ? 1 : 0), pairs)
+
+
+export const objToPayload = <T extends Object>(obj: T): Payload => {
+    return sortKeyValPairs(R.toPairs(obj))
+}
 
 
 export class PayloadDecoder<D> extends t.Type<D, Payload, Payload> {

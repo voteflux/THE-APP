@@ -4,7 +4,7 @@
             <UserSummary :user='user'></UserSummary>
         </UiSection>
 
-        <v-divider />
+        <v-divider class="mt3" />
 
         <!-- <UiSection v-if="showAdmin()" title="Admin Utilities">
             <warning>This section is under active development</warning>
@@ -20,34 +20,26 @@
         </UiSection>
         <v-divider v-if="showAdmin()" /> -->
 
-        <ui-section title="Member Tools">
+        <Section title="Member Tools" :noCollapse="true">
             <ul class="ul-spaced">
                 <li><router-link :to="Routes.EditUserDetails">Change your member details or preferences</router-link></li>
                 <li><router-link :to="Routes.MembershipRevocation">Revoke your membership</router-link></li>
                 <!-- <li><a href="/anon_validation.html">Help validate other members</a></li> -->
             </ul>
-        </ui-section>
+        </Section>
 
-        <v-divider />
+        <v-divider class="mt3" />
 
-        <!-- <ui-section title="Volunteer / Candidature">
-            <Section title="Profiles" :noCollapse="true" class="child-bg-alt" >
-                <EditableOpt class="row" name="I'm interested in standing as a candidate" :value="user.candidature_federal" :onSave="savePropFactory('candidature_federal')" />
-                <EditableOpt class="row" name="I'd like to volunteer" :value="user.volunteer" :onSave="savePropFactory('volunteer')" />
-            </Section>
+        <Section title="Get Involved" :noCollapse="true" class="child-bg-alt" >
+            <EditableOpt class="row" name="I'm interested in standing as a candidate" :value="user.candidature_federal" :onSave="savePropFactory('candidature_federal')" />
+            <EditableOpt class="row" name="I'd like to volunteer" :value="user.volunteer" :onSave="savePropFactory('volunteer')" />
+        </Section>
 
-            <ul>
-                <li v-if="user.volunteer === true"><router-link class="db ma1" :to="Routes.VolunteerDashboard">Volunteer Portal</router-link></li>
-                <li v-if="user.candidature_federal === true"><router-link class="db ma1" :to="Routes.CandidateDashboard">Candidate Portal</router-link></li>
-            </ul>
+        <v-divider class="mt3" />
 
-        </ui-section>
-
-        <v-divider /> -->
-
-        <ui-section title="Log Out">
+        <Section title="Log Out" :noCollapse="true">
             <v-btn color="warning" v-on:click="MsgBus.$emit(M.LOGOUT)">Log Out Now</v-btn>
-        </ui-section>
+        </Section>
 
     </div>
 </template>

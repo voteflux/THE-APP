@@ -1,5 +1,5 @@
 <template>
-    <div class="tl">
+    <div class="tl mt2">
         <h3 class="" v-bind:class="genClasses()">{{ title }} <button v-if="!noCollapse" class="pa1 btn-transparent" @click="toggleCollapsed()"><fa-icon :icon="genIcon()" /></button></h3>
         <div v-if="!collapsed" class="ph2 us-body">
             <slot></slot>

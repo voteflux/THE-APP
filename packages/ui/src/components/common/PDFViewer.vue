@@ -1,29 +1,34 @@
 <template>
-    <div v-if="showPdf">
-        <h3>PDF: {{ title }} <small><a :href="pdf" target="_blank"><fa-icon icon="save" /></a></small></h3>
-        <iframe :src="pdf" style="min-height: 50vh; height: 50vh" width="100%" frameborder="0" class="mv2" />
-    </div>
+    <transition>
+        <div v-if="showPdf">
+            <h3>PDF: {{ title }} <small><a :href="pdf" target="_blank" :download="title + '.pdf'"><v-icon v-text="'save'" /></a></small></h3>
+            <iframe :src="pdf" style="min-height: 50vh; height: 50vh" width="100%" frameborder="0" class="mv2" />
+        </div>
+    </transition>
 </template>
 
 <script lang="ts">
 import Vue from 'vue'
-import { Maybe } from 'tsmonad'
+import { Option, some, none, isSome, isNone } from 'fp-ts/lib/Option'
 
 export const PDFViewer = Vue.extend({
     props: {
         pdfMaybe: {
-            type: Object as () => Maybe<string>,
-            default: Maybe.nothing() as Maybe<string>
+            type: Object as () => Option<string>,
+            default: none as Option<string>
+        },
+        title: {
+            type: String,
+            require: true
         }
     },
 
     computed: {
         showPdf(): boolean {
-            console.log(this.pdfMaybe)
-            return Maybe.isJust(this.$props.pdfMaybe)
+            return isSome(this.$props.pdfMaybe)
         },
         pdf(): string {
-            return this.$props.pdfMaybe.valueOrThrow()
+            return this.$props.pdfMaybe.getOrElseL(() => { throw "PDFViewer.computed.pdf: cannot get PDF from Option" })
         }
     },
 })

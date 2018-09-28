@@ -1,5 +1,4 @@
 import { SortMethod } from "./db";
-import { ThenArg } from "flux-lib/types";
 
 import * as _R from "ramda";
 
@@ -10,6 +9,9 @@ import * as utils from "./utils";
 import { DBV1, UserV1Object, PublicStats, DBV1Collections, collections, Donation, DBV2 } from "flux-lib/types/db";
 import DBCheckCache from "./db/cache";
 import { NdaStatus, NdaStage, NdaDraftCommit } from 'flux-lib/types/db/vols';
+import DBAuthSecToken2 from "db/authSecToken2";
+import { ThenArg } from 'flux-lib/types/utils/promises'
+import { throwIfNull } from 'flux-lib/utils'
 
 /*
  * DB functions for Flux DB (both v1 and v2)
@@ -64,10 +66,18 @@ export const _push = e => ({ $push: e });
 export const _lt = n => ({ $lt: n });
 export const _gt = n => ({ $gt: n });
 export const _eq = n => ({ $eq: n });
+export const _true = _eq(true)
+export const _false = _eq(false)
 export const _upsert = { upsert: true };
 export const _notExists = { $exists: false };
 export const _onRoll = { onAECRoll: true };
 export const _stateConsent = { state_consent: true };
+export const _shouldRecheckValidation = () =>
+    ({ lastValidated: { $lt: (((new Date()).getTime() / 1000) | 0) - 60*60*24*90 } })
+export const _shouldValidateCriteria = () => ({ $or: [
+    { needsValidating: true },
+    { $and: [_deetsValid, _shouldRecheckValidation()] }
+]})
 export const _userInState = s => {
     const rgxPC = _rgx(utils.state_regex(s));
     if (s == "weirdstate") {
@@ -84,6 +94,7 @@ export const _userInState = s => {
     };
 };
 export const _deetsValid = { detailsValid: true };
+export const _deetsNotValid = { detailsValid: false };
 export const _lastValidatedExists = { lastValidated: _exists };
 export const _volunteer = { volunteer: true };
 export const _needsValidating = { needsValidating: true };
@@ -105,7 +116,7 @@ export const mkDbV1 = (uri: string = mongoUrl): Promise<DBV1> =>
                 const setCollection = i => {
                     _dbv1[i] = rawDb.collection(i);
                 };
-                R.map(setCollection, collections);
+                // R.map(setCollection, collections);
                 // console.info(`Created dbv1 obj w keys: ${utils.j(R.keys(dbv1))}`)
 
                 return res({ ..._dbv1 } as DBV1);
@@ -129,8 +140,13 @@ export enum Qs {
 /* MODULE EXPORTS */
 
 export class DBMethods extends DBCheckCache {
+    public secToken2: DBAuthSecToken2;
+    public cache: DBCheckCache;
+
     constructor(public dbv1: DBV1, public dbv2: DBV2) {
         super(dbv1, dbv2);
+        this.secToken2 = new DBAuthSecToken2(dbv1, dbv2, this)
+        this.cache = new DBCheckCache(dbv1, dbv2)
     }
 
     close() {
@@ -176,8 +192,13 @@ export class DBMethods extends DBCheckCache {
 
     n_members_validated_state = async () =>
         await this.countByState(s => ({
-            $and: [_deetsValid, _lastValidatedExists, _stateConsent, _userInState(s)]
+            $and: [_deetsValid, _onRoll, _lastValidatedExists, _stateConsent, _userInState(s)]
         }));
+
+    n_members_not_valid_state = async () =>
+        await this.countByState(s => ({
+            $and: [_deetsNotValid, _onRoll, _stateConsent, _userInState(s)]
+        }))
 
     most_recent_signup = async () =>
         (await this.find_members()
@@ -189,14 +210,39 @@ export class DBMethods extends DBCheckCache {
 
     count_double_check_queue = async () => await this.count_members({ doubleCheckedValidation: false }, _needsValidating, _deetsValid, _onRoll);
 
-    count_validation_queue = async () => await this.count_members(_onRoll, _needsValidating);
+    count_validation_queue = async () => await this.count_members(_onRoll, _shouldValidateCriteria());
 
     count_validation_queue_state = async () =>
         await this.countByState(s => ({
-            $and: [{ needsValidating: true }, _stateConsent, _onRoll, _userInState(s)]
+            $and: [
+                _shouldValidateCriteria(),
+                _onRoll,
+                _stateConsent,
+                _userInState(s),
+            ]
         }));
 
     count_volunteers = () => this.count_members(_volunteer);
+
+    /* validation */
+
+    get_member_needing_validation = async (state=null, extraConds={}) => {
+        const conditions = {
+            '$or': [
+                // not validated within last 90 days
+                {needsValidating: _false, ..._shouldRecheckValidation()},
+                {needsValidating: _true, lastValidated: _notExists},
+                {needsValidating: _true, lastValidationGet: { $lt: utils.now() - 60 }},
+                {needsValidating: _true, lastValidationGet: null}
+            ],
+            ...(extraConds || {}),
+            ...(state ? _userInState(state) : {})
+        }
+        return await this.dbv1.users.findOneAndUpdate(conditions,
+            {'$set': {'lastValidationGet': utils.now()}},
+            {sort: [['lastValidationGet', 1]]}
+        )
+    }
 
     /* stats */
 
@@ -210,16 +256,18 @@ export class DBMethods extends DBCheckCache {
             n_members_raw: await this.count_members(),
             n_members_validated: await this.n_members_validated_with_last_validated(),
             n_members_validated_state: await this.n_members_validated_state(),
+            n_members_not_valid_state: await this.n_members_not_valid_state(),
             last_member_signup: await this.most_recent_signup(),
             double_checked: await this.count_double_checked(),
             double_check_queue: await this.count_double_check_queue(),
             validation_queue: await this.count_validation_queue(),
             validation_queue_state: await this.count_validation_queue_state(),
             db_v: await this.get_version(),
-            last_run: Math.round(Date.now() / 1000),
+            last_run: (Date.now() / 1000) | 0,
             n_volunteers: await this.count_volunteers()
         };
         await this.dbv1.public_stats.update({ id: GETINFO_ID }, _set(getinfo), _upsert);
+        // print(getinfo)
         return getinfo;
     };
 
@@ -297,8 +345,8 @@ export class DBMethods extends DBCheckCache {
 
     getUserFromUid = async userId => {
         const _id = cleanId(userId);
-        return await this.dbv1.users.findOne({ _id });
-    };
+        return await this.dbv1.users.findOne({ _id }).then(throwIfNull('Unknown User'))
+    }
 
     getUserFromEmail = async email => {
         return await this.dbv1.users.findOne({ email });
@@ -411,7 +459,6 @@ export class DBMethods extends DBCheckCache {
         };
         return await this.dbv1.generic_queues.findOneAndUpdate({ _id: doc._id }, updates);
     };
-
 }
 
 // set exports + db object

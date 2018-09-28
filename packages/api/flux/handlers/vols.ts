@@ -1,6 +1,6 @@
 'use strict';
 import { fluxHandler } from './_stdWrapper';
-import { Maybe } from 'tsmonad';
+import { Option, some, none, isSome, isNone } from 'fp-ts/lib/Option';
 import { DB } from './../db';
 const handlerUtils = require('./handlerUtils')
 import path from 'path'

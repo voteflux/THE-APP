@@ -48,7 +48,6 @@
     "tachyons-sass": "^4.9.3",
     "ts-jest": "^23.10.1",
     "tslint": "^5.10.0",
-    "tsmonad": "^0.8.0",
     "typescript": "^3.0.3",
     "typescript-eslint-parser": "^16.0.0",
     "vue": "^2.5.16",

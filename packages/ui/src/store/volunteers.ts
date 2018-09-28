@@ -1,8 +1,8 @@
-import { Maybe } from 'tsmonad';
+import { Option, none, some } from 'fp-ts/lib/Option';
 
 export const state = {
     vol: {
-        ndaSignature: Maybe.nothing(),
+        ndaSignature: none as Option<string>,
     }
 }
 
@@ -14,7 +14,7 @@ export enum VolFs {
 
 export const mutations = {
     [VolFs.setNda]: (state: VolState, newSig) => {
-        state.vol.ndaSignature = Maybe.just(newSig)
+        state.vol.ndaSignature = some(newSig)
     }
 }
 

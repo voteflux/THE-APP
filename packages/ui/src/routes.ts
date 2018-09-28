@@ -3,13 +3,14 @@ export enum Routes {
     Dashboard = "/",
     ValidateSelf = "/membership/validation",
     MembershipRevocation = "/membership/revoke",
+
     FinanceMenu = "/admin/finance",
     FinanceDonationLog = "/admin/finance/donations",
     FinanceDonationEntry = "/admin/finance/donations/entry",
+
     AdminAuditRoles = "/admin/auditRoles",
 
-    VolunteerDashboard = "/volunteers",
-    // VolunteerSignNDA = "/volunteers/sign-nda",
+    VolunteerNdaStatusAndSign = "/volunteers/nda/status",
 
     CandidateDashboard = "/candidates",
 };
@@ -23,11 +24,15 @@ export const pageTitle = (route: Routes) => {
         [R.Dashboard]: "Dashboard",
         [R.ValidateSelf]: "Electoral Roll Self-Validation",
         [R.MembershipRevocation]: "Revoke Your Membership",
+
         [R.FinanceMenu]: "Finance Utilities",
         [R.FinanceDonationLog]: "Donation Log",
         [R.FinanceDonationEntry]: "Add a Donation",
+
         [R.AdminAuditRoles]: "Role Audit (v1)",
-        [R.VolunteerDashboard]: "Volunteer Dashboard",
+
+        [R.VolunteerNdaStatusAndSign]: "NDA Status",
+
         [R.CandidateDashboard]: "Candidate Dashboard",
     })[route] || _e()
 }

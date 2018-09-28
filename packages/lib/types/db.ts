@@ -1,14 +1,17 @@
-export * from './stats'
-export * from './api'
+import { CacheDoc } from './db/cache';
+export * from './db/stats'
+export * from './db/api'
+import { SecToken2Doc } from './db/authSecToken2'
 import { Collection } from 'mongodb'
 import * as t from 'io-ts'
-import { NdaStatus, NdaDraftCommit } from './vols';
+import { NdaStatus, NdaDraftCommit } from './db/vols';
+import { Either } from 'fp-ts/lib/Either'
 
 
 // when adding a collection add to list of strings below too
 export interface DBV1Collections {
     db_meta: Collection<any>,
-    cache: Collection<any>,
+    cache: Collection<CacheDoc>,
     users: Collection<any>,
     public_stats: Collection<any>,
     roles: Collection<any>,
@@ -38,6 +41,7 @@ export interface DBV1Collections {
     suburb: Collection<any>,
     volNdaDraftCommits: Collection<NdaDraftCommit>,
     volNdaStatus: Collection<NdaStatus>,
+    secToken2: Collection<SecToken2Doc>,
 }
 
 // no easy way to keep the type and this list in sync :/
@@ -72,7 +76,10 @@ export const collections = [
     "streets",
     "suburb",
     "volNdaStatus",
+    "volNdaDraftCommits",
+    "secToken2",
 ]
+// ensure this is up to date with the class model above
 
 export type DBV1 = {
     rawDb: any,

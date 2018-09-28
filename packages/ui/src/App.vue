@@ -17,7 +17,7 @@
                 <v-content>
                     <v-container fluid>
                         <transition name="fade" mode="out-in">
-                            <router-view :auth="auth" :user="req.user.unwrap()" :roles="req.roles" />
+                            <router-view :auth="auth" :user="req.user.unwrap()" :userO="this.userO" :roles="req.roles" />
                         </transition>
                     </v-container>
                 </v-content>
@@ -44,6 +44,7 @@ import WR from 'flux-lib/WebRequest'
 import { UserV1Object, Auth } from "@/lib/api"
 import { Routes, pageTitle } from './routes'
 import { AppFs } from './store/app'
+import { UserObject } from './lib/UserObject'
 
 // constants - for everything w/in this components scope
 enum Cs {
@@ -62,6 +63,7 @@ export default /*class App extends Vue*/ Vue.extend({
         },
         auth: undefined as any & Auth,
         user: {} as any,
+        userO: {} as UserObject,
         navOpen: null as null | boolean,
         ...Cs
     }),
@@ -114,7 +116,7 @@ export default /*class App extends Vue*/ Vue.extend({
                         }
                     },
                     success: u => {
-                        this.user = u;
+                        this.setUser(u)
                     }
                 })
             });
@@ -122,6 +124,11 @@ export default /*class App extends Vue*/ Vue.extend({
         logout() {
             this.$flux.auth.remove()
             this.req.user = WR.NotRequested()
+        },
+        setUser(user) {
+            this.user = user
+            this.userO = new UserObject(user, this.auth, this.$flux)
+            this.req.user = WR.Success(user)
         }
     },
     created() {
@@ -136,8 +143,7 @@ export default /*class App extends Vue*/ Vue.extend({
             this.loadUser();
         });
         MsgBus.$on(M.GOT_USER_DETAILS, (user) => {
-            this.user = user
-            this.req.user = WR.Success(user)
+            this.setUser(user)
         });
         MsgBus.$on(M.REFRESH_ROLES, () => {
             this.getRoles();

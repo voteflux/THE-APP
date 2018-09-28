@@ -33,14 +33,14 @@ export default Vue.extend({
             { name: "Home", icon: "home", route: R.Dashboard },
             { name: "Your Profile", icon: "person", items: [
                 { name: "Your Details", route: R.EditUserDetails },
-                { name: "Revoke Your Membership", route: R.MembershipRevocation }
+                { name: "Revoke Your Membership", route: R.MembershipRevocation },
             ] },
             { name: "Volunteer", items: [
-
+                { name: "NDA Status", route: R.VolunteerNdaStatusAndSign },
             ]},
-            { name: "Be a Candidate", items: [
-
-            ]},
+            // { name: "Be a Candidate", items: [
+                //
+            // ]},
         ],
         _value: false
     }),
@@ -55,6 +55,9 @@ export default Vue.extend({
                         { name: "Donation Entry (Manual)", route: R.FinanceDonationEntry}
                     ]}],
                     [Roles.ADMIN, { name: "Admin", items: [{ name: "Audit Roles", route: R.AdminAuditRoles }] }],
+
+
+                    ['any', { name: "Staff UI", href: "/admin", icon: "website" }]
                 ]
 
                 const filteredItems = Ramda.filter(([role, link]) => this.hasRole(role), permissionedItems)

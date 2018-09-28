@@ -29,15 +29,15 @@
                 </div>
                 <div v-else-if="state == CONFIRMATION_2" :key="CONFIRMATION_2">
                     <h4>Last Step:</h4>
-                    <button class="mt3 danger-btn db" v-on:click="doRevocationFinally()">Revoke my Membership</button>
-                    <button class="mt4 db" v-on:click="cancelRevocation()">Cancel - Take me to safety</button>
+                    <v-btn color="error" class="mt3 danger-btn db" v-on:click="doRevocationFinally()">Revoke my Membership</v-btn>
+                    <v-btn color="success" class="mt4 db" v-on:click="cancelRevocation()">Cancel - Take me to safety</v-btn>
                 </div>
                 <div v-else-if="state == SAVING" :key="SAVING">
                     <h4>Revoking membership...</h4>
                 </div>
                 <div v-else-if="state == DONE" :key="DONE">
                     <h4>Your membership has been revoked. You should recieve a confirmation email.</h4>
-                    <button class="db mt2" v-on:click="checkMembership()">Okay</button>
+                    <v-btn color="success" class="db mt2" v-on:click="checkMembership()">Okay</v-btn>
                 </div>
             </transition>
         </div>

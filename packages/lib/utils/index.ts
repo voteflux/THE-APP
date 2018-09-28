@@ -101,3 +101,10 @@ export const prettyPrintUint8Array = (u8a: Uint8Array, cols = 16) => {
     const output = [screen[0].join(" "), screen.slice(1).map((row, i) => row.join(" ")).join("\n\n")].join(`\n${R.repeat('-', (cols+1) * 3 + 1).join('')}\n`)
     console.log(output + "\n\n")
 }
+
+
+export const throwIfNull = <R>(msg: string) => async (r: R | null): Promise<R> => {
+    if (r === null)
+        throw Error(msg)
+    return r
+}

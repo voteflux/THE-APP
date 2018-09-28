@@ -1,18 +1,21 @@
+import sha256 from 'fast-sha256';
 import { FluxApiMethods } from "./api.d";
 // all api calls should be written up as methods here (where the methods take the correct arguments)
 
 import * as R from "ramda";
-import { Maybe, Either } from "tsmonad";
+import { Option, some, none, isSome, isNone } from 'fp-ts/lib/Option'
 import { VueConstructor, Vue } from "vue/types/vue";
 import { Http, HttpResponse, HttpOptions } from "vue-resource/types/vue_resource";
 import { PluginObject } from "vue";
 // import io from "socket.io-client";
 
-import { UserV1Object, DonationsResp, RoleResp, Auth, PR, UserForFinance, RolesResp } from "flux-lib/types/db";
+import { UserV1Object, DonationsResp, RoleResp, Auth, PR, UserForFinance, RolesResp, Req, AuthJWT } from "flux-lib/types/db";
 import { NdaStatus, NdaDraftCommit, GenerateDraftNdaReq } from "flux-lib/types/db/vols";
 import WebRequest from "flux-lib/WebRequest";
-import { ER } from "flux-lib/types/index";
+import { StdSimpleEitherResp } from "flux-lib/types/index";
 import { MsgBus, M } from "../messages";
+import { createSignedReq, PayloadDecoder, objToPayload } from 'flux-lib/types/db/auth'
+import { SignedReqCreationOpts, Payload } from '../../../lib/types/db/auth'
 export * from "flux-lib/types/db";
 export * from "flux-lib/types/db/api";
 export * from "flux-lib/types/db/vols";
@@ -62,6 +65,24 @@ const apiRoots = () => {
 };
 
 
+const mkSignedRequest = (path: string, payload: Payload, auth: AuthJWT, aux?: Payload) => {
+    return createSignedReq({ path, payload, aux }, auth.sk)
+}
+
+
+const onGotUserObj = (fullUserDeetsR: Req<UserV1Object>): Req<UserV1Object> => {
+    fullUserDeetsR.do({
+        failed: e => {
+            throw e;
+        },
+        success: fullUserDeets => {
+            MsgBus.$emit(M.GOT_USER_DETAILS, fullUserDeets);
+        }
+    });
+    return fullUserDeetsR
+}
+
+
 
 export function FluxApi(_Vue: VueConstructor, options?: any): void {
     const Vue = _Vue; //as (VueConstructor & {http: Http});
@@ -85,19 +106,21 @@ export function FluxApi(_Vue: VueConstructor, options?: any): void {
         return roots.v1 + _path;
     };
 
-    const post = <r>(url: string, data: any, options?: HttpOptions): PR<r> => {
-        return http.post(url, data, options).then(mkResp, mkErr(url)) as PR<r>;
+    const post = <R>(url: string, data: any, options?: HttpOptions): PR<R> => {
+        return http.post(url, data, options).then(mkResp, mkErr(url)) as PR<R>;
     };
 
     const get = <r>(url: string): PR<r> => {
         return http.get(url).then(mkResp, mkErr(url)) as PR<r>;
     };
 
-    const post_jwt_request = <InTy extends object, OutTy>(apiPath: string, auth: Auth, args: object): PR<OutTy> => {
-        return post(_api2(apiPath), args, {headers: { 'Authorization': `Bearer ${''}` }})
+    const post_jwt = <InTy extends object, OutTy>(apiPath: string, auth: AuthJWT, args: object): PR<OutTy> => {
+        const payload = objToPayload(args)
+        const body = mkSignedRequest(apiPath, payload, auth)
+        return post(_api2(apiPath), body, {headers: { 'Authorization': `Bearer ${auth.jwt}` }})
     }
 
-    Vue.prototype.$flux = {
+    const fluxMethods = {
         v2: {
             checkEmailToOnboard({ email }): PR<any> {
                 return post(_api2("user/check_email"), { email });
@@ -111,7 +134,7 @@ export function FluxApi(_Vue: VueConstructor, options?: any): void {
             addNewDonation(args) {
                 return post(_api2("finance/addNewDonation"), args);
             },
-            donationAutoComplete(opts: Auth & { email: string }): PR<ER<UserForFinance>> {
+            donationAutoComplete(opts: Auth & { email: string }): PR<StdSimpleEitherResp<UserForFinance>> {
                 return post(_api2("finance/donationAutoComplete"), opts);
             },
             getRoleAudit({ s }): PR<RoleResp[]> {
@@ -123,14 +146,14 @@ export function FluxApi(_Vue: VueConstructor, options?: any): void {
             submitNdaPdfAndSignature(args: Auth & { pdf: string; sig: string }): PR<NdaStatus> {
                 return post(_api2("volunteers/nda/submitPdfAndSig"), args);
             },
-            generateDraftPdf: (auth: Auth, args: GenerateDraftNdaReq): PR<NdaDraftCommit> => {
-                return post_jwt_request("volunteers/nda/generateDraft", auth, args);
+            ndaGenerateDraftPdf: (auth: AuthJWT, args: GenerateDraftNdaReq): PR<NdaDraftCommit> => {
+                return post_jwt("volunteers/nda/generateDraft", auth, args);
             }
         },
 
         v1: {
             getUserDetails({ s }): PR<UserV1Object> {
-                return post(_api1("user_details"), { s });
+                return (post(_api1("user_details"), { s }) as PR<UserV1Object>).then(onGotUserObj)
             },
             saveUserDetails(user): PR<UserV1Object> {
                 return post(_api1("user_details"), user);
@@ -156,24 +179,14 @@ export function FluxApi(_Vue: VueConstructor, options?: any): void {
             captchaImgUrl(session) {
                 return _api1("au/captcha_img/" + session);
             },
-            onGotUserObj(fullUserDeetsR) {
-                fullUserDeetsR.do({
-                    failed: e => {
-                        throw e;
-                    },
-                    success: fullUserDeets => {
-                        MsgBus.$emit(M.GOT_USER_DETAILS, fullUserDeets);
-                    }
-                });
-            }
         },
 
         auth: {
-            loadAuth(): Maybe<Auth> {
+            loadAuth(): Option<Auth> {
                 const memberSecret = localStorage.getItem("s") || undefined;
                 const apiToken = localStorage.getItem("flux.member.apiToken") || undefined;
-                if (memberSecret || apiToken) return Maybe.just({ apiToken, s: memberSecret });
-                return Maybe.nothing();
+                if (memberSecret || apiToken) return some({ apiToken, s: memberSecret });
+                return none;
             },
 
             remove(): void {
@@ -207,6 +220,8 @@ export function FluxApi(_Vue: VueConstructor, options?: any): void {
         },
         $dev: _isDev
     } as FluxApiMethods;
+
+    Vue.prototype.$flux = fluxMethods
 
     return Vue.prototype.$flux;
 }

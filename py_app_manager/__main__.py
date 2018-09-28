@@ -261,11 +261,10 @@ def dev(dev_target, stage):
         (to_run, l) = cmd_w_log(cmd, name, dir_offset='../../')
         to_run = "printf '\\033]2;\%s\\033\\' '{title}'; _r(){{ if [ -e /usr/bin/read ]; then /usr/bin/read \"$@\"; else read \"$@\"; fi }}; endsess(){{ _r -p 'Press enter to terminate all...' && tmux kill-session -t main; }} ; trap 'endsess' SIGINT SIGTERM; ".format(title=name) + to_run
         to_run += "; echo -e '\\n\\n' && endsess "
-        print(name, to_run)
+        logging.debug('Running `{}` as cmd `{}`'.format(name, to_run))
         log_files.append(l)
         if session is None:
             session = server.new_session(session_name="main", start_directory=dir, window_command=to_run)
-            print(session)
             # session.set_option('remain-on-exit', 'on')
             window = session.list_windows()[0]
             return window.attached_pane
@@ -277,9 +276,6 @@ def dev(dev_target, stage):
     # lib_pane = run_dev_cmd('./packages/lib', 'npm run watch', 'dev-lib')
     if dev_target in {'ui', 'all'}:
         ui_pane = run_dev_cmd('./packages/ui', "STAGE={} npm run serve".format(stage), 'dev-ui')
-
-    print(session.list_windows())
-    print(session.list_windows())
 
     if dev_target in {'api', 'all'}:
         # mongo dev server port: 53799
@@ -293,7 +289,7 @@ def dev(dev_target, stage):
 
     session.attach_session()
     kill_sessions()
-    print("Log files: ", ', '.join(log_files))
+    logging.debug("Log files: {}".format(', '.join(log_files)))
 
 
 # monkey patch so usage output looks nicer

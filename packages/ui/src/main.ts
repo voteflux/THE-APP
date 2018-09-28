@@ -97,7 +97,7 @@ const routes = [
     { path: R.FinanceMenu, component: Finance.Menu },
     { path: R.FinanceDonationEntry, component: Finance.EnterDonation },
     { path: R.FinanceDonationLog, component: Finance.DonationLog },
-    { path: R.VolunteerDashboard, component: Volunteers.Dashboard },
+    { path: R.VolunteerNdaStatusAndSign, component: Volunteers.NdaStatusAndSign },
     // { path: R.VolunteerSignNDA, component: Volunteers.SignNDA },
     { path: R.CandidateDashboard, component: Candidates.Dashboard },
     { path: "*", redirect: "/" }

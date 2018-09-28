@@ -7,9 +7,10 @@
         </p>
         <vueSignature class="ba db" ref="signature" :sigOption="sigOpts" :w="'500px'" :h="'320px'"></vueSignature>
         <div class="mt4 flex flex-row items-center justify-around" style="max-width: 500px;">
-            <button @click="clear()">Clear</button>
-            <button @click="undo()">Undo</button>
-            <button @click="save()">Save</button>
+            <v-btn color="" @click="back()">Back</v-btn>
+            <v-btn color="warning" @click="clear()">Clear</v-btn>
+            <v-btn @click="undo()">Undo</v-btn>
+            <v-btn color="success" @click="save()">Save</v-btn>
         </div>
     </center>
 
@@ -20,10 +21,17 @@
 import Vue from 'vue'
 import { VolFs } from '../../../store/volunteers';
 // import routes from '../../routes';
+
+const defaultFunc: { (): void, isDefault?: boolean } = () => {}
+defaultFunc.isDefault = true
+
 export default Vue.extend({
     props: {
         onSave: {
             default: (sig) => {}
+        },
+        onBack: {
+            default: defaultFunc
         }
     },
     data: () => ({
@@ -34,6 +42,15 @@ export default Vue.extend({
     }),
 
     methods: {
+        showBack() {
+            // @ts-ignore
+            return !this.onBack.isDefault
+        },
+
+        back() {
+            this.onBack()
+        },
+
         clear() {
             // @ts-ignore
             this.$refs.signature.clear();

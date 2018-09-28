@@ -47,6 +47,7 @@ custom:
   alerts: ${file(./sls-alerts.yaml):alerts}
   # this is separated out because the structure changed; better to put it here
   handlers: "flux/handlers"
+  scheduled: "flux/scheduled"
   webpack:
     webpackConfig: 'webpack.config.js'   # Name of webpack configuration file
     includeModules: false   # Node modules configuration for packaging
@@ -106,15 +107,20 @@ provider:
 functions:
   # stats
   genStatsGetinfo:
-    handler: ${self:custom.handlers}/stats.genStatsGetinfo
+    handler: ${self:custom.scheduled}/stats.genStatsGetinfo
     timeout: 60
     events:
       - schedule: rate(1 minute)
   genStatsPublic:
-    handler: ${self:custom.handlers}/stats.genStatsPublic
+    handler: ${self:custom.scheduled}/stats.genStatsPublic
     timeout: 60
     events:
       - schedule: rate(1 minute)
+  updateIndexesDBV1:
+    handler: ${self:custom.scheduled}/indexes.updateIndexesDBV1
+    timeout: 300
+    events:
+      - schedule: rate(1 day)
   # user requests
   getRoles:
     handler: ${self:custom.handlers}/user.getRoles

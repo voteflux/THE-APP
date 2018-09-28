@@ -1,3 +1,4 @@
+import { left, right, Either } from 'fp-ts/lib/Either';
 import * as t from 'io-ts'
 
 import { DB, init as dbInit } from './../db';
@@ -5,15 +6,30 @@ import { DBV1, _Auth } from 'flux-lib/types';
 import { UserV1Object } from 'flux-lib/types/db';
 
 import * as utils from '../utils'
+import { Payload, SignedReqNoValidation, isSignedReqValid } from 'flux-lib/types/db/auth'
+import { SignedReqNoValidationRT, validationIssues, CompleteSignedReq } from '../../../lib/types/db/auth'
+import { EitherPromi } from '../../../lib/monads'
 
 
-const getJwt = (headers) => {
-    return headers.Authorization
+const getJwt = (headers): Either<string, string> => {
+    return right(headers.Authorization) || left("No JWT Authorization headers present.")
 }
 
 
+type AuthData = {
+    publicKey: string,
+    sessionId: string,
+    ecSig: string,
+    payload: Payload
+}
 
-export type FluxHandlerV2<I,O> = (db: DB, r: {reqUser: UserV1Object, reqBody: I}, event: any, context: any) => Promise<O>
+
+export type FluxHandlerV2<I,O> = (
+    db: DB,
+    r: {reqAuth: AuthData, reqUser: UserV1Object, reqBody: I},
+    event: any,
+    context: any
+) => Promise<O>
 
 
 type ResponseType = {
@@ -55,15 +71,16 @@ const logFailure = (r: ResponseType): ResponseType => {
 }
 
 
+const decodeError = (opts) => (vErr) => {
+    let eMsg = JSON.stringify(vErr, null, 2);
+    return `Unable to decode incoming request of type ${opts.inType.name}.
+        Error snippets:
 
-// const beforeEnter = f => (db, event, context) => {
-//     if (R.is(String, event.body)) {
-//         try {
-//             event.body = JSON.parse(event.body);
-//         } catch (e) {}
-//     }
-//     return f(db, event, context);
-// };
+        first 500 chars of error message: ${eMsg.slice(0,500)}
+
+        last 500 chars of error message: ${eMsg.slice(eMsg.length - 500, eMsg.length)}
+    `
+}
 
 
 export const fluxHandler = async <I,O,Aux>(opts: {
@@ -88,16 +105,44 @@ export const fluxHandler = async <I,O,Aux>(opts: {
             console.log('declaring handler')
             const _handler = async (event, context): Promise<ResponseType> => {
                 console.log('called handler; decoding to:', opts.inType)
-                const bodyJson = JSON.parse(event.body)
-                const reqBody = opts.inType.decode(bodyJson)
-                    .getOrElseL(vErr => { let eMsg = JSON.stringify(vErr, null, 2); throw Error(`Unable to decode incoming request of type ${opts.inType.name}. \n\n Error snippets: \n\n${eMsg.slice(0,500)}\n\n${eMsg.slice(eMsg.length - 500, eMsg.length)}`) })
+
+                // just check we can decode first
+                const rawBodyE = SignedReqNoValidationRT.decode(JSON.parse(event.body))
+                // set up main EitherPromi chain
+                return new EitherPromi((res, rej) => res(rawBodyE))
+                            .mapLeft(decodeError(opts))
+                            .chain((rawBody: CompleteSignedReq) => // this is a SignedReq<string>
+                                validationIssues(rawBody).mapLeft(decodeError(opts)).map(() => ({ rawBody })))
+                            .chain((scope) =>
+                                // check if JWT is present
+                                getJwt(event.headers).map(authHdr => ({ ...scope, authHdr })))
+                            .asyncChain(async (scope) => {
+                                const authRecord = await db.getUidFromS(scope.rawBody)
+                                return {}
+                            })
+                const bodyAuthE = rawBodyE.mapLeft(decodeError(opts))
+                    .chain((rawBody: CompleteSignedReq) => // this is a SignedReq<string>
+                        validationIssues(rawBody).mapLeft(decodeError(opts)).map(() => ({ rawBody }))
+                        // signature is valid
+                    ).chain((scope) =>
+                        // check if JWT is present
+                        getJwt(event.headers).map(authHdr => ({ ...scope, authHdr }))
+                    )
+
+
 
                 console.log('req body got')
                 // const jwt = getJwt(event.headers)
                 // console.log(jwt, event.headers)
 
+
+
+                if (!opts.auth.isNone()) {
+                    // do auth stuff... eventually
+                }
+
                 const out =
-                    await f(db, {reqUser: {} as UserV1Object, reqBody}, event, context)
+                    await f(db, {reqUser: {} as UserV1Object, reqBody, reqAuth: {} as AuthData}, event, context)
                         .then(out => opts.outType.decode(out).getOrElseL(vErr => { throw vErr }))
                         .then(r200)
                         .then(logSuccess)
@@ -124,7 +169,7 @@ export const fluxHandler = async <I,O,Aux>(opts: {
             //     }
             // }
             // console.error(`Function ${fName} errored: ${err}`);
-            return beforeSend(r500(_err as any))
+            return async () => beforeSend(r500(_err as any))
         } finally {
             await db.close();
         }

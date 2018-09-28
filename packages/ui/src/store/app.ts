@@ -1,4 +1,4 @@
-// import { Maybe } from 'tsmonad';
+import { Option, some, none, isSome, isNone } from 'fp-ts/lib/Option'
 
 export const state = {
     app: {

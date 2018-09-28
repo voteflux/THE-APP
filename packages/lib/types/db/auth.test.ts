@@ -3,7 +3,7 @@ import { strToUint8a, prettyPrintUint8Array } from './../../utils/index';
 import sha256 from 'fast-sha256';
 import nacl from 'tweetnacl'
 
-import { createSignedReq, _szPayload, isSignedReqValid, mkPackedMsgForSigning, SignedReqRT, ReadyToValidatedSignedReq, convertBase64SignedReq, convertUint8aSignedReq } from './auth';
+import { createSignedReq, _szPayload, isSignedReqValid, mkPackedMsgForSigning, SignedReqRT, CompleteSignedReq, convertBase64SignedReq, convertUint8aSignedReq } from './auth';
 import { ThrowReporter } from 'io-ts/lib/ThrowReporter';
 
 const secretKey = new Uint8Array(new Array(32).fill(1))

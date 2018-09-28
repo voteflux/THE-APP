@@ -1,7 +1,14 @@
 <template>
-    <div class="loading">
-        <slot/>
-    </div>
+    <center class="loading">
+         <v-progress-circular
+            indeterminate
+            class="v-mid dib mr3"
+            color="primary"
+            />
+        <div class="v-mid dib">
+            <slot/>
+        </div>
+    </center>
 </template>
 
 <script>
@@ -11,11 +18,11 @@
 </script>
 
 <style scoped>
-    .loading {
+    /* .loading {
         border: #333 1px;
         -webkit-border-radius: 5px;
         -moz-border-radius: 5px;
         border-radius: 5px;
         padding: 3px;
-    }
+    } */
 </style>
