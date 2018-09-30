@@ -1,5 +1,5 @@
 <template>
-    <div class="flex flex-wrap flex-row items-center tl editable-root">
+    <div class="flex flex-wrap flex-row items-center tl editable-root editable-expand">
         <div :class="'col flex flex-wrap items-center ' + calcWidth()">
             <div class="col w-40-ns w-100 var-name">
                 <div class="pl2 dib f6 f5-ns b normal-ns pr2">
@@ -7,18 +7,20 @@
                 </div>
             </div>
             <div class="col w-60-ns w-100 pl0-ns pl2">
-                <div v-if="state == DISPLAY" class="pv2">
-                    {{ value }}
-                </div>
-                <div v-if="state == EDITING" class="">
-                    <slot/>
-                </div>
-                <div v-if="state == SAVING" class="pv2">
-                    Saving...
-                </div>
-                <div v-if="state == ERROR" class="pv2">
-                    Error: {{ err.msg }}
-                </div>
+                <!-- <transition-slide> -->
+                    <div v-if="state == DISPLAY" :key="DISPLAY" class="pv2">
+                        {{ value }}
+                    </div>
+                    <div v-else-if="state == EDITING" :key="EDITING" class="">
+                        <slot/>
+                    </div>
+                    <div v-else-if="state == SAVING" :key="SAVING" class="pv2">
+                        Saving...
+                    </div>
+                    <div v-else-if="state == ERROR" :key="ERROR" class="pv2">
+                        Error: {{ err.msg }}
+                    </div>
+                <!-- </transition-slide> -->
             </div>
         </div>
 
@@ -135,9 +137,13 @@ button {
     @extend .f4;
 }
 
-.editable-root {
-    min-height: 2rem;
-}
+// .editable-root {
+//     min-height: 5rem;
+// }
+
+// .editable-expand {
+//     transition: height 0.5s ease-in-out;
+// }
 
 .var-name {
     @extend .pa0-ns;
@@ -149,5 +155,9 @@ button {
 
 .icons {
     min-height: 2.1rem;
+}
+
+.v-messages__wrapper {
+    display: none;
 }
 </style>

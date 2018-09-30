@@ -58,13 +58,13 @@ export class WebRequest<E,D> {
         return _cases[this.tag]();
     }
 
-    do (cases: PartialCases<D,E,void>): WebRequest<E,D> {
+    do (cases: PartialCases<D,E,void>): void {
         const def = () => {}
         this.caseOf({
             loading: def, notRequested: def, success: def, failed: def,
             ...cases
         })
-        return this;
+        // return this;
     }
 
     isNotRequested() { return this.tag == RT.NotRequested }

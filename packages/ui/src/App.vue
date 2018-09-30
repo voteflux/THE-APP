@@ -26,10 +26,7 @@
             </div>
 
             <div v-else :key="IS_NOT_LOGGED_IN">
-                <LoginForm />
-                <Error v-if="req.user.isFailed()">
-                    {{ req.user.unwrapError() }}
-                </Error>
+                <LoginForm :userReq="req.user" />
             </div>
         </transition>
     </v-app>
@@ -105,23 +102,24 @@ export default /*class App extends Vue*/ Vue.extend({
             this.loadUserSilent()
             this.getRoles()
         },
-        loadUserSilent() {
-            this.$flux.v1.getUserDetails(this.auth).then(r => {
-                this.req.user = r
-                r.do({
-                    failed: (e, errObj) => {
-                        this.loginFailed();
-                        if (errObj && errObj.status == 403) {
-                            this.$flux.auth.remove();
-                        } else {
-                            this.$unknownErr(e);
-                        }
-                    },
-                    success: u => {
-                        this.setUser(u)
+        async loadUserSilent() {
+            console.log('loadUserSilent 1')
+            this.req.user = await this.$flux.v1.getUserDetails(this.auth)
+            console.log('loadUserSilent 2')
+            this.req.user.do({
+                failed: (e, errObj) => {
+                    this.loginFailed();
+                    console.log("Login error", errObj)
+                    if (errObj && errObj.status == 403) {
+                        this.$flux.auth.remove();
+                    } else {
+                        this.$unknownErr(e);
                     }
-                })
-            });
+                },
+                success: u => {
+                    this.setUser(u)
+                }
+            })
         },
         logout() {
             this.$flux.auth.remove()
@@ -189,8 +187,57 @@ export default /*class App extends Vue*/ Vue.extend({
     opacity: 0;
 }
 
+
+.expand-enter-active {
+    transition-delay: 1s;
+}
+.expand-enter-active,
+.expand-leave-active {
+  transition-property: opacity, height;
+  transition-duration: 0.3s;
+}
+
+.expand-enter,
+.expand-leave-to {
+  opacity: 0;
+}
+
+.expand-enter-active,
+.expand-leave-active {
+  transition: height 0.3s ease-in-out;
+  overflow: hidden;
+}
+
+.expand-enter,
+.expand-leave-to {
+  height: 0;
+}
+
+
+.slide-fade-enter-active {
+  transition: all .3s ease;
+//   position: absolute;
+}
+.slide-fade-leave-active {
+  transition: all .8s cubic-bezier(1.0, 0.5, 0.8, 1.0);
+  position: absolute;
+}
+.slide-fade-enter, .slide-fade-leave-to
+/* .slide-fade-leave-active below version 2.1.8 */ {
+  transform: translateX(10px);
+  opacity: 0;
+}
+
+
+
+
+
 // main sitewide styling
 
+
+.editable-root {
+    min-height: 4.9rem;
+}
 
 ul.ul-spaced li {
     margin-top: 10px;
@@ -234,7 +281,7 @@ a.btn {
 }
 
 button {
-    @extend .btn;
+    // @extend .btn;
 }
 
 button .btn-transparent {
@@ -331,6 +378,10 @@ button.tool-btn:disabled:hover {
 button.v-toolbar__side-icon {
     border: 0;
 }
+
+// .v-btn button {
+//     border: 0;
+// }
 
 /* INPUTS */
 

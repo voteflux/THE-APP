@@ -89,7 +89,7 @@
                 <div class="w-50 w-25-l pa2">
                     <h3>Save</h3>
                     <div v-if="entryComplete()">
-                        <button @click="saveDonation()">Save and send email receipt</button>
+                        <v-btn color="success" @click="saveDonation()">Save and send email receipt</v-btn>
                     </div>
                     <div v-else>
                         Please fill in all fields of the donation entry.

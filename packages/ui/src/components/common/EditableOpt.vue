@@ -1,13 +1,19 @@
 <template>
-    <Editable :name="name" :value="renderValue()" :onSave="_onSave" :onStart="_onStart" :onReset="_onReset">
-        <div v-if="useDropdown === true">
-            <select v-model="newValue" class="input mv2">
-                <option :value="true">{{ trueName }}</option>
-                <option :value="false">{{ falseName }}</option>
-            </select>
+    <div class="flex felx-row justify-between items-center pl4 pr4 editable-root">
+        <div class="w-50">{{name}}</div>
+        <div class="w-25 tr pr2">
+            <div v-if="!this.loading" class="flex items-center justify-end">
+                <span>{{ renderValue() }}</span>
+                <span class="ml4">
+                    <div v-if="useDropdown === true">
+                        <v-select :loading="loading" v-model="newValue" :items="[{text: trueName, value: true}, {text: falseName, value: false}]" />
+                    </div>
+                    <v-switch v-else :loading="loading" v-model="newValue" />
+                </span>
+            </div>
+            <loading v-else>Saving...</loading>
         </div>
-        <toggle-button v-else v-model="newValue" class="pv2"/>
-    </Editable>
+    </div>
 </template>
 
 <script lang="ts">
@@ -33,13 +39,22 @@ export default Vue.extend({
         newValue: true,
         newValueInv: false,
         optNames: [] as string[],
+        loading: false,
     }),
+
+    watch: {
+        newValue(newVal, oldVal) {
+            if (oldVal === newVal) return
+            this._onSave()
+        }
+    },
 
     methods: {
         _onStart() { },
 
         _onSave() {
-            return this.$props.onSave(this.newValue)
+            this.loading = true
+            this.$props.onSave(this.newValue).then(() => this.loading = false)
         },
 
         setNVFromInv() {
@@ -65,10 +80,6 @@ export default Vue.extend({
 
 <style scoped lang="scss">
 @import "tachyons";
-
-.editable-root {
-    min-height: 2rem;
-}
 
 .var-name {
     @extend .pa0-ns;

@@ -74,7 +74,6 @@ const mkSignedRequest = (path: string, payload: Payload, auth: AuthJWT, aux?: Pa
 const onGotUserObj = (fullUserDeetsR: Req<UserV1Object>): Req<UserV1Object> => {
     fullUserDeetsR.do({
         failed: e => {
-            throw e;
         },
         success: fullUserDeets => {
             MsgBus.$emit(M.GOT_USER_DETAILS, fullUserDeets);
@@ -165,7 +164,7 @@ export function FluxApi(_Vue: VueConstructor, options?: any): void {
                 return (post(_api1("user_details"), { s }) as PR<UserV1Object>).then(onGotUserObj)
             },
             saveUserDetails(user): PR<UserV1Object> {
-                return post(_api1("user_details"), user);
+                return (post(_api1("user_details"), user) as PR<UserV1Object>).then(onGotUserObj);
             },
             sendUserDetails({ email }) {
                 return post(_api1("send_user_details"), { email });
@@ -188,6 +187,7 @@ export function FluxApi(_Vue: VueConstructor, options?: any): void {
             captchaImgUrl(session) {
                 return _api1("au/captcha_img/" + session);
             },
+            onGotUserObj
         },
 
         auth: {

@@ -1,6 +1,7 @@
 <template>
     <center class="loading">
          <v-progress-circular
+            :size="20"
             indeterminate
             class="v-mid dib mr3"
             color="primary"

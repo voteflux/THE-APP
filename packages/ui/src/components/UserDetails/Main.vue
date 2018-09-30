@@ -2,6 +2,8 @@
     <div>
         <UserDetailsValid :user="user" />
 
+        <warning class="mt3 mb3">If alter your name or address you'll need to validate your details again.</warning>
+
         <div class="child-bg-alt tl">
             <UiSection title="Your Name">
                 <h5>(must match electoral roll)</h5>
@@ -11,8 +13,8 @@
             </UiSection>
 
             <UiSection title="Contact Details">
-                <EditableText class="row" name="Email" :value="user.email" :onSave="savePropFactory('email')" type="email" />
-                <EditableText class="row" name="Contact Number" :value="user.contact_number" :onSave="savePropFactory('contact_number')" type="tel" placeholder="+61 401 555 555" />
+                <EditableText lockable class="row" name="Email" :value="user.email" :onSave="savePropFactory('email')" type="email" />
+                <EditableText lockable class="row" name="Contact Number" :value="user.contact_number" :onSave="savePropFactory('contact_number')" type="tel" placeholder="+61 401 555 555" />
             </UiSection>
 
             <UiSection title="Your Address">
@@ -52,11 +54,12 @@ export default Vue.extend({
     }),
     methods: {
         savePropFactory(prop) {
-            return (newValue) => {
+            return async (newValue) => {
                 assert(prop != 's' && prop != 'authToken')
                 const toSave = { [prop]: newValue, ...this.auth }
-                return this.$flux.v1.saveUserDetails(toSave)
+                const r = await this.$flux.v1.saveUserDetails(toSave)
                     .then(this.$flux.utils.onGotUserObj);
+                return r
             }
         },
 
@@ -69,12 +72,12 @@ export default Vue.extend({
             return d
         },
 
-        saveDob(newDob: Date) {
+        async saveDob(newDob: Date) {
             const dobDay = newDob.getDate()
             const dobMonth = newDob.getMonth() + 1
             const dobYear = newDob.getFullYear()
-            const dob = newDob.toISOString()
-            return this.$flux.v1.saveUserDetails({dobDay, dobMonth, dobYear, dob, s: this.$props.user.s}).then(this.$flux.utils.onGotUserObj)
+            const dob = `${dobYear}-${dobMonth}-${dobDay}`
+            return this.$flux.v1.saveUserDetails({dobDay, dobMonth, dobYear, dob, s: this.$props.user.s})
         }
     }
 })

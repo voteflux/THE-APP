@@ -66,6 +66,8 @@
   ],
   "exclude": [
     "node_modules",
-    "dist"
+    "dist",
+    "../[^(api)]",
+    "../**/.webpack",
   ]
 }
