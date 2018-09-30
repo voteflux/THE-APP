@@ -3,87 +3,67 @@
         <ui-section title="Enter Donation">
             <form @submit="saveDonation()" class="flex flex-wrap">
                 <div class="w-50-l w-100">
-                    <v-text-field
-                        required
-                        v-model="entry.email"
-                        :rules="emailRules"
-                        label="E-mail"
-                        :loading="req.checkEmail.isLoading()"
-                        @change="checkEmail()"
-                        />
+                    <flux-input label="E-mail">
+                        <v-text-field required v-model="entry.email" :rules="emailRules" :loading="req.checkEmail.isLoading()" @change="checkEmail()" />
+                    </flux-input>
                     <!-- <label>email:
                         <fa-icon v-if="req.checkEmail.isLoading()" icon="spinner" class="fa-spin" />
                         <input @change="checkEmail()" type="text" placeholder="name@example.com" v-model="entry.email"/>
                     </label> -->
                     <!-- <label>branch: <input type="text" placeholder="/AUS" v-model="entry.branch"/></label> -->
-                    <v-autocomplete
-                        :items="validJuris"
-                        label="Branch"
-                        v-model="entry.branch"
-                        required
-                        />
-                    <v-text-field
-                        type="number"
-                        :label="`Amount (${entry.unit}) ${ req.recentSimilar.isSuccess() ? '| (' + nSimilarDonations + ' similar)' : '' }`"
-                        v-model.number="entry.amount"
-                        @change="updateRecentSimilar()"
-                        :loading="req.recentSimilar.isLoading()"
-                        required
-                        />
-                    <v-text-field
-                        label="Donation Units (e.g. AUD)"
-                        v-model="entry.units"
-                        required
-                        />
+                    <flux-input label="Branch"><v-autocomplete :items="validJuris" v-model="entry.branch" required /></flux-input>
+                    <flux-input :label="`Amount (${entry.unit}) ${ req.recentSimilar.isSuccess() ? '| (' + nSimilarDonations + ' similar)' : '' }`">
+                        <v-text-field type="number" v-model.number="entry.amount" @change="updateRecentSimilar()" :loading="req.recentSimilar.isLoading()" required />
+                    </flux-input>
+                    <flux-input label="Donation Units (e.g. AUD)"><v-text-field v-model="entry.units" required /></flux-input>
                     <div v-if="entry.unit.toUpperCase() !== 'AUD'">
-                        <v-text-field
-                            label="AUD valid of donation"
-                            v-model="entry.extra_data.aud_value"
-                            type="number"
-                            required
-                            />
+                        <flux-input label="AUD valid of donation"><v-text-field v-model="entry.extra_data.aud_value" type="number" required /></flux-input>
                     </div>
                     <!-- <editable-date name="Date" :initDate="initDate" :onSave="onDateSave" :autoSave="true" /> -->
-                    <v-menu
-                        ref="donationDateMenu"
-                        :close-on-content-click="false"
-                        v-model="donationDateMenuOpen"
-                        :nudge-right="40"
-                        lazy
-                        transition="scale-transition"
-                        offset-y
-                        full-width
-                        max-width="290px"
-                        min-width="290px"
+                    <flux-input label="Date (DD/MM/YYYY)">
+                        <v-menu
+                            ref="donationDateMenu"
+                            :close-on-content-click="false"
+                            v-model="donationDateMenuOpen"
+                            :nudge-right="40"
+                            lazy
+                            transition="scale-transition"
+                            offset-y
+                            full-width
+                            max-width="290px"
+                            min-width="290px"
+                            class="w-100"
                         >
-                        <v-text-field
-                            slot="activator"
-                            v-model="tmpFormattedDate"
-                            label="Date (DD/MM/YYYY)"
-                            @blur="parseDate()"
+                            <v-text-field
+                                slot="activator"
+                                v-model="tmpFormattedDate"
+                                @blur="parseDate()"
+                            />
+                            <v-date-picker v-model="entry.date" no-title @input="datePickerSave()"></v-date-picker>
+                        </v-menu>
+                    </flux-input>
+                    <flux-input label="Payment Source">
+                        <v-autocomplete
+                            :items="paymentSourceItems"
+                            v-model="entry.payment_source"
+                            required
                         />
-                        <v-date-picker v-model="entry.date" no-title @input="datePickerSave()"></v-date-picker>
-                    </v-menu>
-                    <v-autocomplete
-                        :items="paymentSourceItems"
-                        label="Payment Source"
-                        v-model="entry.payment_source"
-                        required
+                    </flux-input>
+                    <flux-input label="Comment (optional)">
+                        <v-textarea
+                            placeholder="Any relevant details we might want in future."
+                            v-model="entry.extra_data.comment"
+                            :rows="3"
                         />
-                    <v-textarea
-                        label="Comment (optional)"
-                        placeholder="Any relevant details we might want in future."
-                        v-model="entry.extra_data.comment"
-                        :rows="3"
-                        />
+                    </flux-input>
                 </div>
                 <div class="w-50-l w-100">
-                    <label>name: <input type="text" placeholder="Fname Mnames Sname" v-model="entry.name"/></label>
-                    <label>street: <input type="text" placeholder="42 Wallaby Way" v-model="entry.street"/></label>
-                    <label>city: <input type="text" placeholder="Sydney" v-model="entry.city"/></label>
-                    <label>state: <input type="text" placeholder="NSW" v-model="entry.state"/></label>
-                    <label>postcode: <input type="text" placeholder="2000" v-model="entry.postcode"/></label>
-                    <label>country: <input type="text" placeholder="Australia" v-model="entry.country"/></label>
+                    <flux-input label="Full Name"><v-text-field v-model="entry.name" required /></flux-input>
+                    <flux-input label="Street"><v-text-field v-model="entry.street" required /></flux-input>
+                    <flux-input label="City"><v-text-field v-model="entry.city" required /></flux-input>
+                    <flux-input label="State"><v-text-field v-model="entry.state" required /></flux-input>
+                    <flux-input label="Postcode"><v-text-field v-model="entry.postcode" required /></flux-input>
+                    <flux-input label="Country"><v-text-field v-model="entry.country" required /></flux-input>
                 </div>
             </form>
 
@@ -140,6 +120,9 @@
     </div>
 </template>
 
+<script type="text/x-template" id="flx-input-template">
+</script>
+
 <script lang="ts">
 const JSError = Error;
 import Vue from 'vue'
@@ -182,6 +165,7 @@ const defaultDonation: DonationT = {
     date: new Date().toISOString(),
     id: 'n/a'
 }
+
 
 export default Vue.extend({
     components: { FluxLogo, Loading, UiSection, Error, Paginate, Donation, EditableDate, AddressEditor, Section, StatusSuccess, DonationTable },
@@ -305,5 +289,9 @@ label {
 label * {
     @extend .w-60;
     margin-left: 0.25rem;
+}
+
+.container {
+    padding: 0;
 }
 </style>

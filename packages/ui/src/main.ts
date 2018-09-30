@@ -80,11 +80,12 @@ import FinanceEnterDonation from "@c/Finance/FinanceEnterDonation.vue";
 
 import R from "./routes";
 
-import {UiSection, Loading, Error, Warning} from "@c/common";
+import {UiSection, Loading, Error, Warning, FluxInput} from "@c/common";
 Vue.component('ui-section', UiSection)
 Vue.component('loading', Loading)
 Vue.component('error', Error)
 Vue.component('warning', Warning)
+Vue.component('flux-input', FluxInput)
 import NavDrawer from '@c/NavDrawer.vue'
 Vue.component('nav-drawer', NavDrawer)
 

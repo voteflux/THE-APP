@@ -20,15 +20,17 @@
         </UiSection>
         <v-divider v-if="showAdmin()" /> -->
 
+        <!--
         <Section title="Member Tools" :noCollapse="true">
             <ul class="ul-spaced">
                 <li><router-link :to="Routes.EditUserDetails">Change your member details or preferences</router-link></li>
                 <li><router-link :to="Routes.MembershipRevocation">Revoke your membership</router-link></li>
-                <!-- <li><a href="/anon_validation.html">Help validate other members</a></li> -->
+                <!-/- <li><a href="/anon_validation.html">Help validate other members</a></li> -/->
             </ul>
         </Section>
 
         <v-divider class="mt3" />
+        -->
 
         <Section title="Get Involved" :noCollapse="true" class="child-bg-alt" >
             <EditableOpt class="row" name="I'm interested in standing as a candidate" :value="user.candidature_federal" :onSave="savePropFactory('candidature_federal')" />
@@ -38,7 +40,7 @@
         <v-divider class="mt3" />
 
         <Section title="Log Out" :noCollapse="true">
-            <v-btn color="warning" v-on:click="MsgBus.$emit(M.LOGOUT)">Log Out Now</v-btn>
+            <v-btn color="warning" class="mt2" v-on:click="MsgBus.$emit(M.LOGOUT)">Log Out Now</v-btn>
         </Section>
 
     </div>
