@@ -19,6 +19,7 @@
 <script lang="ts">
 import Vue from 'vue'
 import Editable from "./Editable.vue"
+import { debounce } from 'ts-debounce';
 
 export default Vue.extend({
     components: { Editable },
@@ -40,12 +41,12 @@ export default Vue.extend({
         newValueInv: false,
         optNames: [] as string[],
         loading: false,
+        doNotSave: false,
     }),
 
     watch: {
         newValue(newVal, oldVal) {
-            if (oldVal === newVal) return
-            this._onSave()
+            this.checkForSave()
         }
     },
 
@@ -64,17 +65,22 @@ export default Vue.extend({
         _onReset() {
             this.newValue = this.$props.value || this.$props.default;
             this.newValueInv = !this.newValue
+            this.loading = false
         },
 
         renderValue() {
             return this.$props.value === true ? this.optNames[0] : this.optNames[1]
-        }
+        },
+
+        checkForSave() {
+            if (this.newValue !== this.$props.value) this._onSave()
+        },
     },
 
     mounted(){
         this._onReset()
         this.optNames = [this.$props.trueName || "Yes", this.$props.falseName || "No" ]
-    }
+    },
 })
 </script>
 

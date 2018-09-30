@@ -72,8 +72,11 @@ export default Vue.extend({
         },
         hasRole(r: string) {
             const rs = this.$props.roles
-            if (rs.isSuccess()) {
-                return rs.unwrap().roles.includes(r) || rs.unwrap().roles.includes("admin")
+            if (rs.isSuccess && rs.isSuccess()) {
+                const _rs = rs.unwrap()
+                if (_rs.roles)
+                    return rs.unwrap().roles.includes(r) || rs.unwrap().roles.includes("admin")
+                return false
             }
             return false
         },
