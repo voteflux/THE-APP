@@ -58,7 +58,7 @@ import Roles from "../lib/roles";
 
 import {M, MsgBus} from "../messages"
 import WebRequest from "flux-lib/WebRequest";
-import { Auth } from 'flux-lib/types';
+import { Auth } from 'flux-lib/types/db';
 import { Req, RolesResp } from 'flux-lib/types/db'
 
 export default Vue.extend({

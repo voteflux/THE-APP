@@ -82,8 +82,8 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import {genPdf} from 'flux-lib/pdfs/nda/generateDraftPdf'
-import { UserV1Object, Auth } from 'flux-lib/types';
+import {genPdf} from 'flux-lib/pdfs/nda/generatePdf'
+import { UserV1Object, Auth } from 'flux-lib/types/db';
 import routes from '@/routes'
 import { Option, some, none, isSome, isNone } from 'fp-ts/lib/Option'
 import { yourSignaturePlaceholder } from 'flux-lib/pdfs/nda/imageUris';

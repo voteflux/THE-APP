@@ -1,6 +1,6 @@
 import { DB } from './../db';
 const handlerUtils = require('../handlers/handlerUtils')
-const R = require('ramda')
+import * as R from 'ramda'
 
 module.exports.genStatsGetinfo = async (db, event, context) => {
     return {result: await db.update_getinfo_stats()}

@@ -1,3 +1,4 @@
+import { DBMethods } from './../db';
 import { DBV1, DBV2 } from 'flux-lib/types/db';
 import { CacheDoc } from 'flux-lib/types/db/cache'
 import { PromE } from 'flux-lib/types'
@@ -15,7 +16,7 @@ const DEFAULT_EXPIRE = 60 * 60 * 24 * 60  // 2 months
 
 
 export default class DBCheckCache {
-    constructor(public dbv1: DBV1, public dbv2: DBV2) {
+    constructor(public dbv1: DBV1, public dbv2: DBV2, public db: DBMethods) {
     }
 
     async check<T>(namespace: string, cacheRawKey: string): PromE<T> {

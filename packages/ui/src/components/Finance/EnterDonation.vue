@@ -1,32 +1,81 @@
 <template>
     <div>
-        <flux-logo title="Donation Entry"/>
-
         <ui-section title="Enter Donation">
             <form @submit="saveDonation()" class="flex flex-wrap">
                 <div class="w-50-l w-100">
-                    <label>email:
+                    <v-text-field
+                        required
+                        v-model="entry.email"
+                        :rules="emailRules"
+                        label="E-mail"
+                        :loading="req.checkEmail.isLoading()"
+                        @change="checkEmail()"
+                        />
+                    <!-- <label>email:
                         <fa-icon v-if="req.checkEmail.isLoading()" icon="spinner" class="fa-spin" />
                         <input @change="checkEmail()" type="text" placeholder="name@example.com" v-model="entry.email"/>
-                    </label>
-                    <label>branch: <input type="text" placeholder="/AUS" v-model="entry.branch"/></label>
-                    <label>
-                        amount ({{ entry.unit }}): {{ req.recentSimilar.isSuccess() ? `(${nSimilarDonations} similar)` : '' }}
-                        <input type="number" placeholder="10.22" v-model.number="entry.amount" @change="updateRecentSimilar()"/>
-                    </label>
-                    <label>units: <input type="text" placeholder="AUD" v-model="entry.unit" /></label>
+                    </label> -->
+                    <!-- <label>branch: <input type="text" placeholder="/AUS" v-model="entry.branch"/></label> -->
+                    <v-autocomplete
+                        :items="validJuris"
+                        label="Branch"
+                        v-model="entry.branch"
+                        required
+                        />
+                    <v-text-field
+                        type="number"
+                        :label="`Amount (${entry.unit}) ${ req.recentSimilar.isSuccess() ? '| (' + nSimilarDonations + ' similar)' : '' }`"
+                        v-model.number="entry.amount"
+                        @change="updateRecentSimilar()"
+                        :loading="req.recentSimilar.isLoading()"
+                        required
+                        />
+                    <v-text-field
+                        label="Donation Units (e.g. AUD)"
+                        v-model="entry.units"
+                        required
+                        />
                     <div v-if="entry.unit.toUpperCase() !== 'AUD'">
-                        <label>AUD value: <input type="number" placeholder="13.37" v-model.number="entry.extra_data.aud_value" /></label>
+                        <v-text-field
+                            label="AUD valid of donation"
+                            v-model="entry.extra_data.aud_value"
+                            type="number"
+                            required
+                            />
                     </div>
-                    <editable-date name="Date" :initDate="initDate" :onSave="onDateSave" :autoSave="true" />
-                    <label>source: <select v-model="entry.payment_source">
-                        <option value="eft" >Bank Transfer</option>
-                        <option value="paypal">PayPal</option>
-                        <option value="crypto">Cryptocurrency</option>
-                    </select></label>
-                    <label>comment: (optional)
-                        <textarea v-model="entry.extra_data.comment" placeholder="Any relevant details we might want in future." />
-                    </label>
+                    <!-- <editable-date name="Date" :initDate="initDate" :onSave="onDateSave" :autoSave="true" /> -->
+                    <v-menu
+                        ref="donationDateMenu"
+                        :close-on-content-click="false"
+                        v-model="donationDateMenuOpen"
+                        :nudge-right="40"
+                        lazy
+                        transition="scale-transition"
+                        offset-y
+                        full-width
+                        max-width="290px"
+                        min-width="290px"
+                        >
+                        <v-text-field
+                            slot="activator"
+                            v-model="tmpFormattedDate"
+                            label="Date (DD/MM/YYYY)"
+                            @blur="parseDate()"
+                        />
+                        <v-date-picker v-model="entry.date" no-title @input="datePickerSave()"></v-date-picker>
+                    </v-menu>
+                    <v-autocomplete
+                        :items="paymentSourceItems"
+                        label="Payment Source"
+                        v-model="entry.payment_source"
+                        required
+                        />
+                    <v-textarea
+                        label="Comment (optional)"
+                        placeholder="Any relevant details we might want in future."
+                        v-model="entry.extra_data.comment"
+                        :rows="3"
+                        />
                 </div>
                 <div class="w-50-l w-100">
                     <label>name: <input type="text" placeholder="Fname Mnames Sname" v-model="entry.name"/></label>
@@ -75,7 +124,7 @@
 
         <Loading v-if="req.saveReq.isLoading()">Saving Donation...</Loading>
 
-        <ui-section title="Recently Entered Donations">
+        <ui-section title="Recently Entered Donations (sorted by DB _ID; descending)">
             <Error v-if="req.donations.isFailed()">{{ req.donations.unwrapError() }}</Error>
             <Loading v-else-if="!req.donations.isSuccess()">Loading donations...</Loading>
             <div v-else>
@@ -96,12 +145,22 @@ const JSError = Error;
 import Vue from 'vue'
 import * as R from 'ramda'
 import { UserV1Object, SortMethod, Donation as DonationT, DonationsResp, SM, UserForFinance } from 'flux-lib/types/db';
+import { validJuris } from 'flux-lib/types/db/api'
 import WebRequest from 'flux-lib/WebRequest';
 import FluxLogo from '@c/common/FluxLogo.vue';
 import { Error, UiSection, Donation, Paginate, EditableDate, AddressEditor, Section, StatusSuccess, Loading, DonationTable } from '@c/common';
 import { Auth, Paginated } from '@/lib/api';
 import { Req } from '@/lib/api';
 import { eitherDo, ER } from 'flux-lib/types'
+import { nameRules, emailRules } from '@/lib/forms'
+
+
+const paymentSourceItems = [
+    { text: "Bank Transfer", value: "eft" },
+    { text: "PayPal", value: "paypal"},
+    { text: "Cryptocurrency", value: "crypto" }
+]
+
 
 const defaultDonation: DonationT = {
     ts: (new Date()).getTime() / 1000 | 0,
@@ -146,7 +205,13 @@ export default Vue.extend({
         entry: R.clone(defaultDonation) as DonationT,
         defaultDonation,
         nSimilarDonations: 0,
-        R
+        R,
+        emailRules,
+        nameRules,
+        validJuris,
+        paymentSourceItems,
+        tmpFormattedDate: '',
+        donationDateMenuOpen: false,
     }),
     methods: {
         checkEmail() {
@@ -180,6 +245,14 @@ export default Vue.extend({
             this.entry.ts = newDate.getTime() / 1000 | 0
             this.entry.date = newDate.toISOString()
         },
+        datePickerSave() {
+            if (this.entry.date) {
+                const [year, month, day] = this.entry.date.split("-")
+                this.entry.ts = (new Date(parseInt(year), parseInt(month)-1, parseInt(day))).getTime() / 1000 | 0
+                this.tmpFormattedDate = `${day.padStart(2, '0')}/${month.padStart(2, '0')}/${year}`
+            }
+            this.donationDateMenuOpen = false
+        },
         entryComplete() {
             return R.compose(R.all(p => !!p), R.values)(this.entry)
         },
@@ -202,7 +275,13 @@ export default Vue.extend({
             const pageN = _pageN || 0
             const limit = _limit || 9999
             this.req.donations = WebRequest.Loading()
-            this.$flux.v2.getDonations({...this.$props.auth, pageN, limit, sortMethod: SortMethod.ID}).then(r => this.req.donations = r)
+            this.$flux.v2.getDonations({...this.$props.auth, pageN, limit, sortMethod: SortMethod.ID})
+                .then(r => this.req.donations = r)
+        },
+        parseDate() {
+            if (!this.tmpFormattedDate) return null
+            const [day, month, year] = this.tmpFormattedDate.split('/')
+            this.entry.date = `${year}-${month.padStart(2, '0')}-${day.padStart(2, '0')}`
         }
     },
     mounted() {

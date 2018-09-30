@@ -79,7 +79,10 @@ export default Vue.extend({
             type: Boolean,
             default: false
         }
-    }
+    },
+    data: () => ({
+        row: false
+    })
 })
 </script>
 

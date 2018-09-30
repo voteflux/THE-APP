@@ -105,6 +105,13 @@ export type SignedReqCreationOpts = {
     aux?: Uint8Array
 }
 
+export type ReqReceipt = {
+    path: string,
+    auxHash?: string,
+    payload: Payload,
+    nonce: string,
+}
+
 
 
 export const SignedReqJsRT = t.refinement(SignedReqNoValidationRT, (opts: SignedReqNoValidation) => {

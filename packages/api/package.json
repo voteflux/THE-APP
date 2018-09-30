@@ -6,7 +6,7 @@
   "private": true,
   "scripts": {
     "test": "echo \"Note: no tests yet...\"",
-    "watch": "sls offline",
+    "watch": "sls offline start --dontPrintOutput",
     "build": "sls package",
     "deploy": "sls deploy",
     "mongo-dev": "./bin/kill-dev-mongod.sh && ts-node -r tsconfig-paths/register -O '{\"allowJs\":false,\"checkJs\":false}' ./dev_mongo_server.ts"
@@ -22,11 +22,14 @@
   "license": "MIT",
   "dependencies": {
     "@nestjs/jwt": "^0.1.3",
+    "@types/base-x": "^1.0.29",
     "@types/base64-arraybuffer": "^0.1.0",
     "@types/jest": "^23.3.2",
     "@types/jsonwebtoken": "^7.2.8",
     "@types/pdfmake": "^0.1.1",
+    "aws-sdk": "^2.325.0",
     "axios": "^0.18.0",
+    "base-x": "^3.0.4",
     "base64-arraybuffer": "^0.1.5",
     "bson": "^3.0.0",
     "dynamodb": "^1.1.2",
@@ -63,7 +66,7 @@
     "serverless-domain-manager": "^2.3.6",
     "serverless-dynamodb-local": "^0.2.30",
     "serverless-iam-roles-per-function": "^0.1.8",
-    "serverless-offline": "^3.25.10",
+    "serverless-offline": "^3.25.17",
     "serverless-plugin-aws-alerts": "^1.2.4",
     "serverless-webpack": "^5.2.0",
     "thread-loader": "^1.2.0",

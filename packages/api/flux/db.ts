@@ -6,12 +6,13 @@ import { MongoClient, FilterQuery, FindOneOptions } from "mongodb";
 import { ObjectID } from "bson";
 
 import * as utils from "./utils";
-import { DBV1, UserV1Object, PublicStats, DBV1Collections, collections, Donation, DBV2 } from "flux-lib/types/db";
+import { DBV1, UserV1Object, PublicStats, Donation, DBV2, collections } from 'flux-lib/types/db'
 import DBCheckCache from "./db/cache";
 import { NdaStatus, NdaStage, NdaDraftCommit } from 'flux-lib/types/db/vols';
-import DBAuthSecToken2 from "db/authSecToken2";
+import DBAuthSecToken2 from "./db/authSecToken2";
 import { ThenArg } from 'flux-lib/types/utils/promises'
 import { throwIfNull } from 'flux-lib/utils'
+import DBOneTimeTokens from './db/oneTimeTokens'
 
 /*
  * DB functions for Flux DB (both v1 and v2)
@@ -116,8 +117,8 @@ export const mkDbV1 = (uri: string = mongoUrl): Promise<DBV1> =>
                 const setCollection = i => {
                     _dbv1[i] = rawDb.collection(i);
                 };
-                // R.map(setCollection, collections);
-                // console.info(`Created dbv1 obj w keys: ${utils.j(R.keys(dbv1))}`)
+                R.map(setCollection, collections);
+                console.info(`Created dbv1 obj w keys: ${utils.j(R.keys(dbv1))}`)
 
                 return res({ ..._dbv1 } as DBV1);
             }
@@ -139,14 +140,15 @@ export enum Qs {
 
 /* MODULE EXPORTS */
 
-export class DBMethods extends DBCheckCache {
-    public secToken2: DBAuthSecToken2;
-    public cache: DBCheckCache;
+export class DBMethods {
+    public secToken2: DBAuthSecToken2
+    public cache: DBCheckCache
+    public oneTimeTokens: DBOneTimeTokens
 
     constructor(public dbv1: DBV1, public dbv2: DBV2) {
-        super(dbv1, dbv2);
         this.secToken2 = new DBAuthSecToken2(dbv1, dbv2, this)
-        this.cache = new DBCheckCache(dbv1, dbv2)
+        this.cache = new DBCheckCache(dbv1, dbv2, this)
+        this.oneTimeTokens = new DBOneTimeTokens(dbv1, dbv2, this)
     }
 
     close() {
@@ -339,23 +341,29 @@ export class DBMethods extends DBCheckCache {
 
     /* User calls */
 
-    getUidFromS = async s => await this.dbv1.users.findOne({ s }, { projection: { _id: 1 } });
+    async getUidFromS(s) {
+        return await this.dbv1.users.findOne({ s }, { projection: { _id: 1 } });
+    }
 
-    getUserFromS = async s => await this.dbv1.users.findOne({ s });
+    async getUserFromS(s) {
+        return await this.dbv1.users.findOne({ s });
+    }
 
-    getUserFromUid = async userId => {
+    async getUserFromUid(userId) {
         const _id = cleanId(userId);
         return await this.dbv1.users.findOne({ _id }).then(throwIfNull('Unknown User'))
     }
 
-    getUserFromEmail = async email => {
+    async getUserFromEmail(email) {
         return await this.dbv1.users.findOne({ email });
     }
 
     /* Volunteer Calls */
 
     // status of a member
-    getNdaStatus = async (_id): Promise<NdaStatus | null> => await this.dbv1.volNdaStatus.findOne({ uid: _id })
+    async getNdaStatus(_id): Promise<NdaStatus | null> {
+        return await this.dbv1.volNdaStatus.findOne({ uid: _id })
+    }
 
     // record nda
     insertFreshNdaPdfAndSig = async (_id, pdf, sig): Promise<NdaStatus> => {
@@ -406,7 +414,7 @@ export class DBMethods extends DBCheckCache {
             // @ts-ignore
             R.reduce(R.concat, []),
             R.map(R.prop("uids"))
-        )(rolesAll as Array<{ uids: ObjectID }>);
+        )(rolesAll);
         // @ts-ignore
         const userMap = await Promise.all(R.map(uid => this.getUserFromUid(uid).then(u => [uid, u]), uniqueUserIDs)).then(R.fromPairs);
         // @ts-ignore
@@ -468,9 +476,8 @@ export const init = async (dbObj = {}, dbV1Uri = mongoUrl) => {
 
     const dbMethods = new DBMethods(dbv1, dbv2);
 
-    R.mapObjIndexed((f, fName) => {
-        dbObj[fName] = f;
-    }, dbMethods);
+
+
     return dbMethods;
 };
 

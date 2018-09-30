@@ -4,6 +4,7 @@ import WebRequest from '../../WebRequest';
 import * as t from 'io-ts'
 import { ThrowReporter } from 'io-ts/lib/ThrowReporter';
 import { Option, some, none, isSome, isNone } from 'fp-ts/lib/Option';
+import * as R from 'ramda'
 
 export interface Auth {
   apiToken?: string;
@@ -44,6 +45,29 @@ export type Conditional<T> = {
 export type GetArbitraryPartial<T> = Auth & Partial<Paginated & Sorted & Conditional<T>>
 
 
+export const JuriMap = {
+    "AUS": [ null, "ACT", "NSW", "NT", "SA", "TAS", "VIC",  "QLD", "WA" ]
+}
+
+const calcJuriPerms = ([j1, v]) => {
+    if (Array.isArray(v)) {
+        return R.map((j2): string[] => j2 === null ? [j1] : [j1, j2], v)
+    }
+}
+export const validJuris = R.reduce(
+    R.concat,
+    [] as string[],
+    R.map(
+        allJuriPerms => R.map(
+            (js: string[]) => R.concat([''], js).join('/'),
+            allJuriPerms || []
+        ),
+        R.map(
+            calcJuriPerms,
+            R.toPairs(JuriMap)
+        )
+    )
+)
 
 
 // Auth + Juri 2.0 Stuff

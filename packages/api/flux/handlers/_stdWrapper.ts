@@ -2,8 +2,7 @@ import { left, right, Either } from 'fp-ts/lib/Either';
 import * as t from 'io-ts'
 
 import { DB, init as dbInit } from './../db';
-import { DBV1, _Auth } from 'flux-lib/types';
-import { UserV1Object } from 'flux-lib/types/db';
+import { DBV1, _Auth, UserV1Object } from 'flux-lib/types/db';
 
 import * as utils from '../utils'
 import { Payload, SignedReqNoValidation, isSignedReqValid } from 'flux-lib/types/db/auth'

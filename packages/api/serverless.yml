@@ -121,6 +121,14 @@ functions:
     timeout: 300
     events:
       - schedule: rate(1 day)
+  # login requests
+  requestLoginToken:
+    handler: ${self:custom.handlers}/login.requestLoginToken
+    events:
+      - http:
+          path: /v2/login/requestLoginToken
+          method: post
+          cors: true
   # user requests
   getRoles:
     handler: ${self:custom.handlers}/user.getRoles

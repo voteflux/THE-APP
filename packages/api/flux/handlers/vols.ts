@@ -10,19 +10,20 @@ import sha256 from 'fast-sha256';
 import { NdaStatus, NdaStage, GenerateDraftNdaReqRT, GenerateDraftNdaRespRT, NdaDraftCommit } from 'flux-lib/types/db/vols'
 import { strToUint8a, uint8aToBase64 } from 'flux-lib/utils/index';
 import { ThrowReporter } from 'io-ts/lib/ThrowReporter';
-import { _Auth } from 'flux-lib/types';
-import { UserV1Object } from 'flux-lib/types/db';
+import { _Auth, UserV1Object } from 'flux-lib/types/db';
 import { genPdf, genNdaDetailsFromUser } from 'flux-lib/pdfs/nda/generatePdf';
 import { uriHash } from 'flux-lib/pdfs/index';
 
-const R = require('ramda')
+import auth from './auth'
+
+import * as R from 'ramda'
 
 const utils = require('../utils')
 
 const toExport = {} as any
 
-toExport.getStatus = (db: DB, ...args) => {
-    return require('./auth')(db).user(async (event, context, {user}): Promise<NdaStatus> => {
+toExport.getStatus = (db: DB, event, context) => {
+    return auth(db).user(async (event, context, {user}): Promise<NdaStatus> => {
         const {_id} = user;
 
         const status = await db.getNdaStatus(_id)
@@ -39,12 +40,12 @@ toExport.getStatus = (db: DB, ...args) => {
             signatureDataUri: '',
             pdfDataUri: '',
         }
-    })(...args)
+    })(event, context)
 }
 
 
-toExport.submitForReview = (db: DB, ...args) => {
-    return require('./auth')(db).user(async (event, context, {user}): Promise<NdaStatus> => {
+toExport.submitForReview = (db: DB, event, context) => {
+    return auth(db).user(async (event, context, {user}): Promise<NdaStatus> => {
         const {_id} = user;
         const {pdf, sig} = event.body;
 
@@ -54,7 +55,7 @@ toExport.submitForReview = (db: DB, ...args) => {
             signatureDataUri: sig,
             pdfDataUri: pdf,
         }
-    })(...args)
+    })(event, context)
 }
 
 
@@ -130,8 +131,8 @@ export const generateDraft = async (event, ctx) =>
     ))(event, ctx)
 
 
-// export const generateDraft = (db: DB, ...args) => {
-//     return require('./auth')(db).user(async (event, context, {user}): Promise<NdaStatus> => {
+// export const generateDraft = (db: DB, event, context) => {
+//     return auth(db).user(async (event, context, {user}): Promise<NdaStatus> => {
 //         const {_id} = user;
 //         const {sig} =
 
@@ -143,7 +144,7 @@ export const generateDraft = async (event, ctx) =>
 //             signatureDataUri: sig,
 //             pdfDataUri: pdf,
 //         }
-//     })(...args)
+//     })(event, context)
 // }
 
 

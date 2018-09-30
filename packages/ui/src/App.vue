@@ -10,8 +10,10 @@
 
             <div v-else-if="req.user.isSuccess()" :key="IS_LOGGED_IN">
                 <v-toolbar fixed app>
-                    <v-toolbar-side-icon :outline="false" @click.stop="navOpen = !navOpen" />
-                    <flux-logo :title="getPageTitle()" />
+                    <v-toolbar-side-icon :light="true" @click.stop="navOpen = !navOpen" />
+                    <v-toolbar-title>
+                        <flux-logo :title="getPageTitle()" />
+                    </v-toolbar-title>
                 </v-toolbar>
                 <nav-drawer v-model="navOpen" :roles="req.roles" />
                 <v-content>
@@ -90,13 +92,13 @@ export default /*class App extends Vue*/ Vue.extend({
         loadAuth() {
             this.req.user = WR.Loading()
 
-            this.$flux.auth.loadAuth().caseOf({
-                nothing: () => this.loginFailed("Cannot find authentication token. Unable to log in."),
-                just: auth => {
+            this.$flux.auth.loadAuth().foldL(
+                () => this.loginFailed("Cannot find authentication token. Unable to log in."),
+                auth => {
                     this.auth = auth;
                     this.loadUser();
                 }
-            });
+            );
         },
         loadUser() {
             this.req.user = WR.Loading()
@@ -326,6 +328,10 @@ button.tool-btn:disabled {
 button.tool-btn:disabled:hover {
 }
 
+button.v-toolbar__side-icon {
+    border: 0;
+}
+
 /* INPUTS */
 
 .input {
@@ -342,12 +348,20 @@ textarea {
     @extend .input;
 }
 
+.v-input textarea {
+    border: 0;
+}
+
 select {
     @extend .input
 }
 
 .inputGroup .input {
     width: inherit;
+}
+
+.v-input input {
+    border: 0;
 }
 
 // a glass for alternating the bg colors of children a bit

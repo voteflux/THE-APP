@@ -16,6 +16,7 @@ import { StdSimpleEitherResp } from "flux-lib/types/index";
 import { MsgBus, M } from "../messages";
 import { createSignedReq, PayloadDecoder, objToPayload } from 'flux-lib/types/db/auth'
 import { SignedReqCreationOpts, Payload } from '../../../lib/types/db/auth'
+import { SimpleEither } from '../../../lib/types/index'
 export * from "flux-lib/types/db";
 export * from "flux-lib/types/db/api";
 export * from "flux-lib/types/db/vols";
@@ -148,6 +149,14 @@ export function FluxApi(_Vue: VueConstructor, options?: any): void {
             },
             ndaGenerateDraftPdf: (auth: AuthJWT, args: GenerateDraftNdaReq): PR<NdaDraftCommit> => {
                 return post_jwt("volunteers/nda/generateDraft", auth, args);
+            },
+            login: {
+                getJWTNoPermissions: (): PR<{jwt: string}> => {
+                    return post(_api2("login/getJWTNoPermissions"), {})
+                },
+                requestLoginToken: (auth: AuthJWT, args: {email: string}): PR<SimpleEither<string, any>> => {
+                    return post_jwt("login/requestLoginToken", auth, args)
+                }
             }
         },
 

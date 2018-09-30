@@ -1,21 +1,22 @@
 'use strict';
 import { DB } from './../db';
+import auth from './auth'
 const handlerUtils = require('./handlerUtils')
 
-const R = require('ramda')
+import * as R from 'ramda'
 
 const utils = require('../utils')
 
 
-export const getRoles = (db, ...args) => {
-    return require('./auth')(db).user(async (event, context, {user}) => {
+module.exports.getRoles = (db, event, context) => {
+    return auth(db).user(async (event, context, {user}) => {
         const {_id} = user;
 
         return {
             roles: await db.getUserRoles(_id),
             status: 'okay'
         }
-    })(...args)
+    })(event, context)
 }
 
 

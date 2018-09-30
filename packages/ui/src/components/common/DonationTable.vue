@@ -46,9 +46,9 @@ export default Vue.extend({
         donationRowsToRender: [
             _str("_id", "DB _ID"),
             _str("id", "Donation ID"),
-            _num("ts"),
+            _num("ts", "Timestamp"),
             _str("date"),
-            _str("name"),
+            _str("name", "Name"),
             _str("email"),
             _num("amount"),
             _str("unit"),

@@ -2,7 +2,7 @@ import { Collection, IndexOptions } from 'mongodb';
 import { _Auth } from 'flux-lib/types/db';
 import { DB } from './../db';
 import { fluxHandler } from '../handlers/_stdWrapper'
-const R = require('ramda')
+import * as R from 'ramda'
 import * as t from 'io-ts'
 
 

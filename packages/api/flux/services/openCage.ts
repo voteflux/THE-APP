@@ -1,4 +1,4 @@
-import { DBV1 } from 'flux-lib/types';
+import { DBV1 } from 'flux-lib/types/db';
 // integrating with opencagedata.com
 import { either, left } from 'fp-ts/lib/Either';
 import { some, none } from 'fp-ts/lib/Option'
