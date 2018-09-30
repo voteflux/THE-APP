@@ -2,7 +2,6 @@
 <div class="flex flex-row justify-center items-center align-center pl4 pr4">
     <v-text-field
         ref="field"
-        autofocus
         class="h-100 v-mid"
         :type="type"
         :placeholder="name"
