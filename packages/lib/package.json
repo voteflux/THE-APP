@@ -1,6 +1,6 @@
 {
   "name": "flux-lib",
-  "version": "0.1.3",
+  "version": "0.1.6",
   "private": true,
   "description": "library for common code between flux projects",
   "author": "Max Kaye <m@xk.io>",
