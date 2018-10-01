@@ -6,11 +6,30 @@ Vue.use(Vuex)
 import VueRouter from "vue-router";
 Vue.use(VueRouter);
 
-import Vuetify from 'vuetify'
+
+import {
+    Vuetify, // required
+    VApp, // required
+    VNavigationDrawer,
+    VFooter,
+    VToolbar,
+    transitions
+} from 'vuetify'
 import 'vuetify/dist/vuetify.min.css'
 import colors from 'vuetify/es5/util/colors'
+import { Ripple } from 'vuetify/es5/directives'
 
 Vue.use(Vuetify, {
+    components: {
+        VApp,
+        VNavigationDrawer,
+        VFooter,
+        VToolbar,
+        transitions
+    },
+    directives: {
+        Ripple
+    },
     iconfont: 'md',
     // https://vuetifyjs.com/en/theme-generator
     theme: {
@@ -21,8 +40,9 @@ Vue.use(Vuetify, {
         warning: colors.yellow.darken3,
         info: colors.blue.base,
         success: colors.green.base
-      }
+    }
 })
+
 
 // import { TableComponent, TableColumn } from 'vue-table-component';
 // Vue.component('sortable-table', TableComponent)
@@ -57,6 +77,8 @@ Vue.use(vueSignature)
 
 
 import App from "./App.vue";
+
+
 
 
 import Dashboard from "@c/Dashboard.vue";
