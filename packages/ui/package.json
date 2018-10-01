@@ -8,6 +8,9 @@
     "lint": "vue-cli-service lint",
     "build-commented-extra": "&& cp -a ./static/* ./dist/ "
   },
+  "sideEffects": [
+    "*.vue"
+  ],
   "dependencies": {
     "@babel/core": "^7.1.2",
     "@babel/polyfill": "^7.0.0-rc.1",

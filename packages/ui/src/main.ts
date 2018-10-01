@@ -27,6 +27,7 @@ import * as VList from 'vuetify/es5/components/VList'
 import * as VNavigationDrawer from 'vuetify/es5/components/VNavigationDrawer'
 import VFooter from 'vuetify/es5/components/VFooter'
 import VDivider from 'vuetify/es5/components/VDivider'
+import VAlert from 'vuetify/es5/components/VAlert'
 import * as VGrid from 'vuetify/es5/components/VGrid'
 import transitions from 'vuetify/es5/components/transitions'
 import directives from 'vuetify/es5/directives'
@@ -46,6 +47,7 @@ Vue.use(Vuetify, {
         ...VNavigationDrawer,
         ...VGrid,
         VBottomNav,
+        VAlert,
         VFooter,
         transitions,
         VIcon,
@@ -80,8 +82,8 @@ Vue.use(Vuetify, {
 // Vue.component('sortable-table', TableComponent)
 // Vue.component('table-col', TableColumn)
 
+import 'vue-good-table/dist/vue-good-table.min.css'
 import VueGoodTablePlugin from 'vue-good-table'
-import 'vue-good-table/dist/vue-good-table.css'
 Vue.use(VueGoodTablePlugin)
 import { VueGoodTable } from 'vue-good-table'
 Vue.component('good-table', VueGoodTable)
