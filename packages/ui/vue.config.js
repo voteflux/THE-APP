@@ -1,6 +1,7 @@
 
 const path = require('path')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
+const tsImportPluginFactory = require('ts-import-plugin')
 
 module.exports = {
     baseUrl: '/v/',
@@ -35,28 +36,28 @@ module.exports = {
                 //   loader: 'babel-loader',
                 //   include: [path.join(__dirname, 'src')],
                 // }
-                {
-                    test: /\.(jsx|tsx|js|ts)$/,
-                    loader: 'ts-loader',
-                    options: {
-                        transpileOnly: true,
-                        happyPackMode: true,
-                        getCustomTransformers: () => ({
-                            before: [ tsImportPluginFactory({
-                                libraryName: "vuetify",
-                                libraryDirectory: "es5/components"
-                            }) ]
-                        }),
-                        compilerOptions: {
-                            module: 'es2015'
-                        }
-                    },
-                    exclude: /node_modules/
-                },
+                // {
+                //     test: /\.(jsx|tsx|js|ts)$/,
+                //     loader: 'ts-loader',
+                //     options: {
+                //         transpileOnly: true,
+                //         happyPackMode: true,
+                //         getCustomTransformers: () => ({
+                //             before: [ tsImportPluginFactory({
+                //                 libraryName: "vuetify",
+                //                 libraryDirectory: "es5/components"
+                //             }) ]
+                //         }),
+                //         compilerOptions: {
+                //             module: 'es2015'
+                //         }
+                //     },
+                //     exclude: /node_modules/
+                // },
             ]
         },
         plugins: [
-            new CopyWebpackPlugin([ { from: "./static/**/*", to: "../" } ]),
+            new CopyWebpackPlugin([ { from: "static/", to: "../" } ]),
             // [require('babel-plugin-transform-imports'), {
             //     "vuetify": {
             //         "transform": "vuetify/es5/components/${member}",

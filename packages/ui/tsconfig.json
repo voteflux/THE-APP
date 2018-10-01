@@ -16,7 +16,7 @@
     "baseUrl": ".",
     "rootDir": "./",
     "types": [
-      "node"
+      "node", "vuetify"
     ],
     "paths": {
       "@/*": ["./src/*"],
@@ -29,11 +29,11 @@
     "src/**/*.vue",
     "tests/**/*.ts",
     "tests/**/*.tsx",
-    "node_modules/flux_lib/**/*.ttf",
   ],
   "exclude": [
     "../[^(ui)]",
     "dist",
     "../**/.webpack",
+    // "node_modules",
   ]
 }

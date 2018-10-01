@@ -6,30 +6,61 @@ Vue.use(Vuex)
 import VueRouter from "vue-router";
 Vue.use(VueRouter);
 
+import VApp from 'vuetify/es5/components/VApp'
+import Vuetify from 'vuetify/es5/components/Vuetify'
+import VIcon from 'vuetify/es5/components/VIcon'
+import * as VMenu from 'vuetify/es5/components/VMenu'
+import VBtn from 'vuetify/es5/components/VBtn'
+import VDatePicker from 'vuetify/es5/components/VDatePicker'
+import * as VForm from 'vuetify/es5/components/VForm'
+import VProgressCircular from 'vuetify/es5/components/VProgressCircular'
+import VSubheader from 'vuetify/es5/components/VSubheader'
+import * as VToolbar from 'vuetify/es5/components/VToolbar'
+import VTooltip from 'vuetify/es5/components/VTooltip'
+import VTextarea from 'vuetify/es5/components/VTextarea'
+import VTextField from 'vuetify/es5/components/VTextField'
+import VAutocomplete from 'vuetify/es5/components/VAutocomplete'
+import VSelect from 'vuetify/es5/components/VSelect'
+import VSwitch from 'vuetify/es5/components/VSwitch'
+import VBottomNav from 'vuetify/es5/components/VBottomNav'
+import * as VList from 'vuetify/es5/components/VList'
+import * as VNavigationDrawer from 'vuetify/es5/components/VNavigationDrawer'
+import VFooter from 'vuetify/es5/components/VFooter'
+import transitions from 'vuetify/es5/components/transitions'
+import directives from 'vuetify/es5/directives'
 
 import {
-    Vuetify, // required
-    VApp, // required
-    VNavigationDrawer,
-    VFooter,
-    VToolbar,
-    transitions
+    // @ts-ignoreVToolbar
 } from 'vuetify'
 import 'vuetify/dist/vuetify.min.css'
 import colors from 'vuetify/es5/util/colors'
-import { Ripple } from 'vuetify/es5/directives'
 
+// @ts-ignore
 Vue.use(Vuetify, {
     components: {
         VApp,
+        ...VList,
+        ...VToolbar,
+        ...VForm,
         VNavigationDrawer,
+        VBottomNav,
         VFooter,
-        VToolbar,
-        transitions
+        transitions,
+        VIcon,
+        VMenu,
+        VTextarea,
+        VTextField,
+        VAutocomplete,
+        VSelect,
+        VSwitch,
+        VBtn,
+        VDatePicker,
+        VProgressCircular,
+        VSubheader,
+        VTooltip,
+
     },
-    directives: {
-        Ripple
-    },
+    directives,
     iconfont: 'md',
     // https://vuetifyjs.com/en/theme-generator
     theme: {
