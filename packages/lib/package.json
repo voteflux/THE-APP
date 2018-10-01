@@ -49,6 +49,7 @@
     "@types/ramda": "^0.25.37",
     "base-x": "^3.0.4",
     "base64-arraybuffer": "^0.1.5",
+    "base64-inline-loader": "^1.1.1",
     "fast-sha256": "^1.1.0",
     "fp-ts": "^1.8.0",
     "funfix": "^7.0.1",

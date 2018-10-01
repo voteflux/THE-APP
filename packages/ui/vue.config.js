@@ -1,5 +1,6 @@
 
 const path = require('path')
+const CopyWebpackPlugin = require('copy-webpack-plugin')
 
 module.exports = {
     baseUrl: '/v/',
@@ -19,5 +20,16 @@ module.exports = {
             filename: "[name].bundle.js",
             chunkFilename: "[name].chunk.js"
         },
+        module: {
+            rules: [
+                {
+                    test: /\.(png|woff|eot|ttf|woff2)(\?.*$|$)/,
+                    loader: "base64-inline-loader?limit=250000",
+                },
+            ]
+        },
+        plugins: [
+          new CopyWebpackPlugin([ { from: "./static/**/*", to: "./dist/" } ])
+        ]
     }
 }

@@ -30,3 +30,5 @@ packages/api/sls-custom.yml
 .vscode
 
 .circleci/run_locally.sh
+
+./report-*

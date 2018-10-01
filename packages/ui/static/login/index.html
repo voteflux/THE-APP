@@ -18,19 +18,24 @@
 
             <img src="/img/flux-logo.svg" alt="Flux Logo" class="logo" />
             <h2>Member Login</h2>
-            <h4>Enter your email address and we'll send you a secure link that you can use to access your membership details.</h4>
 
-            <form ng-submit="flux.resendEmail()">
-                <input class="block field m2 mx-auto" type="email" ng-model="flux.email" placeholder="Enter your email">
-                <submit class="btn btn-primary m1" ng-click="flux.resendEmail()">Send me the link!</submit>
-            </form>
+            <h3 ng-if="flux.loadingLogin">Checking your login details...</h3>
+
+            <div ng-if="!flux.loadingLogin">
+                <h4>Enter your email address and we'll send you a secure link that you can use to access your membership details.</h4>
+
+                <form ng-submit="flux.resendEmail()">
+                    <input class="block field m2 mx-auto" type="email" ng-model="flux.email" placeholder="Enter your email">
+                    <submit class="btn btn-primary m1" ng-click="flux.resendEmail()">Send me the link!</submit>
+                </form>
+            </div>
 
             <div ng-cloak ng-show="flux.errorMsg">
                 <h4 class="red">{{flux.errorMsg}}</h4>
             </div>
 
-            <div ng-cloak ng-show="flux.msg">
-                <h4>{{flux.msg}}</h4>
+            <div>
+                <span class="mb2 white" ng-repeat="(msg, i) in flux.msgs">{{ msg }}</span>
             </div>
 
             <p class="m2">Not a member yet? <br/><a href="https://voteflux.org/signup/" class="btn btn-outline">Sign up now!</a></p>

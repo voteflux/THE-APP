@@ -1,24 +1,16 @@
 'use strict';
 import { fluxHandler } from './_stdWrapper';
-import { Option, some, none, isSome, isNone } from 'fp-ts/lib/Option';
 import { DB } from './../db';
 const handlerUtils = require('./handlerUtils')
-import path from 'path'
-import * as t from 'io-ts'
-import sha256 from 'fast-sha256';
 
 import { NdaStatus, NdaStage, GenerateDraftNdaReqRT, GenerateDraftNdaRespRT, NdaDraftCommit } from 'flux-lib/types/db/vols'
-import { strToUint8a, uint8aToBase64 } from 'flux-lib/utils/index';
-import { ThrowReporter } from 'io-ts/lib/ThrowReporter';
 import { _Auth, UserV1Object } from 'flux-lib/types/db';
-import { genPdf, genNdaDetailsFromUser } from 'flux-lib/pdfs/nda/generatePdf';
+import { genNdaDetailsFromUser } from 'flux-lib/pdfs/nda/generatePdf';
 import { uriHash } from 'flux-lib/pdfs/index';
 
 import auth from './auth'
 
 import * as R from 'ramda'
-
-const utils = require('../utils')
 
 const toExport = {} as any
 
@@ -117,7 +109,8 @@ export const generateDraft = async (event, ctx) =>
         async function generateDraftInner(db: DB, {reqUser, reqBody}, event, context) {
 
             const ndaDeets = genNdaDetailsFromUser(reqUser)
-            const {uri} = await genPdf( ndaDeets.fullName, ndaDeets.fullAddr, reqBody.sigPng )
+            const { genPdf } = await import("flux-lib/pdfs/nda/generatePdf")
+            const { uri } = await genPdf( ndaDeets.fullName, ndaDeets.fullAddr, reqBody.sigPng )
 
             const pdfHash = uriHash(uri)
             const sigHash = uriHash(reqBody.sigPng)

@@ -31,6 +31,7 @@
     "axios": "^0.18.0",
     "base-x": "^3.0.4",
     "base64-arraybuffer": "^0.1.5",
+    "base64-inline-loader": "^1.1.1",
     "bson": "^3.0.0",
     "dynamodb": "^1.1.2",
     "fast-sha256": "^1.1.0",

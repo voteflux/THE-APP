@@ -33,7 +33,11 @@ module.exports = BbPromise.try(() => {
                         transpileOnly: true,
                         happyPackMode: true
                     }
-                }
+                },
+                {
+                    test: /\.(png|woff|eot|ttf|woff2)(\?.*$|$)/,
+                    loader: "base64-inline-loader?limit=250000",
+                },
             ]
         }
     };

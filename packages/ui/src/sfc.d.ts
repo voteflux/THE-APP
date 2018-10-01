@@ -4,3 +4,7 @@ declare module '*.vue' {
 }
 
 declare module 'vue-js-toggle-button';
+
+// declare module '*.ttf' {
+
+// }

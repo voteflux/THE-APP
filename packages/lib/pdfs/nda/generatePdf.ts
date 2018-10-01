@@ -2,6 +2,9 @@ import { UserV1Object } from './../../types/db';
 
 import {yourSignaturePlaceholder} from './imageUris'
 
+import pdfMake from 'pdfmake/build/pdfmake'
+import pdfFonts from "pdfmake/build/vfs_fonts"
+pdfMake.vfs = pdfFonts.pdfMake.vfs
 
 type PdfText = {
     text: string | PdfText | Array<string | PdfText>,
@@ -22,10 +25,7 @@ export const genPdf = async (
     fullAddr="<FULL ADDR>",
     signatureDataURI=yourSignaturePlaceholder
 ): Promise<{uri: string}> => {
-    const pdfMake = await import('pdfmake/build/pdfmake')
-    const pdfFonts = await import("pdfmake/build/vfs_fonts")
-    console.log(pdfFonts.pdfMake.vfs)
-    pdfMake.vfs = pdfFonts.pdfMake.vfs
+    console.log(pdfMake.createPdf, pdfMake.vfs)
 
     const date = new Date()
 
@@ -139,6 +139,8 @@ export const genPdf = async (
     }
 
     // DONE GENERATING NDA
+
+    console.log(pdfMake)
 
     return {
         uri: await (new Promise((res, rej) => (pdfMake.createPdf(docDefinition) as any).getDataUrl(res))) as string

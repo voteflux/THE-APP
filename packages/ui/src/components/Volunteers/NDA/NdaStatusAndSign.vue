@@ -147,16 +147,21 @@ export default Vue.extend({
 
     methods: {
         async generateDraftPdf(opts = { useDefaultSig: false }) {
+            console.log("DRAFT_PDF: Starting")
             const name = this.userO.fullName()
             const addr = this.userO.formalAddress()
             const sig = opts.useDefaultSig === true ? yourSignaturePlaceholder : this.signatureImage
-            const {genPdf} = await import('flux-lib/pdfs/nda/generatePdf')
-            const result = await genPdf(name, addr, sig)
-            this.draftPdf = some(result.uri)
+            console.log("DRAFT_PDF: Importing genPdf")
+            // const {genPdf} = await import('flux-lib/pdfs/nda/generatePdf')
+            // console.log("DRAFT_PDF: Running genPdf")
+            // const result = await genPdf(name, addr, sig)
+            // this.draftPdf = some(result.uri)
+            // console.log("DRAFT_PDF: Finished")
         },
 
         redoSubmission() {
             this.req.ndaStatus = WebRequest.Success({ stage: NdaStage.NOT_STARTED })
+            this.generateDraftPdf({ useDefaultSig: true })
         },
 
         showSignedNda() {

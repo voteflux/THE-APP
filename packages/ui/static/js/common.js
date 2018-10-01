@@ -95,17 +95,18 @@ function sendSToAllFluxDomains(s) {
     sendSToUrlAsHashParam("https://voteflux.org/_record_login_param.html", s)
     sendSToUrlAsHashParam("https://flux.party/_record_login_param.html", s)
     sendSToUrlAsHashParam("https://members.flux.party/_record_login_param.html", s)
+    sendSToUrlAsHashParam("https://app.flux.party/_record_login_param.html", s)
 }
 
 
-function saveMemberSecretOnFluxDomains(silent) {
+function saveMemberSecretOnFluxDomains(silent, useThisS = null) {
     let doLog = silent === false;
     if (__DEBUG_COMMON__ || __DEV_COMMON__) doLog = true;
     const log = (...args) => { if (doLog) { console.log(...args) }}
     log("saveMemberSecretOnFluxDomains called")
-    if (getAuthToken()) {
-        var s = getAuthToken();
-        if ((USE_PROD || !__DEV_FLAG__) && localStorage.getItem('lastSavedS') !== s) {
+    var s = useThisS ? useThisS : getAuthToken();
+    if (s !== undefined) {
+        if (isDefinitelyProduction() && localStorage.getItem('lastSavedS') !== s) {
             sendSToAllFluxDomains(s)
             localStorage.setItem('lastSavedS', s);
         } else {
