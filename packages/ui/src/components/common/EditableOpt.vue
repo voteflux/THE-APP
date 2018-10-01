@@ -2,8 +2,11 @@
     <div class="flex felx-row justify-between items-center pl4 pr4 editable-root">
         <div class="w-50">{{name}}</div>
         <div class="w-25 tr pr2">
-            <div v-if="!this.loading" class="flex items-center justify-end">
-                <span>{{ renderValue() }}</span>
+            <div class="flex items-center justify-end">
+                <div>
+                    <div v-if="!this.loading">{{ renderValue() }}</div>
+                    <loading v-else><small>Saving...</small></loading>
+                </div>
                 <span class="ml4">
                     <div v-if="useDropdown === true">
                         <v-select :loading="loading" v-model="newValue" :items="[{text: trueName, value: true}, {text: falseName, value: false}]" />
@@ -11,7 +14,6 @@
                     <v-switch v-else :loading="loading" v-model="newValue" />
                 </span>
             </div>
-            <loading v-else>Saving...</loading>
         </div>
     </div>
 </template>
@@ -85,17 +87,4 @@ export default Vue.extend({
 </script>
 
 <style scoped lang="scss">
-@import "tachyons-sass/tachyons.scss";
-
-.var-name {
-    @extend .pa0-ns;
-    @extend .pa1;
-}
-
-.col {
-}
-
-.icons {
-    min-height: 2.1rem;
-}
 </style>

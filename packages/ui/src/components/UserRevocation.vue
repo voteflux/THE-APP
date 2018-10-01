@@ -29,7 +29,7 @@
                 </div>
                 <div v-else-if="state == CONFIRMATION_2" :key="CONFIRMATION_2">
                     <h4>Last Step:</h4>
-                    <v-btn color="error" class="mt3 danger-btn db" v-on:click="doRevocationFinally()">Revoke my Membership</v-btn>
+                    <v-btn color="error" class="mt3 db" v-on:click="doRevocationFinally()">Revoke my Membership</v-btn>
                     <v-btn color="success" class="mt4 db" v-on:click="cancelRevocation()">Cancel - Take me to safety</v-btn>
                 </div>
                 <div v-else-if="state == SAVING" :key="SAVING">
@@ -109,14 +109,4 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
-@import "tachyons-sass/tachyons.scss";
-
-.danger-btn {
-    @extend .bg-dark-red;
-    @extend .white;
-}
-
-.danger-btn:disabled {
-    background-color: #6300007c;
-}
 </style>

@@ -23,7 +23,7 @@
             </div>
             <div v-else class="flex felx-row items-center justify-between">
 
-                <div class="sidebtns tl">
+                <div class="w-20 tl">
                     <v-btn class="" v-on:click="prevFormPart()"><v-icon small left v-text="'arrow_back'" />Back</v-btn>
                 </div>
                 <div class="w-60">
@@ -47,7 +47,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="sidebtns tr">
+                <div class="w-20 tr">
                     <v-btn class="" v-on:click="nextFormPart()" :class="nextBtnCls()" :disabled="!canGoNext()">
                         <span v-if="state == INPUT_STREET"><v-icon small left v-text="'save'" />Save</span>
                         <span v-else>Next<v-icon small right v-text="'arrow_forward'" /></span>
@@ -243,31 +243,4 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
-@import "tachyons-sass/tachyons.scss";
-
-// .input {
-//     display: inline-block;
-//     width: 100%;
-//     height: 100%;
-//     @extend .pa1;
-// }
-
-// button {
-//     @extend .mv2;
-//     @extend .mh1;
-//     @extend .f4;
-// }
-
-.sidebtns {
-    @extend .w-20;
-}
-
-.sidebtns .tool-btn {
-    @extend .center;
-    @extend .db;
-}
-
-// .disabled {
-//     color: #777;
-// }
 </style>

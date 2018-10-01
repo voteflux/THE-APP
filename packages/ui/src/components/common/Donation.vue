@@ -6,10 +6,10 @@
                 ID: <span>{{donation.id}}</span>
             </div>
             <div>
-                Name: <strong class="d-name">{{donation.name}}</strong>
+                Name: <strong :class="`${getTextColorCls('name')}`">{{donation.name}}</strong>
             </div>
             <div>
-                Date: <strong class="d-date">{{donation.date}}</strong> (<small>{{donation.ts}}</small>)
+                Date: <strong :class="`${getTextColorCls('date')}`">{{donation.date}}</strong> (<small>{{donation.ts}}</small>)
             </div>
         </div>
 
@@ -38,7 +38,7 @@
                     ID: <code>{{ donation.id }}</code>
                 </div>
                 <div class="dib mr4">
-                    Date: <strong class="d-date">{{ donation.date }}</strong> (<small><code>{{ donation.ts }}</code></small>)
+                    Date: <strong :class="`${getTextColorCls('date')}`">{{ donation.date }}</strong> (<small><code>{{ donation.ts }}</code></small>)
                 </div>
                 <div class="dib mr4">
                     Source: {{ donation.payment_source }}
@@ -54,7 +54,7 @@
             </div>
             <div class="flex mb2">
                 <div class="dib mr4">
-                    Name:&nbsp;<strong class="d-name"><code>{{ donation.name }}</code></strong>&nbsp;<small class="d-email">(<code>{{ donation.email }}</code>)</small>
+                    Name:&nbsp;<strong :class="`${getTextColorCls('name')}`"><code>{{ donation.name }}</code></strong>&nbsp;<small :class="`${getTextColorCls('email')}`">(<code>{{ donation.email }}</code>)</small>
                 </div>
             </div>
             <div class="flex mb2">
@@ -82,31 +82,23 @@ export default Vue.extend({
     },
     data: () => ({
         row: false
-    })
+    }),
+    methods: {
+        getTextColorCls(fieldType: string): string {
+            switch(fieldType){
+                case 'name':
+                    return "green"
+                case 'date':
+                    return "blue"
+                case 'email':
+                    return "orange"
+                default:
+                    return ""
+            }
+        }
+    }
 })
 </script>
 
 <style lang="scss" scoped>
-@import "tachyons-sass/tachyons.scss";
-
-.d-name {
-    @extend .green;
-}
-
-.d-date {
-    @extend .blue;
-}
-
-.d-email {
-    @extend .orange;
-}
-
-.donation-row {
-
-}
-
-.donation-row span {
-    // @extend .bl1
-}
-
 </style>

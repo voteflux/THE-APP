@@ -51,6 +51,8 @@
 import Vue from 'vue'
 import Component from 'vue-class-component';
 
+// NOTE: SOMEWHAT DEPRECATED - COULD BE USED TO GENERALISE OTHER EDITABLES STILL
+
 enum Cs {
     // state constants
     DISPLAY,
@@ -129,35 +131,35 @@ export default Editable;
 </script>
 
 <style scoped lang="scss">
-@import "tachyons-sass/tachyons.scss";
+// @import "tachyons-sass/tachyons.scss";
 
-button {
-    @extend .mv2;
-    @extend .mh1;
-    @extend .f4;
-}
-
-// .editable-root {
-//     min-height: 5rem;
+// button {
+//     @extend .mv2;
+//     @extend .mh1;
+//     @extend .f4;
 // }
 
-// .editable-expand {
-//     transition: height 0.5s ease-in-out;
+// // .editable-root {
+// //     min-height: 5rem;
+// // }
+
+// // .editable-expand {
+// //     transition: height 0.5s ease-in-out;
+// // }
+
+// .var-name {
+//     @extend .pa0-ns;
+//     @extend .pa1;
 // }
 
-.var-name {
-    @extend .pa0-ns;
-    @extend .pa1;
-}
+// .col {
+// }
 
-.col {
-}
+// .icons {
+//     min-height: 2.1rem;
+// }
 
-.icons {
-    min-height: 2.1rem;
-}
-
-.v-messages__wrapper {
-    display: none;
-}
+// .v-messages__wrapper {
+//     display: none;
+// }
 </style>

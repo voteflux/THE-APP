@@ -275,22 +275,6 @@ export default Vue.extend({
 </script>
 
 <style scoped lang="scss">
-@import 'tachyons-sass/tachyons.scss';
-
-label {
-    @extend .flex;
-    @extend .flex-row;
-    @extend .justify-between;
-    @extend .items-center;
-    text-align: right;
-    margin: 0.5rem;
-}
-
-label * {
-    @extend .w-60;
-    margin-left: 0.25rem;
-}
-
 .container {
     padding: 0;
 }

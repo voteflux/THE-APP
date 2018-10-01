@@ -192,17 +192,4 @@ export default Vue.extend({
 </script>
 
 <style scoped lang="scss">
-@import "tachyons-sass/tachyons.scss";
-
-.var-name {
-    @extend .pa0-ns;
-    @extend .pa1;
-}
-
-.col {
-}
-
-.icons {
-    min-height: 2.1rem;
-}
 </style>

@@ -45,8 +45,6 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
-@import "tachyons-sass/tachyons.scss";
-
 .flex-grow {
     flex-grow: 2;
 }

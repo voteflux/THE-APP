@@ -32,15 +32,4 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
-@import "tachyons-sass/tachyons.scss";
-
-// .us-danger-zone {
-//     background: repeating-linear-gradient(
-//     135deg,
-//     #d6030370,
-//     #d6030370 5px,
-//     #e07b7b70 5px,
-//     #e07b7b70 10px
-//     );
-// }
 </style>

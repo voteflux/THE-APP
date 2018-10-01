@@ -5,6 +5,7 @@ module.exports = {
     baseUrl: '/v/',
     outputDir: 'dist/v/',
     lintOnSave: true,
+    parallel: true,
     configureWebpack: {
         mode: process.env.STAGE == "prod" ? "production" : "development",
         optimization: {
@@ -18,8 +19,5 @@ module.exports = {
             filename: "[name].bundle.js",
             chunkFilename: "[name].chunk.js"
         },
-        loaders: {
-
-        }
     }
 }

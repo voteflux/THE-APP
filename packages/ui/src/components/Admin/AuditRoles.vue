@@ -28,7 +28,6 @@ import { Auth, UserV1Object, RoleResp } from '@/lib/api';
 
 import WebRequest from "flux-lib/WebRequest";
 
-import XLSX from 'xlsx';
 import * as R from 'ramda';
 
 
@@ -60,8 +59,9 @@ export default Vue.extend({
                 email: "Email"
             }
         },
-        save() {
+        async save() {
             const roles = this.req.roleAudit.unwrap() as RoleResp[]
+            const {default: XLSX} = await import('xlsx');
             const wb = XLSX.utils.book_new()
             const prettyHeadings = this.prettyHeadings()
             const ts = (new Date()).getTime() / 1000 | 0
