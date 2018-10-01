@@ -129,7 +129,7 @@ export default Editable;
 </script>
 
 <style scoped lang="scss">
-@import "tachyons";
+@import "tachyons-sass/tachyons.scss";
 
 button {
     @extend .mv2;

@@ -1,7 +1,4 @@
 import { UserV1Object } from './../../types/db';
-import pdfMake from 'pdfmake/build/pdfmake'
-import pdfFonts from "pdfmake/build/vfs_fonts"
-pdfMake.vfs = pdfFonts.pdfMake.vfs
 
 import {yourSignaturePlaceholder} from './imageUris'
 
@@ -37,6 +34,9 @@ export const genPdf = async (
     fullAddr="<FULL ADDR>",
     signatureDataURI=yourSignaturePlaceholder
 ): Promise<{uri: string}> => {
+    const pdfMake = await import('pdfmake/build/pdfmake')
+    const pdfFonts = await import("pdfmake/build/vfs_fonts")
+    pdfMake.vfs = pdfFonts.pdfMake.vfs
 
     const date = new Date()
 

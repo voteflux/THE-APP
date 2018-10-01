@@ -29,5 +29,5 @@
 </script>
 
 <style scoped lang="scss">
-// @import "tachyons";
+// @import "tachyons-sass/tachyons.scss";
 </style>

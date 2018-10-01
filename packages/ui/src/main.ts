@@ -6,15 +6,6 @@ Vue.use(Vuex)
 import VueRouter from "vue-router";
 Vue.use(VueRouter);
 
-// todo: phase out fontawesime now we have veutify
-import { library } from '@fortawesome/fontawesome-svg-core'
-import { faCoffee, faArrowLeft, faArrowCircleLeft, faPlusSquare, faMinusSquare, faTimes, faSpinner, faSave } from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-
-library.add(faCoffee, faArrowCircleLeft, faPlusSquare, faMinusSquare, faTimes, faSpinner, faSave)
-Vue.component('fa-icon', FontAwesomeIcon)
-
-
 import Vuetify from 'vuetify'
 import 'vuetify/dist/vuetify.min.css'
 import colors from 'vuetify/es5/util/colors'

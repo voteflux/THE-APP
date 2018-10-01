@@ -109,7 +109,7 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
-@import "tachyons";
+@import "tachyons-sass/tachyons.scss";
 
 .danger-btn {
     @extend .bg-dark-red;

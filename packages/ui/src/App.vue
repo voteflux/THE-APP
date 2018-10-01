@@ -158,8 +158,7 @@ export default /*class App extends Vue*/ Vue.extend({
 </script>
 
 <style lang="scss">
-@import "tachyons";
-// @import '../node_modules/normalize.css/normalize.css';
+@import "tachyons-sass/tachyons.scss";
 
 // app container styling
 #app {

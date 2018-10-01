@@ -82,7 +82,6 @@
 
 <script lang="ts">
 import Vue from 'vue'
-import {genPdf} from 'flux-lib/pdfs/nda/generatePdf'
 import { UserV1Object, Auth } from 'flux-lib/types/db';
 import routes from '@/routes'
 import { Option, some, none, isSome, isNone } from 'fp-ts/lib/Option'
@@ -151,6 +150,7 @@ export default Vue.extend({
             const name = this.userO.fullName()
             const addr = this.userO.formalAddress()
             const sig = opts.useDefaultSig === true ? yourSignaturePlaceholder : this.signatureImage
+            const {genPdf} = await import('flux-lib/pdfs/nda/generatePdf')
             const result = await genPdf(name, addr, sig)
             this.draftPdf = some(result.uri)
         },

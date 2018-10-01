@@ -85,7 +85,7 @@ export default Vue.extend({
 </script>
 
 <style scoped lang="scss">
-@import "tachyons";
+@import "tachyons-sass/tachyons.scss";
 
 .var-name {
     @extend .pa0-ns;

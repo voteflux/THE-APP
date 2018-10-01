@@ -275,7 +275,7 @@ export default Vue.extend({
 </script>
 
 <style scoped lang="scss">
-@import 'tachyons';
+@import 'tachyons-sass/tachyons.scss';
 
 label {
     @extend .flex;

@@ -12,6 +12,7 @@
     "alwaysStrict": true,
     "sourceMap": true,
     "noImplicitAny": false,
+    "importHelpers": true,
     "baseUrl": ".",
     "rootDir": "./",
     "types": [
@@ -30,7 +31,6 @@
     "tests/**/*.tsx"
   ],
   "exclude": [
-    "node_modules",
     "../[^(ui)]",
     "dist",
     "../**/.webpack",
