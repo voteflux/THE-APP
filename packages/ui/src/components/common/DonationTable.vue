@@ -15,8 +15,8 @@
                 prevLabel: 'prev',
                 rowsPerPageLabel: 'Rows per page',
                 ofLabel: 'of',
-                pageLabel: 'page', // for 'pages' mode
-                allLabel: 'All',
+                pageLabel: 'page',
+                allLabel: 'All'
             }"
             >
             <!-- :fixed-header="true" -->
@@ -68,8 +68,8 @@ export default Vue.extend({
         getDonations() {
             return this.donations.map(d => ({
                 ...d,
-                comment: d.extra_data.comment || "",
-                aud_value: d.extra_data.aud_value || d.amount,
+                comment: (d.extra_data || {}).comment || "",
+                aud_value: (d.extra_data || {}).aud_value || d.amount,
                 date: d.date || "",
             }))
         }
