@@ -1,5 +1,5 @@
 <template>
-    <v-app id="app" class="w-100">
+    <v-app id="app" class="w-100" layout>
         <notifications/>
         <transition name="fade" mode="out-in">
             <div v-if="req.user.isLoading()" :key="IS_LOGGING_IN" class="mt4" >

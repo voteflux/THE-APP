@@ -6,7 +6,7 @@ Vue.use(Vuex)
 import VueRouter from "vue-router";
 Vue.use(VueRouter);
 
-import VApp from 'vuetify/es5/components/VApp'
+import * as VApp from 'vuetify/es5/components/VApp'
 import Vuetify from 'vuetify/es5/components/Vuetify'
 import VIcon from 'vuetify/es5/components/VIcon'
 import * as VMenu from 'vuetify/es5/components/VMenu'
@@ -26,28 +26,29 @@ import VBottomNav from 'vuetify/es5/components/VBottomNav'
 import * as VList from 'vuetify/es5/components/VList'
 import * as VNavigationDrawer from 'vuetify/es5/components/VNavigationDrawer'
 import VFooter from 'vuetify/es5/components/VFooter'
+import VDivider from 'vuetify/es5/components/VDivider'
+import * as VGrid from 'vuetify/es5/components/VGrid'
 import transitions from 'vuetify/es5/components/transitions'
 import directives from 'vuetify/es5/directives'
 
-import {
-    // @ts-ignoreVToolbar
-} from 'vuetify'
+import VuetifyAll from 'vuetify'
 import 'vuetify/dist/vuetify.min.css'
 import colors from 'vuetify/es5/util/colors'
 
 // @ts-ignore
 Vue.use(Vuetify, {
     components: {
-        VApp,
+        ...VApp,
         ...VList,
         ...VToolbar,
         ...VForm,
-        VNavigationDrawer,
+        ...VMenu,
+        ...VNavigationDrawer,
+        ...VGrid,
         VBottomNav,
         VFooter,
         transitions,
         VIcon,
-        VMenu,
         VTextarea,
         VTextField,
         VAutocomplete,
@@ -58,7 +59,7 @@ Vue.use(Vuetify, {
         VProgressCircular,
         VSubheader,
         VTooltip,
-
+        VDivider,
     },
     directives,
     iconfont: 'md',
