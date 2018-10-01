@@ -1,6 +1,6 @@
 <template>
     <StatusMsg :type="T.WARNING">
-        <slot></slot>
+        <strong>Warning: </strong> <slot />
     </StatusMsg>
 </template>
 

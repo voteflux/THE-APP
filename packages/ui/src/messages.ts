@@ -1,6 +1,6 @@
 import Vue from "vue";
 
-enum Messages {
+export enum Messages {
     REFRESH_USER = "REFRESH_USER",
     REFRESH_AUTH = "REFRESH_AUTH",
     REFRESH_ROLES = "REFRESH_ROLES",

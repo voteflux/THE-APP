@@ -1,7 +1,5 @@
 <template>
     <div>
-        <flux-logo title="Finance Menu"/>
-
         <ui-section title="Menu">
             <ul class="ul-spaced">
                 <li><router-link :to="Routes.FinanceDonationLog">Donation Log</router-link></li>
@@ -42,6 +40,4 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
-@import "tachyons";
-
 </style>

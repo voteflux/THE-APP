@@ -1,7 +1,6 @@
 <template>
-    <div id="app" class="w-100 w-90-m w-80-l center mb4">
+    <v-app id="app" class="w-100">
         <notifications/>
-
         <transition name="fade" mode="out-in">
             <div v-if="req.user.isLoading()" :key="IS_LOGGING_IN" class="mt4" >
                 <Loading>
@@ -10,19 +9,27 @@
             </div>
 
             <div v-else-if="req.user.isSuccess()" :key="IS_LOGGED_IN">
-                <transition name="fade" mode="out-in">
-                    <router-view :auth="auth" :user="req.user.unwrap()" :roles="req.roles"/>
-                </transition>
+                <v-toolbar fixed app>
+                    <v-toolbar-side-icon :light="true" @click.stop="navOpen = !navOpen" />
+                    <v-toolbar-title>
+                        <flux-logo :title="getPageTitle()" />
+                    </v-toolbar-title>
+                </v-toolbar>
+                <nav-drawer v-model="navOpen" :roles="req.roles" />
+                <v-content>
+                    <v-container fluid>
+                        <transition name="fade" mode="out-in">
+                            <router-view :auth="auth" :user="req.user.unwrap()" :userO="this.userO" :roles="req.roles" />
+                        </transition>
+                    </v-container>
+                </v-content>
             </div>
 
             <div v-else :key="IS_NOT_LOGGED_IN">
-                <LoginForm />
-                <Error v-if="req.user.isFailed()">
-                    {{ req.user.unwrapError() }}
-                </Error>
+                <LoginForm :userReq="req.user" />
             </div>
         </transition>
-    </div>
+    </v-app>
 </template>
 
 <script lang="ts">
@@ -34,6 +41,9 @@ import { debug } from "util";
 import { M, MsgBus } from "./messages";
 import WR from 'flux-lib/WebRequest'
 import { UserV1Object, Auth } from "@/lib/api"
+import { Routes, pageTitle } from './routes'
+import { AppFs } from './store/app'
+import { UserObject } from './lib/UserObject'
 
 // constants - for everything w/in this components scope
 enum Cs {
@@ -52,13 +62,18 @@ export default /*class App extends Vue*/ Vue.extend({
         },
         auth: undefined as any & Auth,
         user: {} as any,
+        userO: {} as UserObject,
+        navOpen: null as null | boolean,
         ...Cs
     }),
     methods: {
+        getPageTitle() {
+            return pageTitle(this.$route.path as Routes)
+        },
         getRoles() {
             this.req.roles = WR.Loading();
             this.$flux.v2.getRoles(this.auth).then(r => {
-                this.req.roles = r.map(({roles}) => roles)
+                this.req.roles = r
                 r.do({
                     failed: (e, errObj) => {
                         // todo: handle failed roles check
@@ -74,40 +89,46 @@ export default /*class App extends Vue*/ Vue.extend({
         loadAuth() {
             this.req.user = WR.Loading()
 
-            this.$flux.auth.loadAuth().caseOf({
-                nothing: () => this.loginFailed("Cannot find authentication token. Unable to log in."),
-                just: auth => {
+            this.$flux.auth.loadAuth().foldL(
+                () => this.loginFailed("Cannot find authentication token. Unable to log in."),
+                auth => {
                     this.auth = auth;
                     this.loadUser();
                 }
-            });
+            );
         },
         loadUser() {
             this.req.user = WR.Loading()
             this.loadUserSilent()
             this.getRoles()
         },
-        loadUserSilent() {
-            this.$flux.v1.getUserDetails(this.auth).then(r => {
-                this.req.user = r
-                r.do({
-                    failed: (e, errObj) => {
-                        this.loginFailed();
-                        if (errObj && errObj.status == 403) {
-                            this.$flux.auth.remove();
-                        } else {
-                            this.$unknownErr(e);
-                        }
-                    },
-                    success: u => {
-                        this.user = u;
+        async loadUserSilent() {
+            console.log('loadUserSilent 1')
+            this.req.user = await this.$flux.v1.getUserDetails(this.auth)
+            console.log('loadUserSilent 2')
+            this.req.user.do({
+                failed: (e, errObj) => {
+                    this.loginFailed();
+                    console.log("Login error", errObj)
+                    if (errObj && errObj.status == 403) {
+                        this.$flux.auth.remove();
+                    } else {
+                        this.$unknownErr(e);
                     }
-                })
-            });
+                },
+                success: u => {
+                    this.setUser(u)
+                }
+            })
         },
         logout() {
             this.$flux.auth.remove()
             this.req.user = WR.NotRequested()
+        },
+        setUser(user) {
+            this.user = user
+            this.userO = new UserObject(user, this.auth, this.$flux)
+            this.req.user = WR.Success(user)
         }
     },
     created() {
@@ -122,8 +143,7 @@ export default /*class App extends Vue*/ Vue.extend({
             this.loadUser();
         });
         MsgBus.$on(M.GOT_USER_DETAILS, (user) => {
-            this.user = user
-            this.req.user = WR.Success(user)
+            this.setUser(user)
         });
         MsgBus.$on(M.REFRESH_ROLES, () => {
             this.getRoles();
@@ -131,13 +151,14 @@ export default /*class App extends Vue*/ Vue.extend({
 
         this.$on(M.LOGOUT, this.logout)
         MsgBus.$on(M.LOGOUT, this.logout)
+
+        this.$store.commit(AppFs.initHistoryCount)
     }
 });
 </script>
 
 <style lang="scss">
-@import "tachyons";
-@import '../node_modules/normalize.css/normalize.css';
+@import "tachyons-sass/tachyons.scss";
 
 // app container styling
 #app {
@@ -165,8 +186,57 @@ export default /*class App extends Vue*/ Vue.extend({
     opacity: 0;
 }
 
+
+.expand-enter-active {
+    transition-delay: 1s;
+}
+.expand-enter-active,
+.expand-leave-active {
+  transition-property: opacity, height;
+  transition-duration: 0.3s;
+}
+
+.expand-enter,
+.expand-leave-to {
+  opacity: 0;
+}
+
+.expand-enter-active,
+.expand-leave-active {
+  transition: height 0.3s ease-in-out;
+  overflow: hidden;
+}
+
+.expand-enter,
+.expand-leave-to {
+  height: 0;
+}
+
+
+.slide-fade-enter-active {
+  transition: all .3s ease;
+//   position: absolute;
+}
+.slide-fade-leave-active {
+  transition: all .8s cubic-bezier(1.0, 0.5, 0.8, 1.0);
+  position: absolute;
+}
+.slide-fade-enter, .slide-fade-leave-to
+/* .slide-fade-leave-active below version 2.1.8 */ {
+  transform: translateX(10px);
+  opacity: 0;
+}
+
+
+
+
+
 // main sitewide styling
 
+
+.editable-root {
+    min-height: 4.9rem;
+}
 
 ul.ul-spaced li {
     margin-top: 10px;
@@ -210,7 +280,7 @@ a.btn {
 }
 
 button {
-    @extend .btn;
+    // @extend .btn;
 }
 
 button .btn-transparent {
@@ -304,6 +374,14 @@ button.tool-btn:disabled {
 button.tool-btn:disabled:hover {
 }
 
+button.v-toolbar__side-icon {
+    border: 0;
+}
+
+// .v-btn button {
+//     border: 0;
+// }
+
 /* INPUTS */
 
 .input {
@@ -320,12 +398,20 @@ textarea {
     @extend .input;
 }
 
+.v-input textarea {
+    border: 0;
+}
+
 select {
     @extend .input
 }
 
 .inputGroup .input {
     width: inherit;
+}
+
+.v-input input {
+    border: 0;
 }
 
 // a glass for alternating the bg colors of children a bit

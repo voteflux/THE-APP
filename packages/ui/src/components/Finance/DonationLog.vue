@@ -1,8 +1,6 @@
 <template>
     <div>
-        <flux-logo title="Donation Log"/>
-
-        <UiSection title="Donations">
+        <UiSection title="Donations (sorted by timestamp; decending)">
             <Error v-if="req.donations.isFailed()">{{ req.donations.unwrapError() }}</Error>
             <Loading v-else-if="!req.donations.isSuccess()">Loading donations...</Loading>
             <div v-else>
@@ -61,6 +59,4 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
-@import "tachyons";
-
 </style>

@@ -14,9 +14,13 @@ import EditableOpt from './EditableOpt.vue'
 import AddressEditor from './AddressEditor.vue'
 import Section from './Section.vue'
 import Loading from './Loading.vue'
+import PDFViewer from './PDFViewer.vue'
+import FluxInput from './FluxInput.vue'
+import TransitionExpand from './TransitionExpand.vue'
+import TransitionSlide from './TransitionSlide.vue'
 
 export {
     Error, Warning, StatusSuccess, Row2, Table2Cols, UiSection, Paginate, Donation, TableNCols, EditableText,
-    EditableDate, EditableOpt, AddressEditor,
-    Section, Loading, DonationTable
+    EditableDate, EditableOpt, AddressEditor, FluxInput,
+    Section, Loading, DonationTable, PDFViewer, TransitionExpand, TransitionSlide,
 };

@@ -12,6 +12,7 @@
     "alwaysStrict": true,
     "sourceMap": true,
     "noImplicitAny": false,
+    "importHelpers": true,
     "baseUrl": ".",
     "rootDir": "./",
     "types": [
@@ -27,9 +28,12 @@
     "src/**/*.tsx",
     "src/**/*.vue",
     "tests/**/*.ts",
-    "tests/**/*.tsx"
+    "tests/**/*.tsx",
+    "node_modules/flux_lib/**/*.ttf",
   ],
   "exclude": [
-    "node_modules"
+    "../[^(ui)]",
+    "dist",
+    "../**/.webpack",
   ]
 }

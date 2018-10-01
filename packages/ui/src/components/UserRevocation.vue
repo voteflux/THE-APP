@@ -19,25 +19,25 @@
             <h3>Revocation</h3>
             <transition name="fade" mode="out-in">
                 <div v-if="state == AT_START" :key="AT_START">
-                    <button class="danger-btn db" v-on:click="startRevocation()">Revoke my Membership</button>
+                    <v-btn color="error" v-on:click="startRevocation()">Revoke my Membership</v-btn>
                 </div>
                 <div v-else-if="state == CONFIMATION" :key="CONFIMATION">
                     <h4>Please confirm by filling out:</h4>
                     <label class="db">Your Email ({{ user.email }})</label><br>
                     <input class="db" type="email" v-model="formEmail" placeholder="confirm your email"/>
-                    <button class="mt2 danger-btn db" :disabled="formEmail !== user.email" v-on:click="confirmRevocation()">Revoke my Membership</button>
+                    <v-btn color="error" class="mt2" :disabled="formEmail !== user.email" v-on:click="confirmRevocation()">Revoke my Membership</v-btn>
                 </div>
                 <div v-else-if="state == CONFIRMATION_2" :key="CONFIRMATION_2">
                     <h4>Last Step:</h4>
-                    <button class="mt3 danger-btn db" v-on:click="doRevocationFinally()">Revoke my Membership</button>
-                    <button class="mt4 db" v-on:click="cancelRevocation()">Cancel - Take me to safety</button>
+                    <v-btn color="error" class="mt3 db" v-on:click="doRevocationFinally()">Revoke my Membership</v-btn>
+                    <v-btn color="success" class="mt4 db" v-on:click="cancelRevocation()">Cancel - Take me to safety</v-btn>
                 </div>
                 <div v-else-if="state == SAVING" :key="SAVING">
                     <h4>Revoking membership...</h4>
                 </div>
                 <div v-else-if="state == DONE" :key="DONE">
                     <h4>Your membership has been revoked. You should recieve a confirmation email.</h4>
-                    <button class="db mt2" v-on:click="checkMembership()">Okay</button>
+                    <v-btn color="success" class="db mt2" v-on:click="checkMembership()">Okay</v-btn>
                 </div>
             </transition>
         </div>
@@ -109,14 +109,4 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
-@import "tachyons";
-
-.danger-btn {
-    @extend .bg-dark-red;
-    @extend .white;
-}
-
-.danger-btn:disabled {
-    background-color: #6300007c;
-}
 </style>

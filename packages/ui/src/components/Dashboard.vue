@@ -1,12 +1,12 @@
 <template>
     <div>
-        <flux-logo title="Dashboard" :showBack="false" />
-
         <UiSection title="Your Summary">
             <UserSummary :user='user'></UserSummary>
         </UiSection>
 
-        <UiSection v-if="roles.isSuccess() && roles.unwrap().length > 0" title="Admin Utilities">
+        <v-divider class="mt3" />
+
+        <!-- <UiSection v-if="showAdmin()" title="Admin Utilities">
             <warning>This section is under active development</warning>
             <ul class="ul-spaced">
                 <li v-if="hasRole(Roles.ADMIN)">Admin utils link will go here when done</li>
@@ -16,52 +16,60 @@
                 <li v-if="hasRole(Roles.COMMS)">Comms utils link will go here when done</li>
                 <li v-if="hasRole(Roles.REGO_OFFICER)">Rego Officer utils link will go here when done</li>
             </ul>
-        </UiSection>
 
-        <ui-section title="Member Tools">
+        </UiSection>
+        <v-divider v-if="showAdmin()" /> -->
+
+        <!--
+        <Section title="Member Tools" :noCollapse="true">
             <ul class="ul-spaced">
                 <li><router-link :to="Routes.EditUserDetails">Change your member details or preferences</router-link></li>
                 <li><router-link :to="Routes.MembershipRevocation">Revoke your membership</router-link></li>
-                <!-- <li><a href="/anon_validation.html">Help validate other members</a></li> -->
+                <!-/- <li><a href="/anon_validation.html">Help validate other members</a></li> -/->
             </ul>
-        </ui-section>
+        </Section>
 
-        <ui-section title="Volunteer Tools">
-            <div v-if="user.volunteer === true">
+        <v-divider class="mt3" />
+        -->
 
-            </div>
-            <div v-else>
-                To enable volunteer tools, please check the volunteer box on your <router-link :to="Routes.EditUserDetails">details</router-link> page.
-            </div>
-        </ui-section>
+        <Section title="Get Involved" :noCollapse="true" class="child-bg-alt" >
+            <EditableOpt class="row" name="I'm interested in standing as a candidate" :value="user.candidature_federal" :onSave="savePropFactory('candidature_federal')" />
+            <EditableOpt class="row" name="I'd like to volunteer" :value="user.volunteer" :onSave="savePropFactory('volunteer')" />
+        </Section>
 
-        <ui-section title="Log Out">
-            <button class="" v-on:click="MsgBus.$emit(M.LOGOUT)">Log Out Now</button>
-        </ui-section>
+        <v-divider class="mt3" />
+
+        <Section title="Log Out" :noCollapse="true">
+            <v-btn color="warning" class="mt2" v-on:click="MsgBus.$emit(M.LOGOUT)">Log Out Now</v-btn>
+        </Section>
 
     </div>
 </template>
 
 
 <script lang="ts">
+import assert from 'assert'
 import Vue from "vue";
 import UserSummary from "./UserSummary.vue";
 import OrganiserUtils from "./OrganiserUtils.vue";
 import FinanceUtils from "./FinanceUtils.vue"
-import { UiSection, Warning } from "@c/common";
+import { UiSection, Warning, Section, EditableOpt } from "@c/common";
 
 import Routes from "../routes"
 import Roles from "../lib/roles";
 
 import {M, MsgBus} from "../messages"
 import WebRequest from "flux-lib/WebRequest";
+import { Auth } from 'flux-lib/types/db';
+import { Req, RolesResp } from 'flux-lib/types/db'
 
 export default Vue.extend({
     name: "Dashboard",
-    components: { UserSummary, UiSection, Warning },
+    components: { UserSummary, UiSection, Warning, Section, EditableOpt },
     props: {
         user: Object,
-        roles: WebRequest,
+        roles: Object as () => Req<RolesResp>,
+        auth: Object as () => Auth
     },
     data: () => ({
         Roles,
@@ -70,12 +78,25 @@ export default Vue.extend({
     }),
     methods: {
         hasRole(r) {
-            const rs = this.$props.roles
+            const rs: Req<RolesResp> = this.$props.roles
             if (rs.isSuccess()) {
-                return rs.unwrap().includes(r) || rs.unwrap().includes("admin")
+                return rs.unwrap().roles.includes(r) || rs.unwrap().roles.includes("admin")
             }
             return false
-        }
+        },
+
+        showAdmin() {
+            return this.roles.isSuccess() && this.roles.unwrap().roles.length > 0
+        },
+
+        savePropFactory(prop) {
+            return (newValue) => {
+                assert(prop != 's' && prop != 'authToken')
+                const toSave = { [prop]: newValue, ...this.$props.auth }
+                return this.$flux.v1.saveUserDetails(toSave)
+                    .then(this.$flux.utils.onGotUserObj);
+            }
+        },
     }
 });
 </script>

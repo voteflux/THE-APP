@@ -1,42 +1,38 @@
 <template>
-    <div style="min-height: 6rem;" class="flex flex-row items-center">
-        <div v-if="state == DISPLAY" class="flex flex-row items-center w-100">
-            <div class="w-30 pl2 v-mid">
+    <div style="min-height: 6rem;" class="flex flex-row items-center pl4 pr4">
+        <div v-if="state == DISPLAY" class="flex flex-row items-center justify-between w-100">
+            <div class="w-30 v-mid">
                 Address as on electoral roll
             </div>
-            <div class="w-40 v-mid">
+            <div class="w-30 v-mid">
                 {{ user.addr_street_no }} {{ user.addr_street }} <br>
                 {{ user.addr_suburb }} <br>
                 {{ user.addr_postcode }}
             </div>
-            <div class="w-30 v-mid">
-                <button class="tool-btn db center" v-on:click="initAddrForm()">✏️ Edit</button>
+            <div class="w-30 v-mid tr">
+                <v-btn class="dib" v-on:click="initAddrForm()"><v-icon small left v-text="'edit'" />Edit</v-btn>
             </div>
         </div>
 
-        <div v-else class="w-100">
-            <div v-if="isLoading" class="flex justify-center">
+        <v-form v-else ref="form" class="w-100" @submit="virtualSubmit()" >
+            <loading v-if="isLoading" class="flex justify-center">
                 Loading...
-            </div>
+            </loading>
             <div v-else-if="state == SAVING" class="flex justify-center">
                 Saving...
             </div>
-            <div v-else class="flex felx-row items-center">
+            <div v-else class="flex felx-row items-center justify-between">
 
-                <div class="sidebtns pr2">
-                    <button class="tool-btn f5" v-on:click="prevFormPart()">🔙 Back</button>
+                <div class="w-20 tl">
+                    <v-btn class="" v-on:click="prevFormPart()"><v-icon small left v-text="'arrow_back'" />Back</v-btn>
                 </div>
                 <div class="w-60">
                     <div v-if="state == INPUT_POSTCODE" class="flex flex-row flex-wrap items-center justify-center">
-                        <label class="mr2">Postcode:</label>
-                        <input class="mw5 input w-100" v-model="newAddress.addr_postcode" v-on:keyup.enter="canGoNext() && nextFormPart()" pattern="\d*" type="text" />
+                        <v-text-field autofocus label="Postcode" v-model="newAddress.addr_postcode" v-on:keyup.enter="virtualSubmit()" :rules="[rules.postcode]" type="text" />
                     </div>
                     <div v-if="state == INPUT_SUBURB">
                         <div v-if="suburbs.length > 0">
-                            <label>Suburb:</label>
-                            <select class="input" v-model="newAddress.addr_suburb">
-                                <option v-for="suburb in suburbs" v-bind:key="suburb" :value="suburb">{{ suburb }}</option>
-                            </select>
+                            <v-autocomplete autofocus label="Suburb" v-model="newAddress.addr_suburb" :items="suburbs" :rules="[rules.nonEmpty]" v-on:keyup.enter="virtualSubmit()" />
                         </div>
                         <Error v-else>
                             No suburbs found for {{ newAddress.addr_postcode }}
@@ -44,25 +40,21 @@
                     </div>
                     <div v-if="state == INPUT_STREET" class="flex flex-row flex-wrap items-center">
                         <div class="w-30-ns w-100 pr2">
-                            <label class="mr2">Street No.:</label>
-                            <input type="text" v-model="newAddress.addr_street_no" size="10">
+                            <v-text-field autofocus label="Street No." type="text" v-model="newAddress.addr_street_no" size="10" v-on:keyup.enter="virtualSubmit()" :rules="[rules.nonEmpty]" />
                         </div>
                         <div class="w-70-ns w-100">
-                            <label>Street:</label>
-                            <select class="input" v-model="newAddress.addr_street">
-                                <option v-for="street in streets" v-bind:key="street" :value="street">{{ street }}</option>
-                            </select>
+                            <v-autocomplete label="Street" v-model="newAddress.addr_street" :items="streets" v-on:keyup.enter="virtualSubmit()" :rules="[rules.nonEmpty]" />
                         </div>
                     </div>
                 </div>
-                <div class="sidebtns pl2">
-                    <button class="tool-btn f5" v-on:click="nextFormPart()" :class="nextBtnCls()" :disabled="!canGoNext()">
-                        <span v-if="state == INPUT_STREET">💾 Save</span>
-                        <span v-else>➡️ Next</span>
-                    </button>
+                <div class="w-20 tr">
+                    <v-btn class="" v-on:click="nextFormPart()" :class="nextBtnCls()" :disabled="!canGoNext()">
+                        <span v-if="state == INPUT_STREET"><v-icon small left v-text="'save'" />Save</span>
+                        <span v-else>Next<v-icon small right v-text="'arrow_forward'" /></span>
+                    </v-btn>
                 </div>
             </div>
-        </div>
+        </v-form>
     </div>
 </template>
 
@@ -110,6 +102,10 @@ export default Vue.extend({
         suburbs: [] as string[],
         streets: [] as string[],
         errMsg: {},
+        rules: {
+            postcode: (v) => /\d+/.test(v) || "Must be 4 digits.",
+            nonEmpty: v => !!v || "Required",
+        },
         ...Cs
     }),
 
@@ -138,6 +134,8 @@ export default Vue.extend({
         },
 
         canGoNext() {
+            // @ts-ignore
+            // if (this.$refs.form && this.$refs.form.validate() === false) return false
             switch(this.state) {
                 case Cs.INPUT_POSTCODE:
                     return /^\d{4}$/.test(this.newAddress.addr_postcode)
@@ -231,6 +229,10 @@ export default Vue.extend({
                 default:
                     this.resetAddrForm()
             }
+        },
+
+        virtualSubmit() {
+            return this.canGoNext() && this.nextFormPart()
         }
     },
 
@@ -241,31 +243,4 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
-@import "tachyons";
-
-// .input {
-//     display: inline-block;
-//     width: 100%;
-//     height: 100%;
-//     @extend .pa1;
-// }
-
-button {
-    @extend .mv2;
-    @extend .mh1;
-    @extend .f4;
-}
-
-.sidebtns {
-    @extend .w-20;
-}
-
-.sidebtns .tool-btn {
-    @extend .center;
-    @extend .db;
-}
-
-.disabled {
-    color: #777;
-}
 </style>

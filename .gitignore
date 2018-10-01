@@ -15,7 +15,7 @@ yarn-debug.log
 .flux-dev.*.log.previous
 tmux*.log
 
-packages/lib/*.js
+# packages/lib/*.js
 packages/lib/**/*.js
 
 packages/api/dist
@@ -30,3 +30,5 @@ packages/api/sls-custom.yml
 .vscode
 
 .circleci/run_locally.sh
+
+./report-*

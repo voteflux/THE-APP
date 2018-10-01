@@ -1,9 +1,9 @@
 <template>
     <div>
         <div class="flex justify-center items-center">
-            <button v-on:click="prevPage()" v-bind:disabled="!hasPrevPage()">« Prev</button>
+            <v-btn v-on:click="prevPage()" v-bind:disabled="!hasPrevPage()">« Prev</v-btn>
             <span class="tc flex-grow">Page {{ page.pageN + 1 }} / {{ totalPages() }}</span>
-            <button v-on:click="nextPage()" v-bind:disabled="!hasNextPage()">Next »</button>
+            <v-btn v-on:click="nextPage()" v-bind:disabled="!hasNextPage()">Next »</v-btn>
         </div>
         <div class="db h-60vh overflow-y-scroll mb3">
             <slot/>
@@ -45,8 +45,6 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
-@import "tachyons";
-
 .flex-grow {
     flex-grow: 2;
 }

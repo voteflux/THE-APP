@@ -1,24 +1,26 @@
 <template>
-    <div v-if="visible == VISIBLE" class="db mh3 mv4 common relative" v-bind:class="getClass()">
-        <span class="pr2 pt2 top-0 right-0 absolute fr" @click="visible = HIDING">
+    <v-alert :type="myType()" dismissible :value="true"> <!--  v-if="visible == VISIBLE" class="db mh3 mv4 common relative" v-bind:class="getClass()"> -->
+        <!-- <span class="pr2 pt2 top-0 right-0 absolute fr" @click="visible = HIDING">
             <fa-icon icon="times" />
-        </span>
-        <div class="heading pl2 pt2 pr1">{{ getHeading() }}</div>
+        </span> -->
+
+        <slot />
+
+        <!-- <div class="heading pl2 pt2 pr1">{{ getHeading() }}</div>
         <div class="err-text pl2 pb2 pr2">
-            <slot></slot>
-        </div>
-    </div>
+            <slot />
+        </div> -->
+    </v-alert>
 </template>
 
 <script lang="ts">
 import Vue from "vue";
 
 export enum Types {
-    NULL,
-    ERROR,
-    WARNING,
-    INFO,
-    SUCCESS,
+    ERROR = "error",
+    WARNING = "warning",
+    INFO = "info",
+    SUCCESS = "success",
 }
 
 enum HideState {
@@ -32,42 +34,49 @@ export default Vue.extend({
     name: "error",
     data: () => ({
         visible: HideState.VISIBLE,
-        statusClass: Types.NULL,
+        statusClass: Types.INFO,
         ...HideState
     }),
+    computed: {
+    },
     methods: {
+        myType() {
+            const t = this.statusClass
+            return t
+        },
         getClass() {
-            return {
-                [Types.ERROR]: "error",
-                [Types.WARNING]: "warning",
-                [Types.INFO]: "info",
-                [Types.SUCCESS]: "success",
-            }[this.statusClass] || "null"
+            return {}
+            // return {
+            //     [Types.ERROR]: "error",
+            //     [Types.WARNING]: "warning",
+            //     [Types.INFO]: "info",
+            //     [Types.SUCCESS]: "success",
+            // }[this.statusClass] || "null"
         },
         getHeading() {
             return {
-                [Types.ERROR]: "Error:",
-                [Types.WARNING]: "Warning:",
-                [Types.INFO]: "Info:",
-                [Types.SUCCESS]: "Success:",
+                [Types.ERROR]: "Error: ",
+                [Types.WARNING]: "Warning: ",
+                [Types.INFO]: "Info: ",
+                [Types.SUCCESS]: "Success: ",
             }[this.statusClass] || ""
         }
     },
     mounted() {
-        this.statusClass = this.$props.type || Types.NULL
+        this.statusClass = this.$props.type || Types.INFO
         this.visible = HideState.VISIBLE
     }
 });
 </script>
 
 <style scoped>
-.common {
+/* .common {
     color: white;
     border: solid 0px;
     border-left-width: 4px;
     text-align: left;
     font-size: 0.9rem;
-}
+} */
 
 .error {
     /* color: #ffffff; */
@@ -75,7 +84,7 @@ export default Vue.extend({
     background-color: rgb(236, 112, 112);
 }
 
-.warning {
+/* .warning {
     color: #333;
     border-color: #8a6d3b;
     background-color: #f0cb80;
@@ -99,5 +108,5 @@ export default Vue.extend({
 
 .heading {
     font-weight: 600;
-}
+} */
 </style>

@@ -10,6 +10,8 @@ Ultimately you'll need these in your path: `python3`, `pip3`, `virtualenv`, `npm
 
 Running `./manage` will set up dependencies and show you available commands.
 
+After you've set up your dev environment, run `git clone https://github.com/voteflux/THE-APP && cd THE-APP`. You'll then be able to run `./manage`, etc.
+
 ### Windows
 
 (WIP)
@@ -22,10 +24,10 @@ Running `./manage` will set up dependencies and show you available commands.
 
 ### Ubuntu
 
-* Install required packages: `sudo apt update && sudo apt install -y python3 python3-pip python3-virtualenv tmux`
+* Install required packages: `sudo apt update && sudo apt install -y curl python3 python3-pip python3-virtualenv tmux git build-essential`
   * note: there might be trouble on ubuntu 16.04 and below wrt to python3, though I'm not certain of that. Please create an isssue if you have trouble with python3 deps
 * If you don't have nodejs v8+ installed already: [install NVM](#install-nvm)
-* Should be all ready to go
+* Should be all ready to go after that
 
 ### MacOS
 
@@ -40,7 +42,7 @@ Running `./manage` will set up dependencies and show you available commands.
 * Ensure your .bashrc or .zshrc is configured correctly with `nvm` as per the last few lines of output when you run the above script.
 * In a new terminal run:
   * `nvm install 8`
-  * `nvm label default 8`
+  * `nvm alias default 8`
   * `nvm use default`
 * Done
 
@@ -120,3 +122,58 @@ If you haven't used `tmux` before: it's pretty nice (an advanced version of `scr
 Production is updated when a new version tag is added using `lerna publish` - leave this to @XertroV for the moment.
 
 Note: if you've been doing anything with tags outside `lerna` you might need to `git push origin [tag-name]` or `git push --follow-tags` so CI detects the latest version. (Also, maybe `git config --global push.followTags true` to set the global git config to do this)
+
+## App overview - tech and things / Contributing notes
+
+Please don't commit built files (no need for this repo), and make sure to use `.gitignore` if you add anything that needs ignoring.
+
+### UI
+
+The UI is a Vue.js app.
+
+**Framework**: The UI is pretty basic at the moment, but the goal is to standardize it using [Vuetify](https://vuetifyjs.com/en/) (UI framework based on material design). One of the main goals of this is to have both a good mobile UI and a good web UI from the same codebase. It will also be highly compatible with the upcoming admin UI (those features are currently in the main UI, but admin stuff will rarely be done from a phone so it makes sense to break those components out).
+
+**API / web requests**: we use a custom `WebRequest` object which all API methods return. It's heavily inspired by `Elm`'s `WebRequest` mixed in with `Rust`'s way of doing `Maybe` and `Either` (`Option` and `Result`). It has four states: NotRequested, Loading, Success, Failed. The latter two states have data you can access using `.unwrap()` and `.unwrapError()`. Components with requests should store all requests in `this.req` (e.g. `this.$flux.api.v2.getRoles(...).then(r => this.req.roles = r)`). UI can then be based directly on the request state:
+
+```vuejs
+<template>
+  <div>
+    <div v-if="req.roles.isSuccess()"> Your roles are: {{ req.roles.unwrap() }} </div>
+    <div v-else-if="req.roles.isFailed()"> <Error>{{ req.roles.unwrapError() }}</Error> </div>
+    <div v-else> <Loading>Loading your roles...</Loading>
+  </div>
+</template>
+
+<script type="ts">
+import Vue from 'vue'
+import { Auth } from 'flux-lib/types/db'
+import { WebRequest } from 'flux-lib/WebRequest'
+export default Vue.extend({
+  props: { auth: { type: Object as () => Auth } },
+  data: () => ({
+    // note: it's planned to code up a mixin for requests to make them nicer / have better type checking
+    req: {
+      roles: WebRequest.NotRequested()
+    },
+    async created() {
+      this.req.roles = WebRequest.Loading()
+      this.req.roles = await this.$flux.api.v2.getRoles(this.auth)
+    }
+  })
+})
+</script>
+```
+
+**Typescript & Typings**: we use Typescript wherever possible and ideally you should add at least half decent typings to functions. Often typescript can infer the type, in which case 👍, but especially for stuff like API methods having types is really useful. Additionally we use `io-ts` for dynamic type checking at runtime boundaries (see API and Lib sections for more). You might be asked to add types if you make a pull request, so please mention if this isn't a strong point and you need some assistance.
+
+### API
+
+(TODO)
+
+Key tech: lambda, serverless, mongo, io-ts, tsmonad, flux-lib
+
+### Lib / Flux-lib
+
+(TODO)
+
+mostly holds types and functions shared across API and UI

@@ -1,6 +1,6 @@
 <template>
-    <div class="tl">
-        <h3 class="" v-bind:class="genClasses()">{{ title }} <button class="pa1 btn-transparent" @click="toggleCollapsed()"><fa-icon :icon="genIcon()" /></button></h3>
+    <div class="tl mt2">
+        <h3 class="" v-bind:class="genClasses()">{{ title }} <v-btn fab flat small v-if="!noCollapse" @click="toggleCollapsed()"><v-icon v-text="genIcon()" /></v-btn></h3>
         <div v-if="!collapsed" class="ph2 us-body">
             <slot></slot>
         </div>
@@ -11,7 +11,7 @@
 import Vue from "vue";
 
 export default Vue.extend({
-    props: ["title", "dangerZone"],
+    props: ["title", "dangerZone", 'noCollapse'],
     data: () => ({
         collapsed: false
     }),
@@ -27,7 +27,7 @@ export default Vue.extend({
         },
 
         genIcon() {
-            return this.collapsed ? "plus-square" : "minus-square"
+            return this.collapsed ? "add_box" : "indeterminate_check_box"
         },
 
         toggleCollapsed() {
@@ -38,15 +38,4 @@ export default Vue.extend({
 </script>
 
 <style lang="scss" scoped>
-@import "tachyons";
-
-.us-danger-zone {
-    background: repeating-linear-gradient(
-    135deg,
-    #d6030370,
-    #d6030370 5px,
-    #e07b7b70 5px,
-    #e07b7b70 10px
-    );
-}
 </style>

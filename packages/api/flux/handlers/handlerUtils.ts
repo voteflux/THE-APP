@@ -41,12 +41,13 @@ const wrapHandler = (f, fName, obj) => async (event, context) => {
     let resp,
         didError = false,
         err;
-    let db = { close: () => {} };
+    let db;
     try {
         db = await dbInit(); // this populates the global `db` object
         // f is presumed to be async
         resp = await beforeEnter(f)(db, event, context);
     } catch (_err) {
+        console.error("Caught error:", _err)
         err = _err;
         didError = true;
         if (err.message.indexOf("Cannot destructure property") >= 0) {
@@ -60,7 +61,7 @@ const wrapHandler = (f, fName, obj) => async (event, context) => {
         }
         console.error(`Function ${fName} errored: ${err}`);
     } finally {
-        await db.close();
+        await (async () => { if (db) await db.close() })()
     }
 
     console.log(`Got Response from: ${fName} \n- err: ${err}, \n- resp: ${j(resp || {}).slice(0, 256)}`);

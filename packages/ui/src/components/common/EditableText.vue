@@ -1,7 +1,33 @@
 <template>
-    <Editable :name="name" :value="value" :onSave="_onSave" :onStart="_onStart" :onReset="_onReset" ref="mainEdit">
-        <input class="e-edit input h-100 pb1 mb1" ref="inputfield" :type="type" :placeholder="name" v-model="newValue" v-on:keyup.enter="_onEnter()" :pattern="pattern">
-    </Editable>
+<div class="flex flex-row justify-center items-center align-center pl4 pr4">
+    <v-text-field
+        ref="field"
+        class="h-100 v-mid"
+        :type="type"
+        :placeholder="name"
+        :label="name"
+        v-model="newValue"
+        v-on:keyup.enter="_onEnter()"
+        :loading="isLoading()"
+        :pattern="pattern"
+        :disabled="isDisabled()"
+        :error-messages="genSavedStatus()"
+    >
+        <div slot="append">
+            <v-fade-transition>
+                <div v-if="edited()">
+                    <v-icon @click="_onSave()" v-text="'save'" class="mr2" />
+                    <v-icon @click="_onReset()" v-text="'undo'" />
+                </div>
+            </v-fade-transition>
+        </div>
+    </v-text-field>
+    <div v-if="lockable" :class="getClasses() + ' ml4'">
+        <v-btn flat small fab @click="toggleLock()" @mouseover="lockMO(true)" @mouseleave="lockMO(false)">
+            <v-icon v-text="getLockIcon()" />
+        </v-btn>
+    </div>
+</div>
 </template>
 
 <script lang="ts">
@@ -18,17 +44,27 @@ export default Vue.extend({
         placeholder: String,
         onSave: Function,
         pattern: String,
+        lockable: Boolean,
     },
 
     data: () => ({
-        newValue: ""
+        newValue: "",
+        lockMouseover: false,
+        unlocked: false,
+        loading: false,
     }),
 
     methods: {
-        _onStart() { this.$nextTick(() => (<HTMLElement>this.$refs.inputfield).focus()) },
+        edited() {
+            return this.newValue !== this.$props.value
+        },
+
+        _onStart() { },
 
         _onSave() {
-            return this.$props.onSave(this.newValue)
+            this.unlocked = false
+            this.loading = true
+            this.$props.onSave(this.newValue).then(() => this.loading = false)
         },
 
         _onReset() {
@@ -36,11 +72,44 @@ export default Vue.extend({
         },
 
         _onEnter() {
-            if (this.newValue !== this.$props.value) {
-                (<any>this.$refs.mainEdit)._doSave()
-            } else {
-                (<any>this.$refs.mainEdit).resetNoSave()
+            // if (this.newValue !== this.$props.value) {
+            //     (<any>this.$refs.mainEdit)._doSave()
+            // } else {
+            //     (<any>this.$refs.mainEdit).resetNoSave()
+            // }
+            this._onSave()
+        },
+
+        lockMO(setTo) {
+            this.lockMouseover = setTo
+        },
+        toggleLock() {
+            const newStatus = !this.unlocked
+            this.unlocked = newStatus
+            if (newStatus) {
+                // @ts-ignore
+                setTimeout(() => this.$refs.field.$el.getElementsByTagName("input")[0].focus())
             }
+        },
+        lockOpen() { return this.unlocked || this.lockMouseover },
+        getLockIcon() {
+            return this.lockOpen() && !this.lockMouseover ? "lock_open" : "lock"
+        },
+        getClasses() {
+            return this.lockOpen() ? "dark-grey-4" : ""
+        },
+        getHoverStyles() {
+            return "dark-grey-2"
+        },
+        isLoading() {
+            return this.loading
+        },
+        isDisabled() {
+            return !this.unlocked && this.lockable
+        },
+        genSavedStatus() {
+            if (this.newValue === this.$props.value) return []
+            return [ 'Not saved yet.' ]
         }
     },
 
@@ -51,21 +120,4 @@ export default Vue.extend({
 </script>
 
 <style scoped lang="scss">
-@import "tachyons";
-
-.editable-root {
-    min-height: 2rem;
-}
-
-.var-name {
-    @extend .pa0-ns;
-    @extend .pa1;
-}
-
-.col {
-}
-
-.icons {
-    min-height: 2.1rem;
-}
 </style>

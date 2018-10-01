@@ -1,6 +1,5 @@
 <template>
     <div>
-        <flux-logo title="Role Audit"/>
         <p>
             Current date: {{ (new Date()).toString() }}
         </p>
@@ -8,7 +7,7 @@
         <Error v-if="req.roleAudit.isFailed()">{{ req.roleAudit.unwrapError() }}</Error>
         <Loading v-else-if="!req.roleAudit.isSuccess()">Loading all permissions...</Loading>
         <div v-else>
-            <button @click="save">Save Spreadsheet</button>
+            <v-btn color="info" @click="save">Save Spreadsheet</v-btn>
             <UiSection v-for="(r, i) in req.roleAudit.unwrap()" :key="i" :title="genRoleHeading(r)">
                 <TableNCols :data="r.users" :headings="headings" :prettyHeadings="prettyHeadings()" class="table"/>
             </UiSection>
@@ -29,7 +28,6 @@ import { Auth, UserV1Object, RoleResp } from '@/lib/api';
 
 import WebRequest from "flux-lib/WebRequest";
 
-import XLSX from 'xlsx';
 import * as R from 'ramda';
 
 
@@ -61,8 +59,9 @@ export default Vue.extend({
                 email: "Email"
             }
         },
-        save() {
+        async save() {
             const roles = this.req.roleAudit.unwrap() as RoleResp[]
+            const {default: XLSX} = await import('xlsx');
             const wb = XLSX.utils.book_new()
             const prettyHeadings = this.prettyHeadings()
             const ts = (new Date()).getTime() / 1000 | 0

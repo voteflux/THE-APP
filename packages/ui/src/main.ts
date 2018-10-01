@@ -1,12 +1,28 @@
 import Vue from "vue";
-import App from "./App.vue";
 
-import { library } from '@fortawesome/fontawesome-svg-core'
-import { faCoffee, faArrowLeft, faArrowCircleLeft, faPlusSquare, faMinusSquare, faTimes, faSpinner } from '@fortawesome/free-solid-svg-icons'
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import Vuex from 'vuex'
+Vue.use(Vuex)
 
-library.add(faCoffee, faArrowCircleLeft, faPlusSquare, faMinusSquare, faTimes, faSpinner)
-Vue.component('fa-icon', FontAwesomeIcon)
+import VueRouter from "vue-router";
+Vue.use(VueRouter);
+
+import Vuetify from 'vuetify'
+import 'vuetify/dist/vuetify.min.css'
+import colors from 'vuetify/es5/util/colors'
+
+Vue.use(Vuetify, {
+    iconfont: 'md',
+    // https://vuetifyjs.com/en/theme-generator
+    theme: {
+        primary: colors.blue.darken1,
+        secondary: colors.blue.lighten3,
+        accent: colors.amber.darken4,
+        error: colors.red.base,
+        warning: colors.yellow.darken3,
+        info: colors.blue.base,
+        success: colors.green.base
+      }
+})
 
 // import { TableComponent, TableColumn } from 'vue-table-component';
 // Vue.component('sortable-table', TableComponent)
@@ -33,21 +49,38 @@ Vue.use(ErrHandlers);
 import { FluxUtils } from "./lib/fluxUtils";
 Vue.use(FluxUtils);
 
-import VueRouter from "vue-router";
-Vue.use(VueRouter);
-
 import ToggleButton from 'vue-js-toggle-button'
 Vue.use(ToggleButton)
+
+import vueSignature from "vue-signature"
+Vue.use(vueSignature)
+
+
+import App from "./App.vue";
+
 
 import Dashboard from "@c/Dashboard.vue";
 import UserValidation from "@c/UserValidation.vue";
 import UserDetailsMain from "@c/UserDetails";
 import UserRevocation from "@c/UserRevocation.vue";
 import * as Finance from "@c/Finance";
+import * as Volunteers from "@c/Volunteers"
+import * as Candidates from "@c/Candidates"
 import AuditRoles from "@c/Admin/AuditRoles.vue";
 import FinanceEnterDonation from "@c/Finance/FinanceEnterDonation.vue";
 
 import R from "./routes";
+
+import {UiSection, Loading, Error, Warning, FluxInput, TransitionExpand, TransitionSlide} from "@c/common";
+Vue.component('ui-section', UiSection)
+Vue.component('loading', Loading)
+Vue.component('error', Error)
+Vue.component('warning', Warning)
+Vue.component('flux-input', FluxInput)
+Vue.component('transition-slide', TransitionSlide)
+Vue.component('transition-expand', TransitionExpand)
+import NavDrawer from '@c/NavDrawer.vue'
+Vue.component('nav-drawer', NavDrawer)
 
 const routes = [
     { path: R.Dashboard, component: Dashboard },
@@ -58,12 +91,22 @@ const routes = [
     { path: R.FinanceMenu, component: Finance.Menu },
     { path: R.FinanceDonationEntry, component: Finance.EnterDonation },
     { path: R.FinanceDonationLog, component: Finance.DonationLog },
+    { path: R.VolunteerNdaStatusAndSign, component: Volunteers.NdaStatusAndSign },
+    // { path: R.VolunteerSignNDA, component: Volunteers.SignNDA },
+    { path: R.CandidateDashboard, component: Candidates.Dashboard },
     { path: "*", redirect: "/" }
 ];
 
 const router = new VueRouter({ routes });
 
+
+import { store } from './store'
+import 'roboto-fontface/css/roboto/roboto-fontface.css'
+import 'material-design-icons-iconfont/dist/material-design-icons.css'
+
+
 new Vue({
     router,
+    store,
     render: h => h(App)
 }).$mount("#app");

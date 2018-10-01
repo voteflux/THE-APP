@@ -12,6 +12,10 @@ interface NetCases<D, E, R> {
 
 type PartialCases<D,E,R> = Partial<NetCases<D,E,R>>
 
+interface Default<R> {
+    default: (...args: any[]) => R;
+}
+
 // define our types as <Error,Data> to match Either type order
 export class WebRequest<E,D> {
     /**
@@ -28,29 +32,39 @@ export class WebRequest<E,D> {
     }
 
     caseOf <R>(cases: NetCases<D, E, R>): R {
-        switch (this.tag) {
-          case RT.NotRequested:
-            return cases.notRequested();
-          case RT.Loading:
-            return cases.loading();
-          case RT.Failed:
-            if (this.error === undefined)
-                throw TypeError('WebRequest: this.error was undefined')
-            return cases.failed(this.error, this.errObj);
-          case RT.Success:
-            if (this.data === undefined)
-                throw TypeError('WebRequest: this.data was undefined')
-            return cases.success(this.data);
-        }
+        const _d = null as any  // never gets called
+        return this.caseOfDefault({ ...cases, default: _d })
     }
 
-    do (cases: PartialCases<D,E,void>): WebRequest<E,D> {
+    caseOfDefault <R>(cases: (PartialCases<D, E, R> & Default<R>)): R {
+        const _cases = {
+            [RT.NotRequested]: cases.notRequested || cases.default,
+            [RT.Loading]: cases.loading || cases.default,
+            [RT.Failed]: () => {
+                if (this.error === undefined)
+                    throw TypeError('WebRequest: this.error was undefined')
+                if (cases.failed)
+                    return cases.failed(this.error, this.errObj);
+                return cases.default()
+            },
+            [RT.Success]: () => {
+                if (this.data === undefined)
+                    throw TypeError('WebRequest: this.data was undefined')
+                if (cases.success)
+                    return cases.success(this.data)
+                return cases.default()
+            },
+        }
+        return _cases[this.tag]();
+    }
+
+    do (cases: PartialCases<D,E,void>): void {
         const def = () => {}
         this.caseOf({
             loading: def, notRequested: def, success: def, failed: def,
             ...cases
         })
-        return this;
+        // return this;
     }
 
     isNotRequested() { return this.tag == RT.NotRequested }

@@ -2,24 +2,26 @@
 const handlerUtils = require('./handlerUtils')
 
 import { DB, Qs, DBMethods } from '../db';
-import { DBV1, ThenArg } from 'flux-lib/types';
+import { DBV1 } from 'flux-lib/types/db';
 import { SortMethod, DonationsResp } from 'flux-lib/types/db'
 import { GetArbitraryPartial } from 'flux-lib/types/db';
 import { ThrowReporter } from 'io-ts/lib/ThrowReporter'
-import { DonationRT, Donation } from 'flux-lib/types/db/index';
-import { EitherResp, ER } from 'flux-lib/types/index';
+import { DonationRT, Donation } from 'flux-lib/types/db';
+import { StdSimpleEitherResp } from 'flux-lib/types';
 import { filterProps } from 'flux-lib/utils'
 import { randomBytes } from 'crypto';
-import { UserForFinance } from 'flux-lib/types/db/index';
+import { UserForFinance } from 'flux-lib/types/db';
 
-const R = require('ramda')
+import auth from './auth'
+
+import * as R from 'ramda'
 
 const utils = require('../utils')
 
 const { Roles } = require('../roles')
 
-module.exports.getDonations = (db, ...args) => {
-    return require('./auth')(db).role(Roles.FINANCE, async (event, context, {user}): Promise<DonationsResp> => {
+module.exports.getDonations = (db, event, context) => {
+    return auth(db).role(Roles.FINANCE, async (event, context, {user}): Promise<DonationsResp> => {
         const data = event.body as GetArbitraryPartial<Donation>;
         const pageN = data.pageN || 0;
         const limit = data.limit || 10;
@@ -32,23 +34,23 @@ module.exports.getDonations = (db, ...args) => {
             ...utils.genPagination(totalDonations, limit, pageN)
         }
         return toReturn
-    })(...args)
+    })(event, context)
 }
 
 
-module.exports.addNewDonation = (db, ...args) => {
-    return require('./auth')(db).role(Roles.FINANCE, async (event, context, {user}): Promise<ER<boolean>> => {
+module.exports.addNewDonation = (db, event, context) => {
+    return auth(db).role(Roles.FINANCE, async (event, context, {user}): Promise<StdSimpleEitherResp<boolean>> => {
         const {doc} = event.body
         doc.id = randomBytes(6).toString('hex')
         ThrowReporter.report(DonationRT.decode(doc))
         await db.addToQueue(Qs.Q_RECEIPTS, doc)
         return { right: true }
-    })(...args)
+    })(event, context)
 }
 
 
-module.exports.donationAutoComplete = (db: DBMethods, ...args) => {
-    return require('./auth')(db).role(Roles.FINANCE, async (event, context, {user}): Promise<ER<UserForFinance>> => {
+module.exports.donationAutoComplete = (db: DBMethods, event, context) => {
+    return auth(db).role(Roles.FINANCE, async (event, context, {user}): Promise<StdSimpleEitherResp<UserForFinance>> => {
         const {email} = event.body
 
         const fullDonorUser = await db.getUserFromEmail(email)
@@ -64,7 +66,7 @@ module.exports.donationAutoComplete = (db: DBMethods, ...args) => {
         )
 
         return { right: donor }
-    })(...args)
+    })(event, context)
 }
 
 

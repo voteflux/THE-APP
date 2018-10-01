@@ -4,7 +4,10 @@
 import sys, os, json, logging, subprocess
 logging.basicConfig(level=logging.INFO)
 
+from time import sleep
 from contextlib import suppress
+from collections import defaultdict
+
 try:
     from git import Repo
 except ImportError as e:
@@ -17,7 +20,7 @@ from py_app_manager.cmd_runner import CmdRunner
 _deps_updated = False
 def ensure_deps(force=False):
     global _deps_updated, repo
-    if (force or not deps_up_to_date()) and not _deps_updated:
+    if force or (not deps_up_to_date() and not _deps_updated):
         def install_deps():
             must_run("python3 -m pip install -r requirements.txt")
             must_run("npm i")
@@ -25,14 +28,14 @@ def ensure_deps(force=False):
             set_deps_up_to_date()
         if Repo is not None:
             repo = Repo('./')
-            if repo.is_dirty():
+            if repo.is_dirty() and not force:
                 logging.warning("⚠️ Repository is dirty; skipping reinstall of requirements!")
             else:
                 logging.warning("⚠️ Detected repository but not dirty; installing requirements!")
                 install_deps()
         else:
             install_deps()
-        _deps_updated = True
+        _deps_updated = True and not force
 
 
 def export(env_name, env_value):
@@ -75,6 +78,8 @@ except Exception as e:
 import click
 stage_option = click.option('--stage', type=click.Choice(['prod', 'staging', 'dev']), default='dev')
 type_pkg_choice = click.Choice(['api', 'ui', 'lib', 'all'])
+
+render_target = lambda target: defaultdict(lambda: target, {'all': '', 'lib': 'flux-lib'})[target]
 
 @click.group()
 @click.option("--debug/--no-debug", default=False)
@@ -124,7 +129,8 @@ def mgr_set_up_to_date():
 def install_npm_deps(target, deps, dev=False):
     logging.warning("⚠️ dependencies will be installed one at a time. (It's a lerna thing)")
     runner = CmdRunner(must_run)
-    lerna_pkg = '' if target == 'all' else '--scope={}'.format(target)
+    scope = render_target(target)
+    lerna_pkg = '' if scope == '' else '--scope={}'.format(scope)
     dev_flag = "--dev" if dev else ""
     for d in deps:
         runner.add('Installing node dependency `{d}` for `{pkg}`'.format(d=d, pkg=target), 'npx lerna add {d} {pkg} {dev}'.format(d=d, pkg=lerna_pkg, dev=dev_flag))
@@ -172,10 +178,12 @@ def deploy(stage, skip_tests, target, args):
 
 @cli.command()
 @click.argument('target', nargs=1, type=click.Choice(['ui', 'api', 'all']))
+@click.argument('build_args', nargs=-1, type=click.STRING)
 @stage_option
-def build(target, stage):
+def build(target, build_args, stage):
     export("STAGE", stage)
     logging.info("Building {} for {}".format(target, stage))
+    remArgs = " ".join(build_args)
 
     try:
         if stage == "prod":
@@ -190,11 +198,11 @@ def build(target, stage):
 
         def build_ui():
             logging.info("### BUILDING UI ###")
-            must_run("cd packages/ui && npm run build")
+            must_run("cd packages/ui && npm run build -- {remArgs}".format(remArgs=remArgs))
 
         def build_api():
             logging.info("### BUILDING API ###")
-            must_run("cd packages/api && npm run build --stage {stage}".format(stage=stage))
+            must_run("cd packages/api && npm run build --stage {stage} -- {remArgs}".format(stage=stage, remArgs=remArgs))
 
         def build_all():
             build_ui()
@@ -224,36 +232,50 @@ def dev(dev_target, stage):
     import libtmux
     api_port = 52700
     ui_port = 32710
+    TMP_SESSION = 'tmp-session'
     server = libtmux.Server(socket_name='flux-app-tmux-session')
+    # server.cmd('set -g destroy-unattached off')
+    server.cmd('set-option -g default-shell /bin/bash')
+    session = server.new_session(session_name="main", start_directory='./', window_command="sleep 1")
+    session.set_option('mouse', 'on')
+    # session.set_option('destroy-unattached', 'off')
+    # session.set_option('remain-on-exit', 'on')
 
     def kill_sessions():
         with suppress(Exception):
-            for s in server.list_sessions():
-                s.kill_session()
+            try:
+                for s in server.list_sessions():
+                    print(s)
+                    print(s.show_option('default-shell'))
+                    s.kill_session()
+            except Exception as e:
+                print('got an exception killing tmux sessions:', e)
 
-    kill_sessions()
-    session = None
-    window = None
+    # kill_sessions()
+    # session = None
+    # window = None
+    window = session.list_windows()[0]
+    print(session.list_windows())
     log_files = []
 
     def run_dev_cmd(dir, cmd, name, active_pane=None, vertical=False):
         nonlocal session, window, log_files
         (to_run, l) = cmd_w_log(cmd, name, dir_offset='../../')
-        to_run = "printf '\033]2;%s\033\\' '{title}'; endsess(){{ /usr/bin/read -p 'Press enter to terminate all...' && tmux kill-session -t main }} ; trap 'endsess' SIGINT SIGTERM; ".format(title=name) + to_run
+        to_run = "printf '\\033]2;\%s\\033\\' '{title}'; _r(){{ if [ -e /usr/bin/read ]; then /usr/bin/read \"$@\"; else read \"$@\"; fi }}; endsess(){{ _r -p 'Press enter to terminate all...' && tmux kill-session -t main; }} ; trap 'endsess' SIGINT SIGTERM; ".format(title=name) + to_run
         to_run += "; echo -e '\\n\\n' && endsess "
+        logging.debug('Running `{}` as cmd `{}`'.format(name, to_run))
         log_files.append(l)
         if session is None:
             session = server.new_session(session_name="main", start_directory=dir, window_command=to_run)
-            session.set_option('mouse', 'on')
             # session.set_option('remain-on-exit', 'on')
             window = session.list_windows()[0]
             return window.attached_pane
         else:
-            opts = {} if active_pane is None else {'target': active_pane.id}
-            return window.split_window(start_directory=dir, shell=to_run, vertical=vertical, **opts)
+            return window.split_window(start_directory=dir, shell=to_run, vertical=vertical)
+
 
     # uncomment the below if we need to compile flux-lib
-    lib_pane = run_dev_cmd('./packages/lib', 'npm run watch', 'dev-lib')
+    # lib_pane = run_dev_cmd('./packages/lib', 'npm run watch', 'dev-lib')
     if dev_target in {'ui', 'all'}:
         ui_pane = run_dev_cmd('./packages/ui', "STAGE={} npm run serve".format(stage), 'dev-ui')
 
@@ -269,7 +291,7 @@ def dev(dev_target, stage):
 
     session.attach_session()
     kill_sessions()
-    print("Log files: ", ', '.join(log_files))
+    logging.debug("Log files: {}".format(', '.join(log_files)))
 
 
 # monkey patch so usage output looks nicer

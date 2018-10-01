@@ -1,12 +1,13 @@
-import { ER } from 'flux-lib/types/index';
+import { StdSimpleEitherResp } from 'flux-lib/types/index';
 import Vue from "vue";
 import {SError} from './errors'
 import WebRequest from "flux-lib/WebRequest";
 import { Auth } from './api';
-import { UserV1Object, SortMethod, Donation, DonationsResp, Paginated, RoleResp, PR } from 'flux-lib/types/db'
-import { Maybe } from "tsmonad/lib/src";
+import { UserV1Object, SortMethod, Donation, DonationsResp, Paginated, RoleResp, PR, R, RolesResp, AuthJWT } from 'flux-lib/types/db'
+import { NdaStatus, NdaDraftCommit, GenerateDraftNdaReq } from 'flux-lib/types/db/vols';
 import { StdV1, GetArbitraryPartial, } from 'flux-lib/types/db/api'
-import { UserForFinance } from 'flux-lib/types/db/index';
+import { UserForFinance } from 'flux-lib/types/db';
+import { Option, some, none, isSome, isNone } from 'fp-ts/lib/Option'
 
 export interface HasAddr {
     addr_street_no: string;
@@ -33,18 +34,22 @@ export interface FluxApiMethods {
         getStreets: (country: string, postcode: string, suburb: string) => PR<{streets: string[]}>,
     },
     v2: {
-        getRoles: (opts : Auth) => PR<{roles: string[]}>,
+        getRoles: (opts : Auth) => PR<RolesResp>,
         getDonations: (opts : GetArbitraryPartial<Donation>) => PR<DonationsResp>,
-        addNewDonation: (opts: {doc: Donation} & Auth) => PR<ER<boolean>>,
-        donationAutoComplete: (opts: Auth & {email: string}) => PR<ER<UserForFinance>>,
+        addNewDonation: (opts: {doc: Donation} & Auth) => PR<StdSimpleEitherResp<boolean>>,
+        donationAutoComplete: (opts: Auth & {email: string}) => PR<StdSimpleEitherResp<UserForFinance>>,
         getRoleAudit: (opts: Auth) => PR<RoleResp[]>,
+        getNdaStatus: (opts: Auth) => PR<NdaStatus>,
+        submitNdaPdfAndSignature: (args: Auth & {pdf: string, sig: string}) => PR<NdaStatus>,
+        ndaGenerateDraftPdf: (auth: AuthJWT, args: GenerateDraftNdaReq) => PR<NdaDraftCommit>,
     },
     utils: {
+        // onGotUserObj: (r: R<UserV1Object>) => void,
         [method: string]: (...args: any[]) => any
     },
     auth: {
         saveSecret: (s: string) => void,
-        loadAuth: () => Maybe<Auth>,
+        loadAuth: () => Option<Auth>,
         remove: () => void,
         sendSToAllFluxDomains: (s: string) => void,
         saveApiToken: (token: string) => void

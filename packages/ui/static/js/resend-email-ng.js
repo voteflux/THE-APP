@@ -13,6 +13,7 @@ app.controller('FluxController', function($scope, $log, $rootScope, $http, $wind
     var flux = this;
     flux.errorMsg = '';
     flux.msg = '';
+    flux.msgs = [];
     flux.debug = false;
     flux.valid_regions = [];
     flux.set_password = false;
@@ -41,9 +42,7 @@ app.controller('FluxController', function($scope, $log, $rootScope, $http, $wind
     // functions utils
     //
 
-
-    flux.setMsg = function(msg) {
-        flux.msg = msg;
+    flux.toast = msg => {
         if (typeof Toastify !== "undefined" && msg.length > 0) {
             Toastify({
                 text: msg,
@@ -54,7 +53,18 @@ app.controller('FluxController', function($scope, $log, $rootScope, $http, $wind
             }).showToast();
         }
     }
-    mkFluxMsg = flux.setMsg;
+
+    flux.setMsg = function(msg) {
+        flux.msg = msg;
+        flux.toast(msg)
+    }
+    flux.addMsg = msg => {
+        flux.msgs.unshift(msg)
+        flux.toast(msg)
+    }
+    mkFluxMsg = flux.addMsg;
+
+    flux.clearMsgs = () => flux.msgs = []
 
     flux.setErr = function(err) {
         flux.errorMsg = err;
@@ -78,7 +88,7 @@ app.controller('FluxController', function($scope, $log, $rootScope, $http, $wind
         flux.showLoading = false;
     };
     flux._showError = function(error){
-        flux.setMsg('');
+        flux.clearMsgs();
         console.log('Got error ---V');
         console.log(error);
         var errorMsg;
@@ -103,7 +113,7 @@ app.controller('FluxController', function($scope, $log, $rootScope, $http, $wind
     // login
 
     flux.resendEmail = function(){
-        flux.setMsg('Sending email...')
+        flux.addMsg('Sending email...')
         flux.setErr('')
         flux.submitEmail(flux.email)
     }
@@ -114,7 +124,7 @@ app.controller('FluxController', function($scope, $log, $rootScope, $http, $wind
     }
 
     flux.finish = function(data){
-        flux.setMsg(data.data['status'])
+        flux.addMsg(data.data['status'])
     }
 
     flux.batchEmails = function(emails){
@@ -122,20 +132,22 @@ app.controller('FluxController', function($scope, $log, $rootScope, $http, $wind
     }
     emailsFunction = flux.batchEmails;
 
+    flux.loadingLogin = true;
+
     flux.checkIfLoggedIn = function(){
         // on page load let's check if the s param is defined and valid. If so redirect to member details page
-        if (flux.memberSecret && flux.memberSecret.length > 17) {
-            flux.setMsg("I'm checking if you're already logged in...")
+        if (flux.memberSecret && flux.memberSecret.length > 10) {
+            flux.addMsg("I'm checking if you're already logged in...")
             $http.post(flux_api('user_details'), {s: flux.memberSecret})
                 .then(function(data) {
                     // this means the details we have are valid
-                    flux.setMsg('Yup, you are! Redirecting in 3 second')
+                    saveMemberSecretOnFluxDomains(false, flux.memberSecret)
+                    flux.addMsg('Yup, you are! Redirecting in 3 second')
                     if (!getParam('nofwd')) {
                         setTimeout(function(){
                             var memberDeetsPage = "/v"
                             if (location.hostname == "voteflux.org" || location.hostname.indexOf("voteflux.netlify.com") !== -1) {
-                                // we might not have the `s` param on api.voteflux.org, so let's add it
-                                location.href = "https://api.voteflux.org" + memberDeetsPage + "#s=" + flux.memberSecret
+                                location.href = "https://app.flux.party" + memberDeetsPage
                             } else {
                                 window.location.href = memberDeetsPage
                             }
@@ -144,12 +156,14 @@ app.controller('FluxController', function($scope, $log, $rootScope, $http, $wind
                 }).catch(function(err) {
                     // they weren't valid
                     if (!(__DEV_FLAG__)) {
-                        sendSToAllFluxDomains("");
+                        saveMemberSecretOnFluxDomains(false, "");
                         localStorage.removeItem('s')
                     }
-                    flux.setMsg("Ahh looks like you're not actually logged in. Sorry for the false alarm.");
-                    flux.setMsg('');
+                    flux.addMsg("Ahh looks like you're not actually logged in. Sorry for the false alarm.");
+                    flux.loadingLogin = false
                 })
+        } else {
+            flux.loadingLogin = false
         }
     }
     flux.checkIfLoggedIn();

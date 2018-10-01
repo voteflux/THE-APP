@@ -1,4 +1,4 @@
-import { DBV1 } from 'flux-lib/types';
+import { DBV1 } from 'flux-lib/types/db';
 // integrating with opencagedata.com
 import { either, left } from 'fp-ts/lib/Either';
 import { some, none } from 'fp-ts/lib/Option'
@@ -27,7 +27,7 @@ export const getCoordinatesOfAddress = async (db: DBMethods, address: string) =>
         throw "No OpenCageData API Key"
     }
 
-    const knownCoords = await db.checkCache<GeoDoc>(CACHE_ADDR_COORDS, address)
+    const knownCoords = await db.cache.check<GeoDoc>(CACHE_ADDR_COORDS, address)
     if (knownCoords.isRight()) {
         return some(knownCoords.value.geometry)
     }
@@ -44,7 +44,7 @@ export const getCoordinatesOfAddress = async (db: DBMethods, address: string) =>
         return none
     }
 
-    await db.insertInCache(CACHE_ADDR_COORDS, address, bestResult)
+    await db.cache.insert(CACHE_ADDR_COORDS, address, bestResult)
 
     return some(bestResult.geometry)
 }

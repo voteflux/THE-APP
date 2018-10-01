@@ -1,5 +1,8 @@
 import * as _R from 'ramda'
-import { Paginated } from 'flux-lib/types';
+import { Paginated } from 'flux-lib/types/db'
+import { randomBytes } from 'crypto'
+import { uint8aToBase64 } from 'flux-lib/utils'
+import { uint8aToBase32 } from 'flux-lib/utils/base32'
 
 export const R = _R
 
@@ -90,3 +93,12 @@ export const staffSafeProps = [
     'dobYear', 'volunteer', 'state_consent', 'onAECRoll', 'detailsValid', 'needsValidating', '_id'
 ]
 export const cleanUserDoc = user => getProps(staffSafeProps, user)
+
+
+export const genBytesAsB64 = (nBytes: number): string => {
+    const bs = new Uint8Array(randomBytes(nBytes))
+    return uint8aToBase64(bs)
+}
+
+export const genBytesAsB32 = (nBytes: number): string =>
+    uint8aToBase32(new Uint8Array(randomBytes(nBytes)))

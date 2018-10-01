@@ -47,6 +47,7 @@ custom:
   alerts: ${file(./sls-alerts.yaml):alerts}
   # this is separated out because the structure changed; better to put it here
   handlers: "flux/handlers"
+  scheduled: "flux/scheduled"
   webpack:
     webpackConfig: 'webpack.config.js'   # Name of webpack configuration file
     includeModules: false   # Node modules configuration for packaging
@@ -106,21 +107,56 @@ provider:
 functions:
   # stats
   genStatsGetinfo:
-    handler: ${self:custom.handlers}/stats.genStatsGetinfo
+    handler: ${self:custom.scheduled}/stats.genStatsGetinfo
     timeout: 60
     events:
       - schedule: rate(1 minute)
   genStatsPublic:
-    handler: ${self:custom.handlers}/stats.genStatsPublic
+    handler: ${self:custom.scheduled}/stats.genStatsPublic
     timeout: 60
     events:
       - schedule: rate(1 minute)
+  updateIndexesDBV1:
+    handler: ${self:custom.scheduled}/indexes.updateIndexesDBV1
+    timeout: 300
+    events:
+      - schedule: rate(1 day)
+  # login requests
+  requestLoginToken:
+    handler: ${self:custom.handlers}/login.requestLoginToken
+    events:
+      - http:
+          path: /v2/login/requestLoginToken
+          method: post
+          cors: true
   # user requests
   getRoles:
     handler: ${self:custom.handlers}/user.getRoles
     events:
       - http:
           path: /v2/user/getRoles
+          method: post
+          cors: true
+  # volunteer requests
+  ndaGetStatus:
+    handler: ${self:custom.handlers}/vols.getStatus
+    events:
+      - http:
+          path: /v2/volunteers/nda/getStatus
+          method: post
+          cors: true
+  ndaSubmitForReview:
+    handler: ${self:custom.handlers}/vols.submitForReview
+    events:
+      - http:
+          path: /v2/volunteers/nda/submitPdfAndSig
+          method: post
+          cors: true
+  ndaGenerateDraft:
+    handler: ${self:custom.handlers}/vols.generateDraft
+    events:
+      - http:
+          path: /v2/volunteers/nda/generateDraft
           method: post
           cors: true
   # admin/finance requests

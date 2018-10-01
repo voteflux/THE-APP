@@ -1,5 +1,5 @@
 <template>
-    <div class="flex flex-wrap flex-row items-center tl editable-root">
+    <div class="flex flex-wrap flex-row items-center tl editable-root editable-expand">
         <div :class="'col flex flex-wrap items-center ' + calcWidth()">
             <div class="col w-40-ns w-100 var-name">
                 <div class="pl2 dib f6 f5-ns b normal-ns pr2">
@@ -7,18 +7,20 @@
                 </div>
             </div>
             <div class="col w-60-ns w-100 pl0-ns pl2">
-                <div v-if="state == DISPLAY" class="pv2">
-                    {{ value }}
-                </div>
-                <div v-if="state == EDITING" class="">
-                    <slot/>
-                </div>
-                <div v-if="state == SAVING" class="pv2">
-                    Saving...
-                </div>
-                <div v-if="state == ERROR" class="pv2">
-                    Error: {{ err.msg }}
-                </div>
+                <!-- <transition-slide> -->
+                    <div v-if="state == DISPLAY" :key="DISPLAY" class="pv2">
+                        {{ value }}
+                    </div>
+                    <div v-else-if="state == EDITING" :key="EDITING" class="">
+                        <slot/>
+                    </div>
+                    <div v-else-if="state == SAVING" :key="SAVING" class="pv2">
+                        Saving...
+                    </div>
+                    <div v-else-if="state == ERROR" :key="ERROR" class="pv2">
+                        Error: {{ err.msg }}
+                    </div>
+                <!-- </transition-slide> -->
             </div>
         </div>
 
@@ -48,6 +50,8 @@
 <script lang="ts">
 import Vue from 'vue'
 import Component from 'vue-class-component';
+
+// NOTE: SOMEWHAT DEPRECATED - COULD BE USED TO GENERALISE OTHER EDITABLES STILL
 
 enum Cs {
     // state constants
@@ -127,27 +131,35 @@ export default Editable;
 </script>
 
 <style scoped lang="scss">
-@import "tachyons";
+// @import "tachyons-sass/tachyons.scss";
 
-button {
-    @extend .mv2;
-    @extend .mh1;
-    @extend .f4;
-}
+// button {
+//     @extend .mv2;
+//     @extend .mh1;
+//     @extend .f4;
+// }
 
-.editable-root {
-    min-height: 2rem;
-}
+// // .editable-root {
+// //     min-height: 5rem;
+// // }
 
-.var-name {
-    @extend .pa0-ns;
-    @extend .pa1;
-}
+// // .editable-expand {
+// //     transition: height 0.5s ease-in-out;
+// // }
 
-.col {
-}
+// .var-name {
+//     @extend .pa0-ns;
+//     @extend .pa1;
+// }
 
-.icons {
-    min-height: 2.1rem;
-}
+// .col {
+// }
+
+// .icons {
+//     min-height: 2.1rem;
+// }
+
+// .v-messages__wrapper {
+//     display: none;
+// }
 </style>
