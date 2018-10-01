@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve --port 52710",
-    "build": "vue-cli-service build && cp -a ./static/* ./dist/",
+    "build": "rm -rf ./dist && mkdir -p dist && cp -a ./static/* ./dist/ && vue-cli-service build",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {

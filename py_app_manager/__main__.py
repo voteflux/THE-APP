@@ -178,10 +178,12 @@ def deploy(stage, skip_tests, target, args):
 
 @cli.command()
 @click.argument('target', nargs=1, type=click.Choice(['ui', 'api', 'all']))
+@click.argument('build_args', nargs=-1, type=click.STRING)
 @stage_option
-def build(target, stage):
+def build(target, build_args, stage):
     export("STAGE", stage)
     logging.info("Building {} for {}".format(target, stage))
+    remArgs = " ".join(build_args)
 
     try:
         if stage == "prod":
@@ -196,11 +198,11 @@ def build(target, stage):
 
         def build_ui():
             logging.info("### BUILDING UI ###")
-            must_run("cd packages/ui && npm run build")
+            must_run("cd packages/ui && npm run build -- {remArgs}".format(remArgs=remArgs))
 
         def build_api():
             logging.info("### BUILDING API ###")
-            must_run("cd packages/api && npm run build --stage {stage}".format(stage=stage))
+            must_run("cd packages/api && npm run build --stage {stage} -- {remArgs}".format(stage=stage, remArgs=remArgs))
 
         def build_all():
             build_ui()

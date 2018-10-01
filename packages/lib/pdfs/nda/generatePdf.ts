@@ -2,18 +2,6 @@ import { UserV1Object } from './../../types/db';
 
 import {yourSignaturePlaceholder} from './imageUris'
 
-import * as R from 'ramda'
-
-// import helvetica from 'pdfjs/font/Helvetica'
-
-// const mkTxt = (s, opts = {}) => ({
-//     ...opts, text: s, type: 'text'
-// })
-
-// const center = s => mkTxt(s, {align: 'center'})
-// const left = s => mkTxt(s, {align: 'left'})
-// const line = () => mkTxt("")
-
 
 type PdfText = {
     text: string | PdfText | Array<string | PdfText>,
@@ -36,6 +24,7 @@ export const genPdf = async (
 ): Promise<{uri: string}> => {
     const pdfMake = await import('pdfmake/build/pdfmake')
     const pdfFonts = await import("pdfmake/build/vfs_fonts")
+    console.log(pdfFonts.pdfMake.vfs)
     pdfMake.vfs = pdfFonts.pdfMake.vfs
 
     const date = new Date()
