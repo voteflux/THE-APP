@@ -1,7 +1,3 @@
-var hn = window.location.hostname
-var __DEBUG_COMMON__ = hn == 'localhost' || hn == '127.0.0.1'
-var __DEV_COMMON__ = hn == "flux-api-dev.herokuapp.com" || hn == "dev.app.flux.party" || __DEBUG_COMMON__
-
 
 function isDefinitelyProduction() {
     var isProdDomain =
@@ -13,43 +9,43 @@ function isDefinitelyProduction() {
 }
 
 
+function extractUrlEncodedVar(toSearch, key) {
+    var result = undefined,
+        tmp = [];
+    toSearch
+        .substr(1)
+        .split("&")
+        .forEach(function (item) {
+            tmp = item.split("=");
+            if (tmp[0] === key) result = decodeURIComponent(tmp[1]);
+        });
+    return result;
+}
+
+
 // http://stackoverflow.com/questions/5448545/how-to-retrieve-get-parameters-from-javascript
-function getParam(val) {
-    var result = undefined,
-        tmp = [];
-    location.search
-        //.replace ( "?", "" )
-        // this is better, there might be a question mark inside
-        .substr(1)
-        .split("&")
-        .forEach(function (item) {
-            tmp = item.split("=");
-            if (tmp[0] === val) result = decodeURIComponent(tmp[1]);
-        });
-    return result;
+function getParam(key) {
+    return extractUrlEncodedVar(location.search, key)
+}
+function hashParam(key) {
+    return extractUrlEncodedVar(location.hash, key)
+}
+
+function isEnv(envStr) {
+    return getParam("env") === envStr
 }
 
 
-var __DEV_FLAG__ = !getParam('prod') && (getParam('debug') || __DEBUG_COMMON__ || __DEV_COMMON__)
+var _hn = window.location.hostname
+var __DEBUG_DOMAIN__ = _hn == 'localhost' || _hn == '127.0.0.1'
+var __DEV_DOMAIN__ = _hn == "flux-api-dev.herokuapp.com" || _hn == "dev.app.flux.party"
 
-var USE_PROD = getParam('prod') && true
+
+var __PROD_ENV__ = (isEnv("prod")) || isDefinitelyProduction()
+var __DEV_ENV__ = !isEnv("prod") && (isEnv("dev") || __DEV_DOMAIN__)
+var __DEBUG_ENV__ = !isEnv("prod") && (isEnv("debug") || __DEBUG_DOMAIN__)
 
 
-// modified above
-function hashParam(val) {
-    var result = undefined,
-        tmp = [];
-    location.hash
-        //.replace ( "#", "" )
-        // this is better, there might be a hash inside
-        .substr(1)
-        .split("&")
-        .forEach(function (item) {
-            tmp = item.split("=");
-            if (tmp[0] === val) result = decodeURIComponent(tmp[1]);
-        });
-    return result;
-}
 
 function getAuthToken() {
     var getParamS = getParam('s');
@@ -99,14 +95,14 @@ function sendSToAllFluxDomains(s) {
 }
 
 
-function saveMemberSecretOnFluxDomains(silent, useThisS = null) {
+function saveMemberSecretOnFluxDomains(silent, useThisS = undefined) {
     let doLog = silent === false;
-    if (__DEBUG_COMMON__ || __DEV_COMMON__) doLog = true;
+    if (__DEBUG_DOMAIN__ || __DEV_DOMAIN__) doLog = true;
     const log = (...args) => { if (doLog) { console.log(...args) }}
     log("saveMemberSecretOnFluxDomains called")
     var s = useThisS ? useThisS : getAuthToken();
     if (s !== undefined) {
-        if (isDefinitelyProduction() && localStorage.getItem('lastSavedS') !== s) {
+        if (__PROD_ENV__ && localStorage.getItem('lastSavedS') !== s) {
             sendSToAllFluxDomains(s)
             localStorage.setItem('lastSavedS', s);
         } else {
@@ -122,11 +118,14 @@ function flux_api(path, useDebug){
     if (path.indexOf('api/v') === -1) {
         path = 'api/v0/' + path;
     }
-    if (__DEV_FLAG__ || useDebug){
-        return "http://localhost:5000/" + path;
+    if (__PROD_ENV__ && !useDebug) {
+        return "https://api.voteflux.org/" + path;
     }
-    if(__DEV_COMMON__ && !USE_PROD) {
+    if(__DEV_ENV__ && !useDebug) {
         return "http://flux-api-dev.herokuapp.com/" + path;
+    }
+    if (__DEBUG_ENV__ || useDebug){
+        return "http://localhost:5000/" + path;
     }
     return "https://api.voteflux.org/" + path;
 };

@@ -14,7 +14,7 @@
 </head>
 <body>
     <div id="angularContainer" ng-controller="FluxController as flux">
-        <div class="container p3 center">
+        <div class="container p3 center rounded" style="background: #0008">
 
             <img src="/img/flux-logo.svg" alt="Flux Logo" class="logo" />
             <h2>Member Login</h2>
@@ -35,7 +35,9 @@
             </div>
 
             <div>
-                <div class="mb2 white" ng-repeat="(i, msg) in flux.msgs">{{ msg }}</div>
+                <div class="mb2 white" ng-repeat="(i, msg) in flux.msgs.slice(0,5) track by i">
+                    <span ng-style="{opacity: 1 - (i / 5)}">{{ msg }}</span>
+                </div>
             </div>
 
             <p class="m2">Not a member yet? <br/><a href="https://voteflux.org/signup/" class="btn btn-outline">Sign up now!</a></p>

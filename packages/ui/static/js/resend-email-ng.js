@@ -26,10 +26,6 @@ app.controller('FluxController', function($scope, $log, $rootScope, $http, $wind
 
     flux.memberSecret = getAuthToken();
 
-    if (document.location.hostname == 'localhost'){
-        flux.debug = true;
-    }
-
     //
     // Functions: api
     //
@@ -155,7 +151,7 @@ app.controller('FluxController', function($scope, $log, $rootScope, $http, $wind
                     }
                 }).catch(function(err) {
                     // they weren't valid
-                    if (!(__DEV_FLAG__)) {
+                    if (!(__DEV_ENV__)) {
                         saveMemberSecretOnFluxDomains(false, "");
                         localStorage.removeItem('s')
                     }
