@@ -79,7 +79,7 @@ Vue.use(Vuetify, {
 
 
 import VueGoodTablePlugin from 'vue-good-table'
-import 'vue-good-table/dist/vue-good-table.min.css'
+import 'vue-good-table/dist/vue-good-table.css'
 Vue.use(VueGoodTablePlugin)
 import { VueGoodTable } from 'vue-good-table'
 Vue.component('good-table', VueGoodTable)
