@@ -29,6 +29,7 @@
     "@types/ramda": "^0.25.37",
     "@vue/babel-preset-app": "^3.0.4",
     "@vue/cli": "^3.0.4",
+    "@vue/cli-service": "^3.0.4",
     "@vue/eslint-config-typescript": "^3.0.0-rc.3",
     "aws-sdk": "^2.232.1",
     "base-x": "^3.0.4",
