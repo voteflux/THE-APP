@@ -79,6 +79,7 @@ Vue.use(Vuetify, {
 
 
 import VueGoodTablePlugin from 'vue-good-table'
+import 'vue-good-table/dist/vue-good-table.min.css'
 Vue.use(VueGoodTablePlugin)
 import { VueGoodTable } from 'vue-good-table'
 Vue.component('good-table', VueGoodTable)
@@ -154,7 +155,6 @@ const router = new VueRouter({ routes });
 import { store } from './store'
 import 'roboto-fontface/css/roboto/roboto-fontface.css'
 import 'material-design-icons-iconfont/dist/material-design-icons.css'
-import 'vue-good-table/dist/vue-good-table.min.css'
 
 
 new Vue({
