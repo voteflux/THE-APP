@@ -190,6 +190,7 @@ def build(target, build_args, stage):
             logging.info("Building for prod!")
             if 'IS_NETLIFY' in os.environ:
                 # Don't checkout anymore, just exit; TODO: can we prevent netlify building?
+                logging.error("PRODUCTION DEPLOY BUT LATEST COMMIT IS NOT A RELEASE - BAILING OUT")
                 sys.exit(1)
                 logging.info("Checking out most recent version tag")
                 # reset_checkout_ref = os.environ.get('BRANCH', 'master')
