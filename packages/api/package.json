@@ -1,6 +1,6 @@
 {
   "name": "api",
-  "version": "0.1.7-alpha.5",
+  "version": "0.1.7-alpha.6",
   "description": "flux api v2",
   "main": "index.js",
   "private": true,
