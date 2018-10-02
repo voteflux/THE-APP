@@ -72,7 +72,7 @@ EOF
 fi
 
 
-if [ ! -d '.venv' ]; then
+if [ ! -d '.venv' ] && [ ! "$IS_NETLIFY" ]; then
     echo "Creating virtualenv"
     python3 -m virtualenv .venv --python=python3
     echo "Created virtualenv in .venv"
