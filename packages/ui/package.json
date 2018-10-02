@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve --port 52710",
-    "build": "rm -rf ./dist && mkdir -p dist && vue-cli-service build",
+    "build": "rm -rf ./dist && mkdir -p dist && ./node_modules/.bin/vue-cli-service build",
     "lint": "vue-cli-service lint",
     "build-commented-extra": "&& cp -a ./static/* ./dist/ "
   },
@@ -28,7 +28,8 @@
     "@types/pdfmake": "^0.1.1",
     "@types/ramda": "^0.25.37",
     "@vue/babel-preset-app": "^3.0.4",
-    "@vue/cli": "^3.0.0-beta.15",
+    "@vue/cli": "^3.0.4",
+    "@vue/cli-service": "^3.0.4",
     "@vue/eslint-config-typescript": "^3.0.0-rc.3",
     "aws-sdk": "^2.232.1",
     "base-x": "^3.0.4",
