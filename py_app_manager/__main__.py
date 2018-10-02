@@ -185,6 +185,8 @@ def build(target, build_args, stage):
     logging.info("Building {} for {}".format(target, stage))
     remArgs = " ".join(build_args)
 
+    must_run("cd packages/ui && ls node_modules/.bin")
+
     try:
         if stage == "prod":
             logging.info("Building for prod!")
