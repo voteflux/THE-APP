@@ -122,7 +122,7 @@ function flux_api(path, useDebug){
         return "https://api.voteflux.org/" + path;
     }
     if(__DEV_ENV__ && !useDebug) {
-        return "http://flux-api-dev.herokuapp.com/" + path;
+        return "https://flux-api-dev.herokuapp.com/" + path;
     }
     if (__DEBUG_ENV__ || useDebug){
         return "http://localhost:5000/" + path;

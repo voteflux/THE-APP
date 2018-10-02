@@ -1,7 +1,7 @@
 <template>
     <center class="loading">
          <v-progress-circular
-            :size="20"
+            :size="size"
             indeterminate
             class="v-mid dib mr3"
             color="primary"
@@ -12,9 +12,16 @@
     </center>
 </template>
 
-<script>
+<script lang="ts">
     export default {
         name: "Loading",
+        props: {
+            size: {
+                type: Number,
+                default: 20,
+                required: false,
+            },
+        },
     }
 </script>
 

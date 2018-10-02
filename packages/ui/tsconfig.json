@@ -19,8 +19,8 @@
       "node", "vuetify"
     ],
     "paths": {
-      "@/*": ["./src/*"],
-      "@c/*": ["./src/components/*"]
+      "@/*": ["src/*"],
+      "@c/*": ["src/components/*"]
     }
   },
   "include": [

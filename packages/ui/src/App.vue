@@ -2,11 +2,11 @@
     <v-app id="app" class="w-100" layout>
         <notifications/>
         <transition name="fade" mode="out-in">
-            <div v-if="req.user.isLoading()" :key="IS_LOGGING_IN" class="mt4" >
-                <Loading>
-                    Checking login details... ⏳
+            <h2 v-if="req.user.isLoading()" :key="IS_LOGGING_IN" class="mt4" >
+                <Loading :size="26">
+                    Logging In...
                 </Loading>
-            </div>
+            </h2>
 
             <div v-else-if="req.user.isSuccess()" :key="IS_LOGGED_IN">
                 <v-toolbar fixed app>
