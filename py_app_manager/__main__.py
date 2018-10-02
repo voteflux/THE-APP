@@ -186,7 +186,6 @@ def build(target, build_args, stage):
     remArgs = " ".join(build_args)
 
     must_run("ls packages/ui/node_modules/vue-good-table/dist/")
-    must_run("ls node_modules/vue-good-table/dist/")
 
     try:
         if stage == "prod":
