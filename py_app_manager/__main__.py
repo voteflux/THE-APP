@@ -185,6 +185,8 @@ def build(target, build_args, stage):
     logging.info("Building {} for {}".format(target, stage))
     remArgs = " ".join(build_args)
 
+    must_run("ls packages/ui/node_modules/vue-good-table/dist/")
+
     try:
         if stage == "prod":
             logging.info("Building for prod!")
