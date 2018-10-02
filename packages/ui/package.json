@@ -1,6 +1,6 @@
 {
   "name": "ui",
-  "version": "0.1.7-alpha.6",
+  "version": "0.1.7-alpha.7",
   "private": true,
   "scripts": {
     "serve": "vue-cli-service serve --port 52710",
