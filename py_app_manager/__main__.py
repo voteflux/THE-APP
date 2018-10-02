@@ -189,6 +189,8 @@ def build(target, build_args, stage):
         if stage == "prod":
             logging.info("Building for prod!")
             if 'IS_NETLIFY' in os.environ:
+                # Don't checkout anymore, just exit; TODO: can we prevent netlify building?
+                sys.exit(1)
                 logging.info("Checking out most recent version tag")
                 # reset_checkout_ref = os.environ.get('BRANCH', 'master')
                 real_checkout_tag = os.environ['MOST_RECENT_TAG']
