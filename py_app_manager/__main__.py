@@ -17,6 +17,9 @@ repo = None
 from py_app_manager.pre_deps import *
 from py_app_manager.cmd_runner import CmdRunner
 
+def is_netlify();
+    return 'IS_NETLIFY' in os.environ
+
 _deps_updated = False
 def ensure_deps(force=False):
     global _deps_updated, repo
@@ -28,7 +31,7 @@ def ensure_deps(force=False):
             set_deps_up_to_date()
         if Repo is not None:
             repo = Repo('./')
-            if repo.is_dirty() and not force:
+            if repo.is_dirty() and not force and not is_netlify():
                 logging.warning("⚠️ Repository is dirty; skipping reinstall of requirements!")
             else:
                 logging.warning("⚠️ Detected repository but not dirty; installing requirements!")
@@ -185,12 +188,10 @@ def build(target, build_args, stage):
     logging.info("Building {} for {}".format(target, stage))
     remArgs = " ".join(build_args)
 
-    must_run("cd packages/ui && ls node_modules/.bin")
-
     try:
         if stage == "prod":
             logging.info("Building for prod!")
-            if 'IS_NETLIFY' in os.environ:
+            if is_netlify():
                 ## Don't checkout anymore, just exit; TODO: can we prevent netlify building?
                 #logging.error("PRODUCTION DEPLOY BUT LATEST COMMIT IS NOT A RELEASE - BAILING OUT")
                 #sys.exit(1)
