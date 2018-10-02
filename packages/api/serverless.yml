@@ -11,7 +11,10 @@
 #
 # Happy Coding!
 
-service: flux-api-2
+service:
+  name: flux-api-2
+  awsTracingConfig:
+    mode: Active
 
 plugins:
   - serverless-webpack
