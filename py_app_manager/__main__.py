@@ -17,7 +17,7 @@ repo = None
 from py_app_manager.pre_deps import *
 from py_app_manager.cmd_runner import CmdRunner
 
-def is_netlify();
+def is_netlify():
     return 'IS_NETLIFY' in os.environ
 
 _deps_updated = False
