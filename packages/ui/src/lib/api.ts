@@ -58,7 +58,7 @@ const apiRoots = () => {
         case "members.flux.party":
         case "api.voteflux.org":
         case "flux-app.netlify.com":
-        case "staging.flux.party":
+        case "staging.app.flux.party":
         case "flux-app-staging.netlify.com":
             return remoteProd
         default:
