@@ -6,7 +6,7 @@ See below for system specific instructions.
 
 This will work for Windows, Macos, and Linux, though for Windows you'll need the linux subsystem (Ubbuntu 18.04 preferred, see below)
 
-Ultimately you'll need these in your path: `python3`, `pip3`, `virtualenv`, `npm`, `node` (v8) -- we'll set them up in a moment.
+Ultimately you'll need these in your path: `python3`, `pip3`, `virtualenv`, `yarn`, `node` (v8) -- we'll set them up in a moment.
 
 Running `./manage` will set up dependencies and show you available commands.
 
@@ -27,12 +27,13 @@ After you've set up your dev environment, run `git clone https://github.com/vote
 * Install required packages: `sudo apt update && sudo apt install -y curl python3 python3-pip python3-virtualenv tmux git build-essential`
   * note: there might be trouble on ubuntu 16.04 and below wrt to python3, though I'm not certain of that. Please create an isssue if you have trouble with python3 deps
 * If you don't have nodejs v8+ installed already: [install NVM](#install-nvm)
+* Install yarn: https://yarnpkg.com/lang/en/docs/install/#debian-stable
 * Should be all ready to go after that
 
 ### MacOS
 
 * For python 3.6 you'll need `brew` installed (See [Homebrew](https://brew.sh/))
-* `brew install python3 tmux`
+* `brew install python3 tmux yarn`
 * [Install NVM](#install-nvm)
 * done
 

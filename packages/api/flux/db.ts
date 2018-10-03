@@ -2,7 +2,7 @@ import { SortMethod } from "./db";
 
 import * as _R from "ramda";
 
-import { MongoClient, FilterQuery, FindOneOptions } from "mongodb";
+import { MongoClient, FilterQuery, FindOneOptions, MongoConnectionOptions } from "mongodb";
 import { ObjectID } from "bson";
 
 import * as utils from "./utils";
@@ -101,29 +101,23 @@ export const _volunteer = { volunteer: true };
 export const _needsValidating = { needsValidating: true };
 
 /* Helper to create DB v1 with accessors for our collections (e.g. `db.users.findOne(...)`) - makes it nicer to use */
-export const mkDbV1 = (uri: string = mongoUrl): Promise<DBV1> =>
-    new Promise((res, rej) => {
-        MongoClient.connect(
-            uri,
-            (err, client) => {
-                if (err !== null) {
-                    console.error(`mkDbV1 error: ${utils.j(err)}`);
-                    return rej(err);
-                }
+export const mkDbV1 = async (uri: string = mongoUrl, opts: MongoConnectionOptions = {}): Promise<DBV1> => {
+    const client = await MongoClient.connect(uri, opts).catch(err => {
+        console.error(`mkDbV1 error: ${utils.j(err)}`);
+        throw err;
+    })
 
-                const rawDb = client.db();
+    const rawDb = client.db();
 
-                let _dbv1 = { rawDb, client };
-                const setCollection = i => {
-                    _dbv1[i] = rawDb.collection(i);
-                };
-                R.map(setCollection, collections);
-                // console.info(`Created dbv1 obj w keys: ${utils.j(R.keys(dbv1))}`)
+    let _dbv1 = { rawDb, client };
+    const setCollection = i => {
+        _dbv1[i] = rawDb.collection(i);
+    };
+    R.map(setCollection, collections);
+    // console.info(`Created dbv1 obj w keys: ${utils.j(R.keys(dbv1))}`)
 
-                return res({ ..._dbv1 } as DBV1);
-            }
-        );
-    });
+    return { ..._dbv1 } as DBV1
+}
 
 
 /* SPECIFIC DB CALLS */
@@ -355,6 +349,7 @@ export class DBMethods {
     }
 
     async getUserFromEmail(email) {
+        console.log("finding user with email", email)
         return await this.dbv1.users.findOne({ email });
     }
 
@@ -471,7 +466,11 @@ export class DBMethods {
 
 // set exports + db object
 export const init = async (dbObj = {}, dbV1Uri = mongoUrl) => {
-    dbv1 = await mkDbV1(dbV1Uri);
+    dbv1 = await mkDbV1(dbV1Uri, {
+        reconnectTries: Number.MAX_VALUE,
+        reconnectInterval: 1000,
+        keepAlive: 1
+    });
     dbv2 = undefined;
 
     const dbMethods = new DBMethods(dbv1, dbv2);

@@ -1,0 +1,4 @@
+include aa.pug
+
+mixin loginLink(token = "TOKEN_HERE")
+  +aa("https://app.flux.party/v/#/login/" + token)(target="_blank" rel="noopener test")

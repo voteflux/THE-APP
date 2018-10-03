@@ -7,7 +7,7 @@ import { DBV1, _Auth, UserV1Object } from 'flux-lib/types/db';
 import * as utils from '../utils'
 import { Payload, SignedReqNoValidation, isSignedReqValid } from 'flux-lib/types/db/auth'
 import { SignedReqNoValidationRT, validationIssues, CompleteSignedReq } from '../../../lib/types/db/auth'
-import { EitherPromi } from '../../../lib/monads'
+import { EitherPromi } from 'flux-lib/monads'
 
 
 const getJwt = (headers): Either<string, string> => {
@@ -44,7 +44,7 @@ const r200 = <T extends Object>(body: T): ResponseType => ({
 
 const r500 = (err: Error, msg = ""): ResponseType => ({
     statusCode: 500,
-    body: [msg, JSON.stringify(err)].join(' ')
+    body: [msg, err].join(' ')
 });
 
 const beforeSend = (response: ResponseType): ResponseType => {
@@ -59,6 +59,12 @@ const beforeSend = (response: ResponseType): ResponseType => {
 };
 
 
+const logAndPass = <R>(r: R): R => {
+    console.log(r)
+    return r
+}
+
+
 const logSuccess = (r: ResponseType): ResponseType => {
     console.log(`Success!!`, JSON.stringify(r, null, 2))
     return r
@@ -67,6 +73,11 @@ const logSuccess = (r: ResponseType): ResponseType => {
 const logFailure = (r: ResponseType): ResponseType => {
     console.error(`Failed!!`, r)
     return r
+}
+
+const logTraceBack = <R>(e: Error, toRet: R): R => {
+    console.trace(e)
+    return toRet
 }
 
 
@@ -103,49 +114,54 @@ export const fluxHandler = async <I,O,Aux>(opts: {
 
             console.log('declaring handler')
             const _handler = async (event, context): Promise<ResponseType> => {
-                console.log('called handler; decoding to:', opts.inType)
+                console.log('called handler; decoding to:', opts.inType.name)
 
                 // just check we can decode first
-                const rawBodyE = SignedReqNoValidationRT.decode(JSON.parse(event.body))
-                // set up main EitherPromi chain
-                return new EitherPromi((res, rej) => res(rawBodyE))
-                            .mapLeft(decodeError(opts))
-                            .chain((rawBody: CompleteSignedReq) => // this is a SignedReq<string>
-                                validationIssues(rawBody).mapLeft(decodeError(opts)).map(() => ({ rawBody })))
-                            .chain((scope) =>
-                                // check if JWT is present
-                                getJwt(event.headers).map(authHdr => ({ ...scope, authHdr })))
-                            .asyncChain(async (scope) => {
-                                const authRecord = await db.getUidFromS(scope.rawBody)
-                                return {}
-                            })
-                const bodyAuthE = rawBodyE.mapLeft(decodeError(opts))
-                    .chain((rawBody: CompleteSignedReq) => // this is a SignedReq<string>
-                        validationIssues(rawBody).mapLeft(decodeError(opts)).map(() => ({ rawBody }))
-                        // signature is valid
-                    ).chain((scope) =>
-                        // check if JWT is present
-                        getJwt(event.headers).map(authHdr => ({ ...scope, authHdr }))
-                    )
+                // const rawBodyE = SignedReqNoValidationRT.decode(JSON.parse(event.body))
+                // // set up main EitherPromi chain
+                // const a = new EitherPromi((res, rej) => res(rawBodyE))
+                //             .mapLeft(decodeError(opts))
+                //             .chain((rawBody: CompleteSignedReq) => // this is a SignedReq<string>
+                //                 validationIssues(rawBody).mapLeft(decodeError(opts)).map(() => ({ rawBody })))
+                //             .chain((scope) =>
+                //                 // check if JWT is present
+                //                 getJwt(event.headers).map(authHdr => ({ ...scope, authHdr })))
+                //             .asyncChain(async (scope) => {
+                //                 const authRecord = await db.getUidFromS(scope.rawBody)
+                //                 return right("blah")
+                //             })
+                // const bodyAuthE = rawBodyE.mapLeft(decodeError(opts))
+                //     .chain((rawBody: CompleteSignedReq) => // this is a SignedReq<string>
+                //         validationIssues(rawBody).mapLeft(decodeError(opts)).map(() => ({ rawBody }))
+                //         // signature is valid
+                //     ).chain((scope) =>
+                //         // check if JWT is present
+                //         getJwt(event.headers).map(authHdr => ({ ...scope, authHdr }))
+                //     )
 
 
 
-                console.log('req body got')
+                // do auth stuff... eventually
+                const reqBody = JSON.parse(event.body)
+                console.log('req body got', reqBody)
+
+
+
                 // const jwt = getJwt(event.headers)
                 // console.log(jwt, event.headers)
-
-
-
                 if (!opts.auth.isNone()) {
-                    // do auth stuff... eventually
+
                 }
+
+                console.log("starting function...")
 
                 const out =
                     await f(db, {reqUser: {} as UserV1Object, reqBody, reqAuth: {} as AuthData}, event, context)
-                        .then(out => opts.outType.decode(out).getOrElseL(vErr => { throw vErr }))
+                        .then(logAndPass)
+                        .then(out => opts.outType.decode(out).getOrElseL(vErr => { throw `Failed to decode ${out} into ${opts.outType.name}` }))
                         .then(r200)
                         .then(logSuccess)
-                        .catch(i => logFailure(r500(i, "Failed decoding return type.")))
+                        .catch(i => logTraceBack(i, logFailure(r500(i, "Failed decoding return type."))))
                         .then(beforeSend)
 
                 return out

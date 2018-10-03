@@ -1,0 +1,11 @@
+extends ../stdEmail
+include ../mixins/loginLink.pug
+
+block mainBody
+  h4 Here is the login code you need to access your Flux member account:
+  h3 #{loginToken || "LOGIN_TOKEN"}
+
+  p
+    | Please enter this token in the app or click this link:
+    |
+    +loginLink(loginToken)

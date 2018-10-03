@@ -3,13 +3,16 @@ import time
 
 mgr_setup_flag_file = "./.dev_app_init_last"
 
-def must_run(cmd):
+def must_run(cmd, graceful_exit=True):
     logging.info("Running `%s`" % cmd)
     exit_code = os.system(cmd)
     logging.debug("Command `%s` exited w code %d" % (cmd, exit_code))
     if exit_code != 0:
         logging.error("Failed to run %s" % cmd)
-        raise Exception("Failed to run required cmd: %s" % cmd)
+        if graceful_exit:
+            sys.exit(1)
+        else:
+            raise Exception("Failed to run required cmd: %s" % cmd)
 
 def run_or(cmd, error_msg, verbose=False):
     exit_code = os.system(cmd)

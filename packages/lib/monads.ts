@@ -36,6 +36,13 @@ export class EitherPromi<L,R> {
         return new EitherPromi(undefined, this.prom.then(e => e.chain(f)))
     }
 
+    async asyncChain<L,R,R2>(e: Either<L, R>, f: (r: R) => Promise<Either<L,R2>>): Promise<Either<L,R2>> {
+        if (e.isRight())
+            return await f(e.value)
+        return left(e.value)
+    }
+
+
     async isLeft(): Promise<boolean> {
         const e = await this.peek()
         return e.isLeft()

@@ -1,0 +1,20 @@
+.flex {
+    display: flex;
+}
+
+.flex-column {
+    flex-direction: column;
+    justify-content: stretch;
+}
+
+.w-100 {
+    width: 100%;
+}
+
+.mb2 {
+    margin-bottom: 2rem;
+}
+
+.container {
+
+}

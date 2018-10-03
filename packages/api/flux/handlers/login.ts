@@ -1,12 +1,14 @@
 import { FluxHandlerV2, fluxHandler } from './_stdWrapper';
 import { _Auth } from 'flux-lib/types/db'
 import * as t from 'io-ts'
-import { SimpleEitherRT } from 'flux-lib/types'; // eitherToSimpleEither
+import {SimpleEither, SimpleEitherRT} from 'flux-lib/types'; // eitherToSimpleEither
 import { fromNullable, Either, left, right } from 'fp-ts/lib/Either'
 import { TaskEither, fromEither, tryCatch } from 'fp-ts/lib/TaskEither';
 import { TokenNamespaces } from 'flux-lib/types/db/oneTimeTokens';
-import { UserV1Object } from '../../../lib/types/db'
+import { UserV1Object } from 'flux-lib/types/db'
 import { CloudWatchLogs } from 'aws-sdk';
+import * as email from "../email";
+import {DB} from "../db";
 
 
 const LoginTokenReq = t.type({
@@ -24,12 +26,15 @@ const asyncChain = async <L,R,R2>(e: Either<L, R>, f: (R) => Promise<Either<L,R2
 
 
 const sendLoginTokenEmail = async (user: UserV1Object, {token}) => {
-    return left(`Failed to send email`)
+    await email.sendLoginEmail(user.email, {loginToken: token, name: "FirstName", title: "SomeHtmlTitle"})
+    // return left(`Failed to send email`)
     return right({})
 }
 
 
-const logReqLoginTokenFailures = (tokenE, emailE) => {
+const logReqLoginTokenFailures = (userE, tokenE, emailE) => {
+    if (userE.isLeft())
+        console.error(`Error creating login token request:\nUserE: ${userE.value}`)
     if (tokenE.isLeft())
         console.error(`Error creating login token request:\nTokenE: ${tokenE.value}`)
     if (emailE.isLeft())
@@ -41,16 +46,30 @@ const eToTuple = <L, R1, R2>(e1: Either<L, R1>, e2: Either<L, R2>): Either<L, [R
     e1.chain(r1 => e2.map(r2 => [r1, r2] as [R1, R2]))
 
 
+const eToSimpleE = <L, R>(e1: Either<L, R>): SimpleEither<L, R> =>
+    e1.map(r1 => { right: r1 }).getOrElseL(left => {left})
+
+
 export const requestLoginToken = async (event, context) =>
     (await fluxHandler({
         auth: _Auth.None(),
         inType: LoginTokenReq,
         outType: LoginTokenResp,
         logParams: true
-    }, async (db, {reqBody, reqAuth}, event, context) => {
-        const userE = await db.getUserFromEmail(reqBody.email).then(fromNullable('Unknown email'))
+    }, async (db: DB, {reqBody, reqAuth}, event, context) => {
+        console.log('getting user', reqBody.email)
+        const userE = await db.getUserFromEmail(reqBody.email).then(fromNullable('Unknown email')).catch(e => {
+            console.error(e)
+            return left(e)
+        })
+        console.log('getting token')
         const tokenE = await asyncChain(userE, user => db.oneTimeTokens.addNewOneTimeToken(user._id, TokenNamespaces.LOGIN_REQ))
+        console.log('generating email')
+        await sendLoginTokenEmail(reqBody as UserV1Object, {token: "SOME TOKEN"})
         const emailE = await asyncChain(eToTuple(userE, tokenE), ([user, {token}]) => sendLoginTokenEmail(user, token))
-        logReqLoginTokenFailures(tokenE, emailE)
-        return {right: null}
+        logReqLoginTokenFailures(userE, tokenE, emailE)
+        if (emailE.isRight())
+            return {right: null}
+        else
+            return {left: emailE.value.toString()}
     }))(event, context)

@@ -1,0 +1,43 @@
+include mixins/aa
+
+doctype html
+html(lang='en')
+  head
+    if title
+      title #{title}
+    else
+      title TITLE GOES HERE
+    link(rel="stylesheet" href="./styles.css")
+  body
+    .container
+      .flex.flex-column
+        img.w-100.mb2(src="./logo-header.png")
+        block content
+        footer
+          small
+            p
+              | You can manage your membership details in the
+              |
+              a(href="https://app.flux.party", target="_blank" rel="noopener") membership app
+              | .
+              | You can find more details in regards to your membership (such as revocation, if desired) on our FAQ page:
+              |
+              +aa("https://voteflux.org/about/faq")
+              |
+              | Further Reading
+              |
+              ul
+                li
+                  +aa("https://voteflux.org")
+                  |
+                  | (and, soon, https://flux.party)
+                li
+                  +aa("https://docs.flux.party")
+                li
+                  +aa("https://github.com/voteflux")
+                li
+                  | Membership graphs and info:
+                  |
+                  +aa https://voteflux.org/dashboard/
+              |
+              | If you respond to this email it will be answered by a human.

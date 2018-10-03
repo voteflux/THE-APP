@@ -45,6 +45,7 @@ def export(env_name, env_value):
     os.environ[env_name] = env_value
 
 
+
 # check we're in the correct directory
 try:
     with open('package.json', 'r') as f:
@@ -143,7 +144,7 @@ def install_npm_deps(target, deps, dev=False):
 @cli.command()
 @click.argument('target', nargs=1, type=type_pkg_choice)  # help='Package to add dependency to',
 @click.argument('dependencies', nargs=-1)  # help='NPM packages to add as dependencies'
-@click.option('--dev', default=False, type=bool, help="Install as devDependency")
+@click.option('--dev', is_flag=True, default=False, type=bool, help="Install as devDependency")
 def addto(target, dependencies, dev):
     install_npm_deps(target, dependencies, dev)
 
@@ -208,7 +209,7 @@ def build(target, build_args, stage):
 
         def build_api():
             logging.info("### BUILDING API ###")
-            must_run("cd packages/api && npm run build --stage {stage} -- {remArgs}".format(stage=stage, remArgs=remArgs))
+            must_run("cd packages/api && npm run build -- --stage {stage} {remArgs}".format(stage=stage, remArgs=remArgs))
 
         def build_all():
             build_ui()

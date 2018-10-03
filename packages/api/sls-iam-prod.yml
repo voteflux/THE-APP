@@ -1,0 +1,6 @@
+requestLoginToken:
+  - Effect: "Allow"
+    Action:
+      - "ses:SendRawEmail"
+    Resource:
+      - "arn:aws:ses:us-east-1:076866892044:identity/login@flux.party"
