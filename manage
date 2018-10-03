@@ -10,10 +10,30 @@ if [ "$NETLIFY_BUILD_BASE" ]; then
     export IS_NETLIFY="true"
     git remote add origin $(echo "https://$REPOSITORY_URL" | sed 's/\.com:/.com\//g' | sed 's/git@//g') || true
     git fetch --tags origin
+
+
 else
     echo "Detected: not on netlify"
 fi
 
+
+export MOST_RECENT_TAG="$(git tag --sort version:refname | tail -n 1)"
+if [ "$IS_NETLIFY" ]; then
+    CURR_COMMIT="$(git rev-parse HEAD)"
+    LAST_RELEASE_COMMIT="$(git rev-parse $MOST_RECENT_TAG)"
+    echo "$MOST_RECENT_TAG"
+    echo "$CURR_COMMIT"
+    echo "$LAST_RELEASE_COMMIT"
+    if [[ "$@" = *"--stage prod"* ]]; then
+        if [ "$CURR_COMMIT" != "$LAST_RELEASE_COMMIT" ]; then
+            echo "Exiting as this is a production build but HEAD is not tagged as a release"
+            echo "Most recent tag: $MOST_RECENT_TAG"
+            echo "Commit for $MOST_RECENT_TAG: $LAST_RELEASE_COMMIT"
+            echo "Current commit: $CURR_COMMIT"
+            exit 1
+        fi
+    fi
+fi
 
 _error=false
 if python3 -m pip --version >/dev/null 2>&1; then
@@ -81,8 +101,6 @@ if [ ! "$IS_NETLIFY" ]; then
     source .venv/bin/activate
 fi
 
-
-export MOST_RECENT_TAG="$(git describe --abbrev=0)"
 
 echo -e "\n\n⚠️ Most recent tag: $MOST_RECENT_TAG\n"
 
