@@ -88,7 +88,7 @@ export const fluxHandler = async <I,O,Aux>(opts: {
         outType: t.Type<O>,
         logParams?: boolean,
     }, f: FluxHandlerV2<I,O> ): Promise<(event: any, context: any) => Promise<ResponseType>> => {
-        console.log(`Wrapping: ${f.prototype}`)
+        // console.log(`Wrapping: ${f.prototype}`)
         const _logParams = opts.logParams !== false
 
         console.log('init db')

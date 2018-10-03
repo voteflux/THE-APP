@@ -45,6 +45,7 @@
     "mongodb": "^3.0.6",
     "ramda": "^0.25.0",
     "serverless-plugin-chrome": "^1.0.0-55",
+    "serverless-plugin-tracing": "^2.0.0",
     "ts-debounce": "^0.3.2",
     "ts-jest": "^23.10.1",
     "tweetnacl": "^1.0.0",

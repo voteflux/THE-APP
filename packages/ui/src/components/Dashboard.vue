@@ -91,7 +91,9 @@ export default Vue.extend({
 
         savePropFactory(prop) {
             return (newValue) => {
-                assert(prop != 's' && prop != 'authToken')
+                if (prop == 's' || prop == 'authToken') {
+                    throw Error("refusing to save user prop s or authToken")
+                }
                 const toSave = { [prop]: newValue, ...this.$props.auth }
                 return this.$flux.v1.saveUserDetails(toSave)
                     .then(this.$flux.utils.onGotUserObj);

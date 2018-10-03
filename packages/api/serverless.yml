@@ -13,8 +13,6 @@
 
 service:
   name: flux-api-2
-  awsTracingConfig:
-    mode: Active
 
 plugins:
   - serverless-webpack
@@ -22,6 +20,7 @@ plugins:
   - serverless-dynamodb-local
   - serverless-iam-roles-per-function
   - serverless-plugin-aws-alerts
+  - serverless-plugin-tracing
   - serverless-offline  # keep this last
 
 package:
@@ -42,11 +41,11 @@ custom:
   # region: ${file(./sls-custom.yml):region}
   customDomain: ${file(./sls-${self:provider.stage}-domain.yml)}
   # cognito: ${file(./sls-${self:provider.stage}-cognito.yml):cognito}
-  iam:
-    cognitoAdmin:
-      - Effect: "Allow"
-        Action: "cognito-idp:*"
-        Resource: "arn:aws:cognito-idp:*:*:userpool/*"
+#  iam:
+#    cognitoAdmin:
+#      - Effect: "Allow"
+#        Action: "cognito-idp:*"
+#        Resource: "arn:aws:cognito-idp:*:*:userpool/*"
   alerts: ${file(./sls-alerts.yaml):alerts}
   # this is separated out because the structure changed; better to put it here
   handlers: "flux/handlers"
@@ -71,40 +70,14 @@ provider:
     OPENCAGE_API: ${ssm:${self:provider.stage}OpenCageApiKey, self:custom.openCageApiKey}
     # USER_POOL_ID: ${self:custom.cognito.poolId}
     # CLIENT_ID: ${self:custom.cognito.clientId}
-
-# you can overwrite defaults here
-#  stage: dev
-#  region: us-east-1
-
-# you can add statements to the Lambda function's IAM Role here
-#  iamRoleStatements:
-#    - Effect: "Allow"
-#      Action:
-#        - "s3:ListBucket"
-#      Resource: { "Fn::Join" : ["", ["arn:aws:s3:::", { "Ref" : "ServerlessDeploymentBucket" } ] ]  }
-#    - Effect: "Allow"
-#      Action:
-#        - "s3:PutObject"
-#      Resource:
-#        Fn::Join:
-#          - ""
-#          - - "arn:aws:s3:::"
-#            - "Ref" : "ServerlessDeploymentBucket"
-#            - "/*"
-
-# you can define service wide environment variables here
-#  environment:
-#    variable1: value1
-
-# you can add packaging information here
-#package:
-#  include:
-#    - include-me.js
-#    - include-me-dir/**
-#  exclude:
-#    - exclude-me.js
-#    - exclude-me-dir/**
-
+  tracing: true
+  iamRoleStatements:
+    - Effect: "Allow" # xray permissions (required)
+      Action:
+        - "xray:PutTraceSegments"
+        - "xray:PutTelemetryRecords"
+      Resource:
+        - "*"
 
 
 functions:
@@ -113,15 +86,15 @@ functions:
     handler: ${self:custom.scheduled}/stats.genStatsGetinfo
     timeout: 60
     events:
-      - schedule: rate(1 minute)
+      - schedule: rate(2 minutes)
   genStatsPublic:
     handler: ${self:custom.scheduled}/stats.genStatsPublic
-    timeout: 60
+    timeout: 120
     events:
-      - schedule: rate(1 minute)
+      - schedule: rate(5 minutes)
   updateIndexesDBV1:
     handler: ${self:custom.scheduled}/indexes.updateIndexesDBV1
-    timeout: 300
+    timeout: 60
     events:
       - schedule: rate(1 day)
   # login requests
@@ -193,26 +166,7 @@ functions:
           method: post
           cors: true
   # admin/other requests
-
-  # random stuff from past
-
-  # checkEmail:
-  #   handler: ${self:custom.handlers}/login.checkEmail
-  #   iamRoleStatementsInherit: true
-  #   iamRoleStatements: ${self:custom.iam.cognitoAdmin}
-  #   events:
-  #     - http:
-  #         path: /user/check_email
-  #         method: post
-
-
-  # getStats:
-  #   handler: handler.getStats
-  #   events:
-  #     - http:
-  #       path: /stats/{id}
-  #       method: get
-
+  # nothing yet
 
 
 #    The following are a few example events you can configure

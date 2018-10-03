@@ -43,6 +43,7 @@ const checkAuthOfRole = (db: DB) => (role: string, f) => async (event, context) 
             return fail('insufficient permissions')
         }
     }
+    console.log(`Authenticated user (ID: ${user._id.toString()})`)
     return await f(event, context, {user})
 }
 

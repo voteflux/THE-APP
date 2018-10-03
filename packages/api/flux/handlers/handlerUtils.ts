@@ -3,7 +3,7 @@ import { init as dbInit } from "../db";
 // require('module-alias/register')
 
 const utils = require("../utils");
-const R = utils.R;
+import * as R from 'ramda'
 
 // convenience function for 200 responses
 const _r = body => ({
@@ -30,6 +30,17 @@ const beforeEnter = f => (db, event, context) => {
     }
     return f(db, event, context);
 };
+
+const respPreview = r => {
+    if (!r) {
+        return `response empty / null / undefined: ${r}`
+    } else if (Array.isArray(r)) {
+        return `response array. length ${r.length}`
+    } else if (typeof r === "object") {
+        return `response object. keys: {${R.keys(r)}}`
+    }
+    return `unknown response type. response value: ${r}`
+}
 
 // convenience for sz-ing json
 const j = utils.j;
@@ -64,7 +75,7 @@ const wrapHandler = (f, fName, obj) => async (event, context) => {
         await (async () => { if (db) await db.close() })()
     }
 
-    console.log(`Got Response from: ${fName} \n- err: ${err}, \n- resp: ${j(resp || {}).slice(0, 256)}`);
+    console.log(`Got Response from: ${fName} \n- err: ${err}, \n- resp: ${respPreview(resp)}`);
 
     if (didError) {
         console.log(`Throwing... Error:\n${err}`);
