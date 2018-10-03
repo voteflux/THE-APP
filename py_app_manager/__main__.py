@@ -175,7 +175,7 @@ def test(stage, target, args):
 def deploy(stage, skip_tests, target, args):
     runner = CmdRunner(must_run)
     if target in {'api', 'all'}:
-        runner.add('api', "cd packages/api && npm run deploy --stage {} -- {args}".format(stage, args=' '.join(args)))
+        runner.add('api', "cd packages/api && npm run deploy -- --stage {} {args}".format(stage, args=' '.join(args)))
     runner.run()
 
 

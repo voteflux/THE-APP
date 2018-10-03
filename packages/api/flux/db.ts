@@ -118,7 +118,7 @@ export const mkDbV1 = (uri: string = mongoUrl): Promise<DBV1> =>
                     _dbv1[i] = rawDb.collection(i);
                 };
                 R.map(setCollection, collections);
-                console.info(`Created dbv1 obj w keys: ${utils.j(R.keys(dbv1))}`)
+                // console.info(`Created dbv1 obj w keys: ${utils.j(R.keys(dbv1))}`)
 
                 return res({ ..._dbv1 } as DBV1);
             }
