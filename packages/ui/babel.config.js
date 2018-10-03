@@ -1,5 +1,5 @@
 module.exports = {
-    presets: [{modules: false}],
+    // presets: [{modules: false}],
     plugins: [
         // "@babel/plugin-syntax-dynamic-import",
          /* [ "transform-imports", {

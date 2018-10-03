@@ -9,6 +9,7 @@ yarn-debug.log
 **/.idea
 **/__pycache__
 **/.dynamodb
+**/.DS_Store
 
 # all logfiles
 .flux-dev.*.log

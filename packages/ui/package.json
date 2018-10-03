@@ -27,7 +27,6 @@
     "@types/node": "^10.9.4",
     "@types/pdfmake": "^0.1.1",
     "@types/ramda": "^0.25.37",
-    "@vue/babel-preset-app": "^3.0.4",
     "@vue/cli": "^3.0.4",
     "@vue/cli-service": "^3.0.4",
     "@vue/eslint-config-typescript": "^3.0.0-rc.3",
@@ -78,7 +77,6 @@
   "devDependencies": {
     "@babel/plugin-syntax-dynamic-import": "^7.0.0",
     "@types/node": "^10.9.4",
-    "@vue/cli-plugin-babel": "^3.0.4",
     "@vue/cli-plugin-typescript": "^3.0.4",
     "@vue/cli-service": "^3.0.0-beta.9",
     "awesome-typescript-loader": "^5.2.0",
