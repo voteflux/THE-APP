@@ -151,7 +151,7 @@ import 'material-design-icons-iconfont/dist/material-design-icons.css'
 
 
 import VueGoodTablePlugin from 'vue-good-table'
-import 'vue-good-table/dist/vue-good-table.css'
+import './css/vendor/vue-good-table.min.css'
 Vue.use(VueGoodTablePlugin)
 import { VueGoodTable } from 'vue-good-table'
 Vue.component('good-table', VueGoodTable)
