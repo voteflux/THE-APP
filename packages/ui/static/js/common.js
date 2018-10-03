@@ -1,15 +1,16 @@
 var _hn = window.location.hostname
 
 function isDefinitelyProduction() {
-    var isProdDomain =
-        _hn === "members.flux.party" ||
+    return _hn === "members.flux.party" ||
         _hn === "app.flux.party" ||
         _hn === "admin.flux.party" ||
         _hn === "staging.app.flux.party" ||
         _hn === "staging.admin.flux.party"
+}
 
-
-    return isProdDomain
+function isStaging() {
+    return _hn === "staging.app.flux.party" ||
+    _hn === "staging.admin.flux.party"
 }
 
 
@@ -48,6 +49,8 @@ var __PROD_ENV__ = (isEnv("prod")) || isDefinitelyProduction()
 var __DEV_ENV__ = !isEnv("prod") && (isEnv("dev") || __DEV_DOMAIN__)
 var __DEBUG_ENV__ = !isEnv("prod") && (isEnv("debug") || __DEBUG_DOMAIN__)
 
+
+console.log ({__PROD_ENV__, __DEV_ENV__, __DEBUG_ENV__})
 
 
 function getAuthToken() {
@@ -108,7 +111,7 @@ function saveMemberSecretOnFluxDomains(silent, useThisS = undefined) {
     log("saveMemberSecretOnFluxDomains called")
     var s = useThisS ? useThisS : getAuthToken();
     if (s !== undefined) {
-        if (__PROD_ENV__) {
+        if (__PROD_ENV__ && !isStaging()) {
             sendSToAllFluxDomains(s)
             localStorage.setItem('lastSavedS', s);
         } else {
