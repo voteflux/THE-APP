@@ -9,7 +9,8 @@
     "build-commented-extra": "&& cp -a ./static/* ./dist/ "
   },
   "sideEffects": [
-    "*.vue"
+    "*.vue",
+    "*.css"
   ],
   "dependencies": {
     "@babel/core": "^7.1.2",
