@@ -1,9 +1,13 @@
+var _hn = window.location.hostname
 
 function isDefinitelyProduction() {
     var isProdDomain =
-        window.location.hostname === "members.flux.party" ||
-        window.location.hostname === "app.flux.party" ||
-        window.location.hostname === "admin.flux.party"
+        _hn === "members.flux.party" ||
+        _hn === "app.flux.party" ||
+        _hn === "admin.flux.party" ||
+        _hn === "staging.app.flux.party" ||
+        _hn === "staging.admin.flux.party"
+
 
     return isProdDomain
 }
@@ -36,9 +40,8 @@ function isEnv(envStr) {
 }
 
 
-var _hn = window.location.hostname
-var __DEBUG_DOMAIN__ = _hn == 'localhost' || _hn == '127.0.0.1'
-var __DEV_DOMAIN__ = _hn == "flux-api-dev.herokuapp.com" || _hn == "dev.app.flux.party"
+var __DEBUG_DOMAIN__ = _hn === 'localhost' || _hn === '127.0.0.1'
+var __DEV_DOMAIN__ = _hn === "flux-api-dev.herokuapp.com" || _hn === "dev.app.flux.party"
 
 
 var __PROD_ENV__ = (isEnv("prod")) || isDefinitelyProduction()
@@ -92,6 +95,9 @@ function sendSToAllFluxDomains(s) {
     sendSToUrlAsHashParam("https://flux.party/_record_login_param.html", s)
     sendSToUrlAsHashParam("https://members.flux.party/_record_login_param.html", s)
     sendSToUrlAsHashParam("https://app.flux.party/_record_login_param.html", s)
+    sendSToUrlAsHashParam("https://staging.app.flux.party/_record_login_param.html", s)
+    // sendSToUrlAsHashParam("https://admin.flux.party/_record_login_param.html", s)
+    // sendSToUrlAsHashParam("https://staging.admin.flux.party/_record_login_param.html", s)
 }
 
 
@@ -102,7 +108,7 @@ function saveMemberSecretOnFluxDomains(silent, useThisS = undefined) {
     log("saveMemberSecretOnFluxDomains called")
     var s = useThisS ? useThisS : getAuthToken();
     if (s !== undefined) {
-        if (__PROD_ENV__ && localStorage.getItem('lastSavedS') !== s) {
+        if (__PROD_ENV__) {
             sendSToAllFluxDomains(s)
             localStorage.setItem('lastSavedS', s);
         } else {

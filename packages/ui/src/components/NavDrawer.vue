@@ -57,11 +57,15 @@ export default Vue.extend({
                     [Roles.ADMIN, { name: "Admin", items: [{ name: "Audit Roles", route: R.AdminAuditRoles }] }],
 
 
-                    // ['any', { name: "Staff UI", href: "/admin", icon: "website" }]
+                    // ['any', { name: "Staff UI", href: "/admin", icon: "web" }]
                 ]
 
-                const filteredItems = Ramda.filter(([role, link]) => this.hasRole(role), permissionedItems)
+                const filteredItems = Ramda.filter(([role, item]) => this.hasRole(role), permissionedItems)
                 const extraItems = Ramda.map(([r,i]) => i, filteredItems)
+
+                if (this.hasAnyRole()) {
+                    extraItems.push({ name: "Staging UI", href: "https://staging.app.flux.party/v/", icon: "launch" })
+                }
 
                 return Ramda.concat(this.items as NavItemRec[], extraItems)
             }
@@ -79,6 +83,13 @@ export default Vue.extend({
                 return false
             }
             return false
+        },
+        hasAnyRole() {
+            const rs = this.$props.roles
+            if (rs.isSuccess()) {
+                return (rs.unwrap() || {roles:[]}).roles.length > 0
+            }
+            return false;
         },
     },
     created() {

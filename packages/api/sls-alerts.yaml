@@ -5,22 +5,11 @@ alerts:
     - staging
   dashboards: true
   topics:
-    ok:
-      topic: ${self:service}-${self:provider.stage}-alarm-ok
-      notifications:
-        - protocol: email
-          endpoint: max.kaye@voteflux.org
     alarm:
       topic: ${self:service}-${self:provider.stage}-alarm-alarm
       notifications:
         - protocol: email
           endpoint: max.kaye@voteflux.org
-    insufficientData:
-      topic: ${self:service}-${self:provider.stage}-alarm-insufficientData
-      notifications:
-        - protocol: email
-          endpoint: max.kaye@voteflux.org
-      period: 90000  # insufficient data only triggers >= 1 day of inactivity
   definitions:
     functionErrors:
       period: 300
