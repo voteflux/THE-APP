@@ -1,5 +1,6 @@
 module.exports = {
-    "plugins": [
+    presets: [{modules: false}],
+    plugins: [
         // "@babel/plugin-syntax-dynamic-import",
          /* [ "transform-imports", {
             "vuetify": {
