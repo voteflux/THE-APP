@@ -4,14 +4,13 @@ set -e
 
 if [ "$NETLIFY_BUILD_BASE" ]; then
     echo 'Netlify detected'
-    echo -e "\n\n###\n\n"
-    env
-    echo -e "\n\n###\n\n"
+#    echo -e "\n\n###\n\n"
+#    env
+#    echo -e "\n\n###\n\n"
     export IS_NETLIFY="true"
+    echo "ensuring repo is up to date and complete"
     git remote add origin $(echo "https://$REPOSITORY_URL" | sed 's/\.com:/.com\//g' | sed 's/git@//g') || true
     git fetch --tags origin
-
-
 else
     echo "Detected: not on netlify"
 fi
@@ -21,9 +20,6 @@ export MOST_RECENT_TAG="$(git tag --sort version:refname | tail -n 1)"
 if [ "$IS_NETLIFY" ]; then
     CURR_COMMIT="$(git rev-parse HEAD)"
     LAST_RELEASE_COMMIT="$(git rev-parse $MOST_RECENT_TAG)"
-    echo "$MOST_RECENT_TAG"
-    echo "$CURR_COMMIT"
-    echo "$LAST_RELEASE_COMMIT"
     if [[ "$@" = *"--stage prod"* ]]; then
         if [ "$CURR_COMMIT" != "$LAST_RELEASE_COMMIT" ]; then
             echo "Exiting as this is a production build but HEAD is not tagged as a release"
