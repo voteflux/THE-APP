@@ -2,13 +2,14 @@ version: 0.1
 phases:
   install:
     commands:
-      - npm install -g serverless lerna
-      - env
+      - npm install -g serverless lernax
   pre_build:
     commands:
       - lerna bootstrap
+      - chmod +x ./manage
   build:
     commands:
+      - env
       - ./manage build api
       - serverless deploy --stage cicd | tee deploy.out
 #  post_build:
