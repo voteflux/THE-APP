@@ -33,3 +33,5 @@ packages/api/sls-custom.yml
 .circleci/run_locally.sh
 
 report-*.html
+
+codebuild_tmp

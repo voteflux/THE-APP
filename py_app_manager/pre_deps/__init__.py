@@ -32,7 +32,7 @@ def get_git_head():
     try:
         return subprocess.check_output(['git', 'rev-parse', 'HEAD'])
     except:
-        return "FAKE-HEAD"
+        return b"FAKE-HEAD"
 
 def deps_up_to_date():
     if not os.path.isfile(mgr_setup_flag_file):

@@ -8,6 +8,7 @@
     "packages/*"
   ],
   "scripts": {
-    "bootstrap": "lerna bootstrap"
+    "bootstrap": "lerna bootstrap",
+    "test:codebuild": "sh ./scripts/codebuild_build.sh -i xertrov/flux-build:latest -a ./codebuild_tmp"
   }
 }
