@@ -3,6 +3,7 @@ phases:
   install:
     commands:
       - npm install -g serverless lerna
+      - env
   pre_build:
     commands:
       - lerna bootstrap
