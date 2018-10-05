@@ -54,3 +54,5 @@ RUN rm -rf /var/runtime /var/lang && \
   cat nodejs8.10.tgz | tar -zx -C / && \
   rm nodejs8.10.tgz && \
   true
+
+RUN curl --silent --location https://dl.yarnpkg.com/rpm/yarn.repo | tee /etc/yum.repos.d/yarn.repo && yum install yarn -y

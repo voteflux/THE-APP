@@ -1,0 +1,13 @@
+version: 0.1
+phases:
+  install:
+    commands:
+    - yarn install
+    - npm install -g serverless
+  build:
+    commands:
+    - ./manage build api
+    - serverless deploy --stage cicd | tee deploy.out
+#  post_build:
+#    commands:
+#    - . ./test.sh
