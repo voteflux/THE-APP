@@ -29,7 +29,10 @@ def cmd_w_log(cmd, log_name, dir_offset="./"):
     return (('mv {p} {p}.previous || true && ' + cmd + ''' 2>&1 | tee "{p}" ''').format(p=fpath), fname)
 
 def get_git_head():
-    return subprocess.check_output(['git', 'rev-parse', 'HEAD'])
+    try:
+        return subprocess.check_output(['git', 'rev-parse', 'HEAD'])
+    except:
+        return "FAKE-HEAD"
 
 def deps_up_to_date():
     if not os.path.isfile(mgr_setup_flag_file):
