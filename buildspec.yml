@@ -2,12 +2,14 @@ version: 0.1
 phases:
   install:
     commands:
-    - yarn install
-    - npm install -g serverless
+      - npm install -g serverless lerna
+  pre_build:
+    commands:
+      - lerna bootstrap
   build:
     commands:
-    - ./manage build api
-    - serverless deploy --stage cicd | tee deploy.out
+      - ./manage build api
+      - serverless deploy --stage cicd | tee deploy.out
 #  post_build:
 #    commands:
 #    - . ./test.sh
