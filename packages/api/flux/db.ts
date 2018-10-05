@@ -2,7 +2,7 @@ import { SortMethod } from "./db";
 
 import * as _R from "ramda";
 
-import { MongoClient, FilterQuery, FindOneOptions, MongoConnectionOptions } from "mongodb";
+import {FilterQuery, FindOneOptions, connect } from "mongodb";
 import { ObjectID } from "bson";
 
 import * as utils from "./utils";
@@ -48,12 +48,7 @@ const cleanId = rawId => (R.is(ObjectID, rawId) ? rawId : new ObjectID(rawId));
 
 /* DB Setup - v1 */
 
-const mongoUrl: string = process.env.MONGODB_URI || "MONGO_URI NOT SET"
-// const dbName = R.last(mongoUrl.split('/'))
-let dbv1 = {} as DBV1;
-
-/* DB Setup v2 - might never be used if we keep mongodb... */
-let dbv2 = undefined;
+export const getMongoURI = () => process.env.MONGODB_URI || "MONGO_URI NOT SET"
 
 /* DB Constants */
 const PUB_STATS_ID = 0;
@@ -101,8 +96,8 @@ export const _volunteer = { volunteer: true };
 export const _needsValidating = { needsValidating: true };
 
 /* Helper to create DB v1 with accessors for our collections (e.g. `db.users.findOne(...)`) - makes it nicer to use */
-export const mkDbV1 = async (uri: string = mongoUrl, opts: MongoConnectionOptions = {}): Promise<DBV1> => {
-    const client = await MongoClient.connect(uri, opts).catch(err => {
+export const mkDbV1 = async (uri: string = getMongoURI(), opts = {}): Promise<DBV1> => {
+    const client = await connect(uri, opts).catch(err => {
         console.error(`mkDbV1 error: ${utils.j(err)}`);
         throw err;
     })
@@ -363,14 +358,14 @@ export class DBMethods {
     // record nda
     insertFreshNdaPdfAndSig = async (_id, pdf, sig): Promise<NdaStatus> => {
         const ndaStatusToSet = { pdfDataUri: pdf, signatureDataUri: sig, stage: NdaStage.AWAITING_APPROVAL }
-        await this.dbv1.volNdaStatus.updateOne({ uid: _id }, _set(ndaStatusToSet), { upsert: true })
+        // await this.dbv1.volNdaStatus.updateOne({ uid: _id }, _set(ndaStatusToSet), { upsert: true })
         return ndaStatusToSet
     }
 
     // draft NDA
     commitDraftNda = async (uid, pdfHash, sigHash, acceptSig): Promise<NdaDraftCommit> => {
         const draftCommit = { uid, pdfHash, sigHash, ts: utils.now(), acceptSig }
-        await this.dbv1.volNdaDraftCommits.insertOne(draftCommit)
+        // await this.dbv1.volNdaDraftCommits.insertOne(draftCommit)
         return draftCommit
     }
 
@@ -465,17 +460,15 @@ export class DBMethods {
 }
 
 // set exports + db object
-export const init = async (dbObj = {}, dbV1Uri = mongoUrl) => {
-    dbv1 = await mkDbV1(dbV1Uri, {
+export const init = async (dbObj = {}, dbV1Uri = getMongoURI()) => {
+    const dbv1 = await mkDbV1(dbV1Uri, {
         reconnectTries: Number.MAX_VALUE,
         reconnectInterval: 1000,
         keepAlive: 1
     });
-    dbv2 = undefined;
+    const dbv2 = undefined;
 
     const dbMethods = new DBMethods(dbv1, dbv2);
-
-
 
     return dbMethods;
 };

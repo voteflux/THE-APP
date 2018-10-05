@@ -2,6 +2,14 @@
 set -e
 
 
+function depsUpToDate() {
+    if [ ! -e './.dev_app_init_last' ] || [ "$(git rev-parse HEAD)" != `cat ./.dev_app_init_last` ]; then
+        return false
+    fi
+    return true
+}
+
+
 if [ "$NETLIFY_BUILD_BASE" ]; then
     echo 'Netlify detected'
 #    echo -e "\n\n###\n\n"
@@ -32,60 +40,75 @@ if [ "$IS_NETLIFY" ]; then
     fi
 fi
 
-_error=false
-if python3 -m pip --version >/dev/null 2>&1; then
-    echo 'Found pip3'
-    if [ "$NETLIFY_BUILD_BASE" ]; then
-        python3 -m pip install virtualenv
+if [ ! depsUpToDate ]; then
+    _error=false
+    if python3 -m pip --version >/dev/null 2>&1; then
+        echo 'Found pip3'
+        if [ "$NETLIFY_BUILD_BASE" ]; then
+            python3 -m pip install virtualenv
+        fi
+    else
+        echo "Error: 'python3 -m pip' must be available on path"
+        _error=true
     fi
-else
-    echo "Error: 'python3 -m pip' must be available on path"
-    _error=true
-fi
-if python3 -m virtualenv --version >/dev/null 2>&1; then
-    echo 'Found virtualenv'
-else
-    echo "Error: 'python3 -m virtualenv' must work"
-    echo "try 'pip3 install virtualenv' or 'sudo apt install python3-virtualenv'"
-    _error=true
-fi
-if which npm >/dev/null 2>&1; then
-    echo 'Found npm'
-else
-    echo "Error: npm must be available on path"
-    echo "Please install Node v8 or higher"
-    _error=true
-fi
-if tmux -V >/dev/null 2>&1; then
-    echo 'Found tmux'
-    if [ ! "$(grep 'destroy-unattached' ~/.tmux.conf)" ]; then
-        echo "set -g destroy-unattached off" >> ~/.tmux.conf
+    if python3 -m virtualenv --version >/dev/null 2>&1; then
+        echo 'Found virtualenv'
+    else
+        echo "Error: 'python3 -m virtualenv' must work"
+        echo "try 'pip3 install virtualenv' or 'sudo apt install python3-virtualenv'"
+        _error=true
     fi
-else
-    echo "WARNING: tmux must be available for './manage dev' commands"
-    echo "Try 'sudo apt install tmux' or 'brew install tmux'"
-fi
+    if node --version >/dev/null 2>&1; then
+        echo "Found node"
+    else
+        echo "Error: node not found; Please install nvm and set up node 8.10+"
+        _error=true
+    fi
+    if npx --version >/dev/null 2>&1; then
+        echo "Found npx"
+    else
+        echo "Error: npx not found; Please install nvm and set up node 8.10+"
+        _error=true
+    fi
+    if which yarn >/dev/null 2>&1; then
+        echo 'Found yarn'
+    else
+        echo "Error: yarn must be available on path"
+        echo "try 'brew install yarn' on macos or for ubuntu/debian check out https://yarnpkg.com/lang/en/docs/install/#debian-stable"
+        _error=true
+    fi
+    if tmux -V >/dev/null 2>&1; then
+        echo 'Found tmux'
+        if [ ! "$(grep 'destroy-unattached' ~/.tmux.conf)" ]; then
+            echo "set -g destroy-unattached off" >> ~/.tmux.conf
+        fi
+    else
+        echo "WARNING: tmux must be available for './manage dev' commands"
+        echo "Try 'sudo apt install tmux' or 'brew install tmux'"
+        sleep 1
+    fi
 
 
-if $_error; then
-    exit 1
-fi
+    if $_error; then
+        exit 1
+    fi
 
 
-if [ ! -e 'packages/api/sls-custom.yml' ]; then
-    cp packages/api/sls-custom.yml.default packages/api/sls-custom.yml
-    echo 'Please edit packages/api/sls-custom.yml if you intend to do any API work.'
-fi
+    if [ ! -e 'packages/api/sls-custom.yml' ]; then
+        cp packages/api/sls-custom.yml.default packages/api/sls-custom.yml
+        echo 'Please edit packages/api/sls-custom.yml if you intend to do any API work.'
+    fi
 
 
-if [ ! -e "$HOME/.aws/credentials" ]; then
-    mkdir -p ~/.aws
-    cat <<EOF >> ~/.aws/credentials
+    if [ ! -e "$HOME/.aws/credentials" ]; then
+        mkdir -p ~/.aws
+        cat <<EOF >> ~/.aws/credentials
 [default]
 aws_secret_access_key = 1234
 aws_access_key_id = 5678
 EOF
-    echo "⚠ NOTE: I've added a default ~/.aws/credentials file for you"
+        echo -e "⚠️ NOTE: I've added a default ~/.aws/credentials file for you"
+    fi
 fi
 
 

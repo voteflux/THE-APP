@@ -9,4 +9,4 @@ if [ "$(basename `pwd`)" != "docker" ]; then
     fi
 fi
 
-docker build . "$@"
+docker build . -t xertrov/build-flux:latest "$@"

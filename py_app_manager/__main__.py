@@ -26,7 +26,7 @@ def ensure_deps(force=False):
     if force or (not deps_up_to_date() and not _deps_updated):
         def install_deps():
             must_run("python3 -m pip install -r requirements.txt")
-            must_run("npm i")
+            must_run("yarn install")
             must_run("npx lerna bootstrap")
             set_deps_up_to_date()
         if Repo is not None:
@@ -157,6 +157,15 @@ def add(dependencies, dev):
 
 
 @cli.command()
+@click.argument('args', nargs=-1)
+def nest(args):
+    _args = ' '.join(args)
+    runner = CmdRunner(must_run)
+    runner.add('nest cmd: {}'.format(_args), 'cd packages/api/ && yarn nest {}'.format(_args))
+    runner.run()
+
+
+@cli.command()
 @stage_option
 @click.argument('target', nargs=1, type=click.Choice(['api', 'ui', 'all']))
 @click.argument('args', nargs=-1)
@@ -164,7 +173,7 @@ def test(stage, target, args):
     export("STAGE", stage)
     runner = CmdRunner(must_run)
     if target in {'api', 'all'}:
-        runner.add('api tests', 'cd packages/api && npm run test -- --stage {s} {args}'.format(s=stage, args=' '.join(args)))
+        runner.add('api tests', 'cd packages/api && yarn test -- --stage {s} {args}'.format(s=stage, args=' '.join(args)))
     runner.run()
 
 
@@ -176,7 +185,7 @@ def test(stage, target, args):
 def deploy(stage, skip_tests, target, args):
     runner = CmdRunner(must_run)
     if target in {'api', 'all'}:
-        runner.add('api', "cd packages/api && npm run deploy -- --stage {} {args}".format(stage, args=' '.join(args)))
+        runner.add('api', "cd packages/api && yarn deploy -- --stage {} {args}".format(stage, args=' '.join(args)))
     runner.run()
 
 
@@ -205,11 +214,11 @@ def build(target, build_args, stage):
 
         def build_ui():
             logging.info("### BUILDING UI ###")
-            must_run("cd packages/ui && npm run build -- {remArgs}".format(remArgs=remArgs))
+            must_run("cd packages/ui && yarn build -- {remArgs}".format(remArgs=remArgs))
 
         def build_api():
             logging.info("### BUILDING API ###")
-            must_run("cd packages/api && npm run build -- --stage {stage} {remArgs}".format(stage=stage, remArgs=remArgs))
+            must_run("cd packages/api && yarn build -- --stage {stage} {remArgs}".format(stage=stage, remArgs=remArgs))
 
         def build_all():
             build_ui()
@@ -282,17 +291,17 @@ def dev(dev_target, stage):
 
 
     # uncomment the below if we need to compile flux-lib
-    # lib_pane = run_dev_cmd('./packages/lib', 'npm run watch', 'dev-lib')
+    # lib_pane = run_dev_cmd('./packages/lib', 'yarn watch', 'dev-lib')
     if dev_target in {'ui', 'all'}:
-        ui_pane = run_dev_cmd('./packages/ui', "STAGE={} npm run serve".format(stage), 'dev-ui')
+        ui_pane = run_dev_cmd('./packages/ui', "STAGE={} yarn serve".format(stage), 'dev-ui')
 
     if dev_target in {'api', 'all'}:
         # mongo dev server port: 53799
-        mongo_pane = run_dev_cmd('./packages/api', 'npm run mongo-dev', "mongo-dev", vertical=False)
-        api_cmd = "npm run watch -- --stage dev --port %d" % (api_port,)
+        mongo_pane = run_dev_cmd('./packages/api', 'yarn mongo-dev', "mongo-dev", vertical=False)
+        api_cmd = "yarn watch -- --stage dev --port %d" % (api_port,)
         api_pane = run_dev_cmd('./packages/api', api_cmd, "dev-api", vertical=True, active_pane=mongo_pane)
         # don't need to run tsc on the api atm
-        # compile_pane = run_dev_cmd('./packages/api', 'npm run watch:build', 'api-watch', vertical=True)
+        # compile_pane = run_dev_cmd('./packages/api', 'yarn watch:build', 'api-watch', vertical=True)
 
     window.select_layout('tiled')
 

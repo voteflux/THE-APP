@@ -1,3 +1,4 @@
+const TsconfigPathsPlugin = require('tsconfig-paths-webpack-plugin');
 const webpack = require("webpack");
 const slsw = require("serverless-webpack");
 const BbPromise = require("bluebird");
@@ -41,10 +42,13 @@ module.exports = BbPromise.try(() => {
             ]),
             new CopyWebpackPlugin([
                 { from: 'flux/tmpl', to: "flux/tmpl" }
-            ]),
+            ])
         ],
         resolve: {
             extensions: [".ts", ".tsx", ".js"],
+            plugins: [
+                new TsconfigPathsPlugin({ configFile: './tsconfig.json' })
+            ]
         },
         module: {
             rules: [

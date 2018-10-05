@@ -100,6 +100,18 @@ provider:
 
 
 functions:
+  # NEST APP
+  nest-app:
+    handler: ${self:custom.handlers}/main-nest.nest
+    timeout: 60
+    events:
+      - http:
+          path: /v3
+          method:
+            - post
+            - get
+          cors: true
+    iamRoleStatements: ${self:custom.iam.requestLoginToken}
   # stats
   genStatsGetinfo:
     handler: ${self:custom.scheduled}/stats.genStatsGetinfo
