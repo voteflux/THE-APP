@@ -9,6 +9,6 @@
   ],
   "scripts": {
     "bootstrap": "lerna bootstrap",
-    "test:codebuild": "sh ./scripts/codebuild_build.sh -i xertrov/flux-build:latest -a ./codebuild_tmp"
+    "codebuild": "sh ./scripts/codebuild.sh"
   }
 }
