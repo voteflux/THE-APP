@@ -99,11 +99,18 @@ provider:
         - "xray:PutTelemetryRecords"
       Resource:
         - "*"
-    - Effect: Allow
+        - Effect: Allow
       Action:
         - "s3:PutObject"
+        - "s3:PutObjectAcl"
       Resource:
         - "arn:aws:s3:::${self:custom.statsS3Bucket}/*"
+    - Effect: Allow
+      Action:
+        - "s3:DeleteObject"
+      Resource:
+        - "arn:aws:s3:::${self:custom.statsS3Bucket}/latest/*"
+
 
 
 functions:
