@@ -21,7 +21,7 @@ module.exports.genS3StatsDaily = async (db, event, context) => {
     const nRevocations = await db.count_logs({action: "deleted_user"})
     const nRevParams = {
         Body: JSON.stringify({ nRevocations, ts }),
-        Bucket: "flux-stats"
+        Bucket: process.env.STATS_S3_BUCKET
     }
 
     const genUploads = (params, name) => ([
@@ -29,7 +29,7 @@ module.exports.genS3StatsDaily = async (db, event, context) => {
         s3.putObject({ ...params, Key: `latest/${name}` }).promise()
     ])
 
-    uploads = [
+    const uploads = [
         ...genUploads(nRevParams, 'revocations')
     ]
 
