@@ -92,6 +92,11 @@ functions:
     timeout: 120
     events:
       - schedule: rate(5 minutes)
+  genS3StatsDaily:
+    handler: ${self:custom.scheduled}/stats.genS3StatsDaily
+    timeout: 120
+    events:
+      - schedule: rate(1 day)
   updateIndexesDBV1:
     handler: ${self:custom.scheduled}/indexes.updateIndexesDBV1
     timeout: 60

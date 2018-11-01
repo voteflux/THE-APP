@@ -226,6 +226,9 @@ export class DBMethods {
 
     count_volunteers = () => this.count_members(_volunteer);
 
+    count_logs = async (query={}) =>
+        await this.dbv1.log.count(query)
+
     /* validation */
 
     get_member_needing_validation = async (state=null, extraConds={}) => {
