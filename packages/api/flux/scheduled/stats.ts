@@ -22,12 +22,11 @@ module.exports.genS3StatsDaily = async (db, event, context) => {
     const nRevParams = {
         Body: JSON.stringify({ nRevocations, ts }),
         Bucket: process.env.STATS_S3_BUCKET,
-        ACL: 'public-read',
         ContentType: 'application/json'
     }
 
     const genUploads = (params, name) => ([
-        s3.putObject({ ...params, Key: `${dStr}/${name}` }).promise()
+        s3.putObject({ ...params, Key: `${dStr}/${name}` }).promise(),
         s3.putObject({ ...params, Key: `latest/${name}` }).promise()
     ])
 

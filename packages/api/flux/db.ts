@@ -48,7 +48,7 @@ const cleanId = rawId => (R.is(ObjectID, rawId) ? rawId : new ObjectID(rawId));
 
 /* DB Setup - v1 */
 
-const mongoUrl: string = process.env.MONGODB_URI || "MONGO_URI NOT SET"
+const mongoUrl: string = process.env.MONGODB_URI || console.error("MONGODB_URI NOT SET") || ""
 // const dbName = R.last(mongoUrl.split('/'))
 let dbv1 = {} as DBV1;
 
@@ -105,6 +105,7 @@ export const mkDbV1 = (uri: string = mongoUrl): Promise<DBV1> =>
     new Promise((res, rej) => {
         MongoClient.connect(
             uri,
+            { useNewUrlParser: true },
             (err, client) => {
                 if (err !== null) {
                     console.error(`mkDbV1 error: ${utils.j(err)}`);
