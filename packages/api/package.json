@@ -28,6 +28,7 @@
     "@types/jest": "^23.3.2",
     "@types/jsonwebtoken": "^7.2.8",
     "@types/pdfmake": "^0.1.1",
+    "@types/vega": "^0.0.30",
     "aws-sdk": "^2.325.0",
     "axios": "^0.18.0",
     "base-x": "^3.0.4",
@@ -50,7 +51,8 @@
     "ts-jest": "^23.10.1",
     "tweetnacl": "^1.0.0",
     "tweetnacl-ts": "^1.0.2",
-    "tweetnacl-util": "^0.15.0"
+    "tweetnacl-util": "^0.15.0",
+    "vega": "^4.3.0"
   },
   "devDependencies": {
     "@types/mongodb": "^3.1.4",
