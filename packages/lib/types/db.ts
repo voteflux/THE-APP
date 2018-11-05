@@ -32,7 +32,7 @@ export interface DBV1_Collections {
     email_validation: _Collection<any>,
     sms_verifications: _Collection<any>,
     errors: _Collection<any>,
-    log: _Collection<any>,
+    log: _Collection<{action: string, data: any}>,
     login_codes: _Collection<any>,
     login_tokens: _Collection<any>,
     notify_queue: _Collection<any>,

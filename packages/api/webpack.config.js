@@ -33,7 +33,16 @@ module.exports = BbPromise.try(() => {
                         transpileOnly: true,
                         happyPackMode: true
                     }
+                },
+                {
+                    type: 'javascript/auto',
+                    test: /\.mjs$/,
+                    use: []
                 }
+                // {
+                //     loader: "json-loader",
+                //     test: /\.json$/
+                // }
             ]
         }
     };

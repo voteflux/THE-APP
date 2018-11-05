@@ -3,6 +3,7 @@ import * as R from 'ramda'
 
 import { DB, init as initDb } from '../flux/db';
 import { ObjectID } from 'bson';
+import { getAllRevocations } from '../flux/stats/revocations'
 
 const S3 = require('aws-sdk/clients/s3')
 const s3 = new S3()
@@ -30,15 +31,7 @@ const args = yargs.option('target', {
 const tsToFormattedDate = (ts: number): string => (new Date(ts * 1000)).toISOString().slice(0,10)
 
 
-const revocations = async (allLogs: {_id: ObjectID, action: string, data: any}[]) => {
-    allLogs.map(l => {
-        const ts = l._id.getTimestamp()
-        const d = new Date(ts)
-        console.log(`Log (${l._id}, ${l.action}) at ${d}`)
-    })
-
-    const revocations = R.filter(l => l.action === "deleted_user" || l.action === "pp_receipt_fail", allLogs)
-
+const revocations = async (revocations: {_id: ObjectID, action: string, data: any}[]) => {
     console.log("nRevocations total:", revocations.length)
 
     const timestamps = R.map(({_id}) => _id.generationTime, revocations)
@@ -47,7 +40,7 @@ const revocations = async (allLogs: {_id: ObjectID, action: string, data: any}[]
 
     console.log("Timestamps:", timestamps)
     const minTs = <number>R.reduce(R.min, endTs, timestamps) - 86400
-    const maxTs = <number>R.reduce(R.max, 0, timestamps); // endTs
+    const maxTs = <number>R.reduce(R.max, endTs, timestamps); // endTs
 
     if (maxTs <= minTs) {
         console.log("No timestamps to scan...", {minTs, maxTs})
@@ -101,7 +94,7 @@ const main = async() => {
     const db = await initDb()
     console.log("Created db...")
 
-    const allLogs = await db.dbv1.log.find({}).toArray()
+    const allLogs = await getAllRevocations(db)
     console.log("Got all logs...")
 
     await targets[args.target](allLogs).catch(e => console.error(`Error running target=${args.target}:`, e))

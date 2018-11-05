@@ -52,7 +52,8 @@
     "tweetnacl": "^1.0.0",
     "tweetnacl-ts": "^1.0.2",
     "tweetnacl-util": "^0.15.0",
-    "vega": "^4.3.0"
+    "vega": "^4.3.0",
+    "vega-lite": "^3.0.0-rc8"
   },
   "devDependencies": {
     "@types/mongodb": "^3.1.4",
