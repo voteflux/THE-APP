@@ -1,4 +1,4 @@
-# members.flux.party
+# app.flux.party
 
 Static pages for members.flux.party that interact with both APIv1 and APIv2.
 
