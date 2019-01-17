@@ -199,7 +199,7 @@ def deploy(stage, skip_tests, quick_sam, target, args):
                           f"sam validate && rm {tmp_file} || true && "
                           f"sam package --s3-bucket {bucket} --output-template-file {tmp_file} && "
                           f"sam deploy --template-file tmp-out.yaml "
-                          f"--stack-name flux-sam-app "
+                          f"--stack-name flux-sam-app-dev "
                           f"--parameter-overrides {params_str} "
                           f"--capabilities CAPABILITY_IAM --no-fail-on-empty-changeset")
     runner.run()
