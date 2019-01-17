@@ -4,7 +4,7 @@ logging.warning("logging started")
 import json
 import sys
 sys.path.insert(0, '/opt')
-sys.path.insert(0, '../deps')
+sys.path.insert(0, './deps')
 
 
 from attrdict import AttrDict

@@ -50,6 +50,15 @@ def gen_table_name(name):
     return f"{env.pNamePrefix}-{name}"
 
 
+class ModelEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if hasattr(obj, 'attribute_values'):
+            return obj.attribute_values
+        elif isinstance(obj, datetime.datetime):
+            return obj.isoformat()
+        return json.JSONEncoder.default(self, obj)
+
+
 class BaseModel(Model):
     @classmethod
     def get_or(cls, *args, default=None):
@@ -60,6 +69,11 @@ class BaseModel(Model):
         except super().DoesNotExist as e:
             return default
 
+    def to_json(self):
+        return json.dumps(self, cls=ModelEncoder)
+
+    def to_python(self):
+        return json.loads(self.to_json())
 
 class Ix(GlobalSecondaryIndex):
     class Meta:
@@ -113,6 +127,8 @@ def auth(f):
             print(f"auth-inner got good return: {ret}")
             return ret
         except Exception as e:
+            import traceback
+            traceback.print_exc()
             print(f"[ERROR]: {repr(e)} {str(e)}, {type(e)}")
         return gen_status(500)
 
@@ -130,8 +146,8 @@ async def get_mine(data, user, *args, **kwargs):
     print(qs_log)
     for q_log in qs_log:
         print(q_log)
-        q = QuestionModel.get(q_log.qid)
-        qs.append(q)
+        q = QuestionModel.get_or(q_log.qid, default={})
+        qs.append(q if type(q) is dict else q.to_python())
     return success(qs)
 
 
@@ -185,10 +201,11 @@ async def submit(data, user, *args, **kwargs):
     }
     params.update({'prev_q': prev_q} if prev_q else {})
     q = QuestionModel(**params)
+    q.save()
     UserQuestionsModel(uid=uid).update(actions=[
-        UserQuestionsModel.qs.set((UserQuestionsModel.qs | []).prepend([UserQuestionLogEntry(ts=ts, qid=q.id)]))
+        UserQuestionsModel.qs.set((UserQuestionsModel.qs | []).prepend([UserQuestionLogEntry(ts=ts, qid=q.qid)]))
     ])
     UserQuestionsModel(uid="global").update(actions=[
-        UserQuestionsModel.qs.set((UserQuestionsModel.qs | []).prepend([UserQuestionLogEntry(ts=ts, qid=q.id)]))
+        UserQuestionsModel.qs.set((UserQuestionsModel.qs | []).prepend([UserQuestionLogEntry(ts=ts, qid=q.qid)]))
     ])
     return success({'submitted': True, 'qid': qid})

@@ -19,7 +19,7 @@
             ></v-text-field>
 
             <v-select
-                    v-model="select"
+                    v-model="display_choice"
                     :items="displayOpts"
                     :rules="[v => !!v || 'Item is required']"
                     label="Public Name on Question"
@@ -68,13 +68,17 @@ export default Vue.extend({
         back() {
             history.back()
         },
-        submit() {
+        async submit() {
             this.submitWR = WebRequest.Loading()
-            this.$flux.v3.qanda.submit({
+            this.submitWR = await this.$flux.v3.qanda.submit({
                 display_choice: this.display_choice,
                 question: this.question,
                 title: this.title,
-            }).then(() => this.back())
+                ...this.auth
+            })
+            this.submitWR.do({
+                'success': () => this.back()
+            })
         }
     },
 
