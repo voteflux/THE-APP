@@ -62,8 +62,8 @@ const mkErr = (path: string) => <r>(err: HttpResponse): WebRequest<string, r> =>
 // "https://w184hkom33.execute-api.ap-southeast-2.amazonaws.com/Prod/"
 // "https://api.sam-flux-dev.fish.xk.io/"
 const localDev = { v3: "http://localhost:52710/", v2: "http://localhost:52700/v2/", v1: "https://flux-api-dev.herokuapp.com/", prod: false }
-const remoteDev = { v3: "http://dev-api.sam.flux.party/", v2: "https://dev.api.flux.party/v2/", v1: "https://flux-api-dev.herokuapp.com/", prod: false }
-const remoteProd = { v3: "http://api.sam.flux.party/", v2: "https://api.flux.party/v2/", v1: "https://api.voteflux.org/", prod: true }
+const remoteDev = { v3: "https://api.dev.sam.flux.party/", v2: "https://dev.api.flux.party/v2/", v1: "https://flux-api-dev.herokuapp.com/", prod: false }
+const remoteProd = { v3: "https://api.sam.flux.party/", v2: "https://api.flux.party/v2/", v1: "https://api.voteflux.org/", prod: true }
 const apiRoots = () => {
     switch (window.location.hostname) {
         case "127.0.0.1":
