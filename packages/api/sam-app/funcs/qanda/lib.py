@@ -23,7 +23,7 @@ def get_ssm(name, with_decryption=False):
     return ssm.get_parameter(Name=name, WithDecryption=with_decryption)['Parameter']['Value']
 
 
-mongodb_uri = env.MONGODB_URI if env.MONGODB_URI != '' else get_ssm(f'{env.pNamePrefix}-flux-sam-app-mongodb-uri',
+mongodb_uri = env.MONGODB_URI if env.MONGODB_URI != '' else get_ssm(f'{env.pNamePrefix}-mongodb-uri',
                                                                     with_decryption=True)
 mongo_client = AsyncIOMotorClient(env.MONGODB_URI)
 mongo = mongo_client[env.MONGODB_URI.rsplit('/')[-1].rsplit('?')[0]]
