@@ -5,9 +5,13 @@
             <v-btn large color="info" @click="openAskPage()"><v-icon left>question_answer</v-icon> Ask a Question</v-btn>
         </div>
         <ui-collapsible title="Your Questions">
-            <v-list v-if="yourQsWR.isSuccess() && yourQsWR.unwrap().length > 0">
-
-            </v-list>
+            <div v-if="yourQsWR.isSuccess() && yourQsWR.unwrap().length > 0">
+                <div v-for="q in yourQsWR.unwrap()" class="pv1">
+                    <h4 class="pb1">Title: {{q.title}}</h4>
+                    <h5 class="pb1">Author: {{q.display_name}}, Date: {{q.ts}}</h5>
+                    <p>Question: {{q.question}}</p>
+                </div>
+            </div>
             <h4 style="text-align: center;" v-else-if="yourQsWR.isSuccess()">You haven't asked any questions yet.</h4>
             <loading v-else-if="yourQsWR.isLoading() || yourQsWR.isNotRequested()">Loading
             </loading>
