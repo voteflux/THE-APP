@@ -53,7 +53,7 @@ import Vue from "vue";
 import UserSummary from "./UserSummary.vue";
 import OrganiserUtils from "./OrganiserUtils.vue";
 import FinanceUtils from "./FinanceUtils.vue"
-import { UiSection, Warning, Section, EditableOpt } from "@c/common";
+import { UiSection, Warning, CollapsibleSection, EditableOpt } from "@c/common";
 
 import Routes from "../routes"
 import Roles from "../lib/roles";
@@ -65,7 +65,7 @@ import { Req, RolesResp } from 'flux-lib/types/db'
 
 export default Vue.extend({
     name: "Dashboard",
-    components: { UserSummary, UiSection, Warning, Section, EditableOpt },
+    components: { UserSummary, UiSection, Warning, Section: CollapsibleSection, EditableOpt },
     props: {
         user: Object,
         roles: Object as () => Req<RolesResp>,

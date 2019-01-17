@@ -1,0 +1,7 @@
+{
+  "pNamePrefix": "flux-api-local-dev",
+  "pHostedZoneId": "ZG8WT0PBH5AHJ",
+  "pSubdomain": "sam-flux-dev",
+  "pDomain": "fish.xk.io",
+  "pCertificateArn": "arn:aws:acm:ap-southeast-2:377792328368:certificate/a38d284f-52b0-4a17-b3df-16171a3d816e"
+}

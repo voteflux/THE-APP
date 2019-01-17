@@ -102,12 +102,12 @@ Vue.use(vueSignature)
 import App from "./App.vue";
 
 
-
-
 import Dashboard from "@c/Dashboard.vue";
 import UserValidation from "@c/UserValidation.vue";
 import UserDetailsMain from "@c/UserDetails";
 import UserRevocation from "@c/UserRevocation.vue";
+import QAndA from "@c/QAndA/QAndA.vue";
+import AskQuestion from "@c/QAndA/AskQuestion.vue";
 import * as Finance from "@c/Finance";
 import * as Volunteers from "@c/Volunteers"
 import * as Candidates from "@c/Candidates"
@@ -116,22 +116,25 @@ import FinanceEnterDonation from "@c/Finance/FinanceEnterDonation.vue";
 
 import R from "./routes";
 
-import {UiSection, Loading, Error, Warning, FluxInput, TransitionExpand, TransitionSlide} from "@c/common";
-Vue.component('ui-section', UiSection)
-Vue.component('loading', Loading)
-Vue.component('error', Error)
-Vue.component('warning', Warning)
-Vue.component('flux-input', FluxInput)
-Vue.component('transition-slide', TransitionSlide)
-Vue.component('transition-expand', TransitionExpand)
-import NavDrawer from '@c/NavDrawer.vue'
-Vue.component('nav-drawer', NavDrawer)
+import {UiSection, Loading, Error, Warning, FluxInput, TransitionExpand, TransitionSlide, CollapsibleSection} from "@c/common";
+import NavDrawer from '@c/NavDrawer.vue';
+Vue.component('ui-section', UiSection);
+Vue.component('ui-collapsible', CollapsibleSection);
+Vue.component('loading', Loading);
+Vue.component('error', Error);
+Vue.component('warning', Warning);
+Vue.component('flux-input', FluxInput);
+Vue.component('transition-slide', TransitionSlide);
+Vue.component('transition-expand', TransitionExpand);
+Vue.component('nav-drawer', NavDrawer);
 
 const routes = [
     { path: R.Dashboard, component: Dashboard },
     { path: R.ValidateSelf, component: UserValidation },
     { path: R.EditUserDetails, component: UserDetailsMain },
     { path: R.MembershipRevocation, component: UserRevocation },
+    { path: R.MembersQAndA, component: QAndA },
+    { path: R.MembersAskQuestion, component: AskQuestion },
     { path: R.AdminAuditRoles, component: AuditRoles },
     { path: R.FinanceMenu, component: Finance.Menu },
     { path: R.FinanceDonationEntry, component: Finance.EnterDonation },

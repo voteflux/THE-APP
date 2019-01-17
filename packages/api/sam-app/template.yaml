@@ -1,0 +1,121 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: "flux sam-app stack"
+
+Parameters:
+  pNamePrefix:
+    Type: String
+  pHostedZoneId:
+    Type: String
+  pSubdomain:
+    Type: String
+  pDomain:
+    Type: String
+  pCertificateArn:
+    Type: String
+    
+# More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+Globals:
+  Function:
+    Timeout: 6
+  Api:
+    EndpointConfiguration: REGIONAL
+    Cors: "'*'"
+
+
+Resources:
+
+  rQandaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: "funcs/qanda"
+      Handler: "index.qanda"
+      Runtime: "python3.6"
+      Environment:
+        Variables:
+          MONGODB_URI: ""
+          pNamePrefix: !Ref pNamePrefix
+      Events:
+        GetMyQs:
+          Type: Api
+          Properties:
+            Path: /qanda/getMine
+            Method: post
+        SubmitQ:
+          Type: Api
+          Properties:
+            Path: /qanda/submit
+            Method: post
+        GetAllQs:
+          Type: Api
+          Properties:
+            Path: /qanda/get
+            Method: get
+      Policies:
+        Version: 2012-10-17
+        Statement:
+          - Effect: Allow
+            Action:
+              - ssm:GetParameter
+              - ssm:DecryptParameter
+            Resource:
+              - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${pNamePrefix}-flux-sam-app-mongodb-uri'
+
+  rUserQuestionsTable:
+    Type: AWS::Serverless::SimpleTable
+    Properties:
+      TableName: !Sub ${pNamePrefix}-qanda-user-qs-ddb
+      PrimaryKey:
+        Name: uid
+        Type: String
+      SSESpecification:
+        SSEEnabled: True
+
+  rQuestionsTable:
+    Type: AWS::Serverless::SimpleTable
+    Properties:
+      TableName: !Sub ${pNamePrefix}-qanda-questions-ddb
+      PrimaryKey:
+        Name: qid
+        Type: String
+      SSESpecification:
+        SSEEnabled: True
+
+  rApiDomain:
+    Type: AWS::ApiGateway::DomainName
+    Properties:
+      DomainName: !Sub "api.${pSubdomain}.${pDomain}"
+      RegionalCertificateArn: !Ref pCertificateArn
+      EndpointConfiguration: { Types: [REGIONAL] }
+
+  rApiDomainRecord:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      Name: !Sub api.${pSubdomain}.${pDomain}.
+      HostedZoneName: !Sub ${pDomain}.
+      AliasTarget:
+        DNSName: !GetAtt rApiDomain.RegionalDomainName
+        HostedZoneId: !GetAtt rApiDomain.RegionalHostedZoneId
+      Type: A
+
+  rApiBasePath:
+    Type: AWS::ApiGateway::BasePathMapping
+    Properties:
+      DomainName: !Ref rApiDomain
+      RestApiId: !Ref ServerlessRestApi
+      Stage: !Ref ServerlessRestApiProdStage
+
+
+Outputs:
+#
+#    HelloWorldApi:
+#      Description: "API Gateway endpoint URL for Prod stage for Hello World function"
+#      Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/"
+#
+    oQandaFunction:
+      Description: "Hello World Lambda Function ARN"
+      Value: !GetAtt rQandaFunction.Arn
+#
+#    HelloWorldFunctionIamRole:
+#      Description: "Implicit IAM Role created for Hello World function"
+#      Value: !GetAtt HelloWorldFunctionRole.Arn

@@ -9,7 +9,18 @@ import { Http, HttpResponse, HttpOptions } from "vue-resource/types/vue_resource
 import { PluginObject } from "vue";
 // import io from "socket.io-client";
 
-import { UserV1Object, DonationsResp, RoleResp, Auth, PR, UserForFinance, RolesResp, Req, AuthJWT } from "flux-lib/types/db";
+import {
+    UserV1Object,
+    DonationsResp,
+    RoleResp,
+    Auth,
+    PR,
+    UserForFinance,
+    RolesResp,
+    Req,
+    AuthJWT,
+    Paginated
+} from "flux-lib/types/db";
 import { NdaStatus, NdaDraftCommit, GenerateDraftNdaReq } from "flux-lib/types/db/vols";
 import WebRequest from "flux-lib/WebRequest";
 import { StdSimpleEitherResp } from "flux-lib/types/index";
@@ -17,6 +28,7 @@ import { MsgBus, M } from "../messages";
 import { createSignedReq, PayloadDecoder, objToPayload } from 'flux-lib/types/db/auth'
 import { SignedReqCreationOpts, Payload } from '../../../lib/types/db/auth'
 import { SimpleEither } from '../../../lib/types/index'
+import {QandaQuestion} from "flux-lib/types/db/qanda";
 export * from "flux-lib/types/db";
 export * from "flux-lib/types/db/api";
 export * from "flux-lib/types/db/vols";
@@ -27,10 +39,14 @@ export interface CheckEmailResp {
 
 const mkResp = <r>(data): WebRequest<string, r> => {
     if (data.status == 200) {
-        if (data.body.error === undefined || data.body.error === "" || data.body.error == false) {
+        console.log(data)
+        if (data.body && data.body !== null && data.body.error === undefined) {
             return WebRequest.Success(data.body);
         } else {
-            return WebRequest.Failed(data.body.error);
+            if (data.body && data.body.error) {
+                return WebRequest.Failed(data.body.error);
+            }
+            return WebRequest.Failed("No response from API")
         }
     } else {
         return WebRequest.Failed(`HTTP request failed with status: ${data.status}`);
@@ -43,9 +59,11 @@ const mkErr = (path: string) => <r>(err: HttpResponse): WebRequest<string, r> =>
 };
 
 // todo: check API paths against diff
-const localDev = { v2: "http://localhost:52700/v2/", v1: "https://flux-api-dev.herokuapp.com/", prod: false }
-const remoteDev = { v2: "https://dev.api.flux.party/v2/", v1: "https://flux-api-dev.herokuapp.com/", prod: false }
-const remoteProd = { v2: "https://api.flux.party/v2/", v1: "https://api.voteflux.org/", prod: true }
+// "https://w184hkom33.execute-api.ap-southeast-2.amazonaws.com/Prod/"
+// "https://api.sam-flux-dev.fish.xk.io/"
+const localDev = { v3: "http://localhost:52710/", v2: "http://localhost:52700/v2/", v1: "https://flux-api-dev.herokuapp.com/", prod: false }
+const remoteDev = { v3: "http://dev-api.sam.flux.party/", v2: "https://dev.api.flux.party/v2/", v1: "https://flux-api-dev.herokuapp.com/", prod: false }
+const remoteProd = { v3: "http://api.sam.flux.party/", v2: "https://api.flux.party/v2/", v1: "https://api.voteflux.org/", prod: true }
 const apiRoots = () => {
     switch (window.location.hostname) {
         case "127.0.0.1":
@@ -97,6 +115,10 @@ export function FluxApi(_Vue: VueConstructor, options?: any): void {
 
     const roots = apiRoots();
 
+    const _api3 = (_path: string) => {
+        return roots.v3 + _path;
+    };
+
     const _api2 = (_path: string) => {
         return roots.v2 + _path;
     };
@@ -124,6 +146,16 @@ export function FluxApi(_Vue: VueConstructor, options?: any): void {
     }
 
     const fluxMethods = {
+        v3: {
+            qanda: {
+                getMine: (args)=>
+                    post(_api3("qanda/getMine"), args),
+                getAll: () =>
+                    get(_api3("qanda/getAll")),
+                submit: (args) =>
+                    post(_api3("qanda/submit"), args),
+            },
+        },
         v2: {
             checkEmailToOnboard({ email }): PR<any> {
                 return post(_api2("user/check_email"), { email });
@@ -159,7 +191,7 @@ export function FluxApi(_Vue: VueConstructor, options?: any): void {
                 requestLoginToken: (auth: AuthJWT, args: {email: string}): PR<SimpleEither<string, any>> => {
                     return post_jwt("login/requestLoginToken", auth, args)
                 }
-            }
+            },
         },
 
         v1: {

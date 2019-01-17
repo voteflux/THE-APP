@@ -32,4 +32,7 @@ module.exports = {
             new CopyWebpackPlugin([ { from: "static/", to: "../" } ]),
         ],
     },
+    devServer:{
+        proxy:"http://localhost:52701"
+    }
 }

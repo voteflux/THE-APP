@@ -7,6 +7,7 @@
   "scripts": {
     "test": "echo \"Note: no tests yet...\"",
     "watch": "sls offline start --dontPrintOutput",
+    "sam-local": "sam local start-api",
     "build": "sls package",
     "deploy": "sls deploy",
     "mongo-dev": "./bin/kill-dev-mongod.sh && ts-node -r tsconfig-paths/register -O '{\"allowJs\":false,\"checkJs\":false}' ./dev_mongo_server.ts"
@@ -29,6 +30,7 @@
     "@types/jsonwebtoken": "^7.2.8",
     "@types/pdfmake": "^0.1.1",
     "@types/vega": "^0.0.30",
+    "aws-sam-local": "^0.2.11",
     "aws-sdk": "^2.325.0",
     "axios": "^0.18.0",
     "base-x": "^3.0.4",

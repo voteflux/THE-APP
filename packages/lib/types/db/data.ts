@@ -6,3 +6,6 @@ export type SzObjectId = t.TypeOf<typeof SzObjectIdRT>
 
 export const HashRT = t.refinement(t.string, s => base64ToUint8a(s).length === 32)
 export type HashTy = t.TypeOf<typeof HashRT>
+
+
+export type PageKey = string

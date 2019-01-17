@@ -86,7 +86,7 @@ import { UserV1Object, Auth } from 'flux-lib/types/db';
 import routes from '@/routes'
 import { Option, some, none, isSome, isNone } from 'fp-ts/lib/Option'
 import { yourSignaturePlaceholder } from 'flux-lib/pdfs/nda/imageUris';
-import { Error, Loading, Section, PDFViewer } from "@c/common"
+import { Error, Loading, CollapsibleSection, PDFViewer } from "@c/common"
 import WebRequest from 'flux-lib/WebRequest';
 import { NdaStage, NdaDraftCommit, GenerateDraftNdaResp, NdaStatus } from 'flux-lib/types/db/vols'
 import SignNDA from './SignNDA.vue'
@@ -108,7 +108,7 @@ enum WIZ {
 
 
 export default Vue.extend({
-    components: { Loading, Error, Section, SignNDA, PDFViewer },
+    components: { Loading, Error, Section: CollapsibleSection, SignNDA, PDFViewer },
 
     props: {
         user: Object as () => UserV1Object,

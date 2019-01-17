@@ -2,6 +2,10 @@
 '''
 
 import sys, os, json, logging, subprocess
+
+import boto3
+from attrdict import AttrDict
+
 logging.basicConfig(level=logging.INFO)
 
 from time import sleep
@@ -17,10 +21,14 @@ repo = None
 from py_app_manager.pre_deps import *
 from py_app_manager.cmd_runner import CmdRunner
 
+
 def is_netlify():
     return 'IS_NETLIFY' in os.environ
 
+
 _deps_updated = False
+
+
 def ensure_deps(force=False):
     global _deps_updated, repo
     if force or (not deps_up_to_date() and not _deps_updated):
@@ -29,6 +37,7 @@ def ensure_deps(force=False):
             must_run("npm i")
             must_run("npx lerna bootstrap")
             set_deps_up_to_date()
+
         if Repo is not None:
             repo = Repo('./')
             if repo.is_dirty() and not force and not is_netlify():
@@ -57,13 +66,11 @@ except Exception as e:
     print("Please run ./manage from the root directory (of the repository)")
     sys.exit(255)
 
-
 skip_ensure_deps = len(sys.argv) > 1 and ( \
-        sys.argv[1] == "mgr_set_up_to_date" \
-        or False
-    )
+            sys.argv[1] == "mgr_set_up_to_date" \
+            or False
+)
 _deps_updated = skip_ensure_deps
-
 
 # ensure deps and things are installed before we go further
 try:
@@ -74,15 +81,16 @@ except Exception as e:
     print(e, e.args, e.message)
     raise e
 
-
 # main UI
 
 
 import click
+
 stage_option = click.option('--stage', type=click.Choice(['prod', 'staging', 'dev']), default='dev')
 type_pkg_choice = click.Choice(['api', 'ui', 'lib', 'all'])
 
 render_target = lambda target: defaultdict(lambda: target, {'all': '', 'lib': 'flux-lib'})[target]
+
 
 @click.group()
 @click.option("--debug/--no-debug", default=False)
@@ -136,7 +144,8 @@ def install_npm_deps(target, deps, dev=False):
     lerna_pkg = '' if scope == '' else '--scope={}'.format(scope)
     dev_flag = "--dev" if dev else ""
     for d in deps:
-        runner.add('Installing node dependency `{d}` for `{pkg}`'.format(d=d, pkg=target), 'npx lerna add {d} {pkg} {dev}'.format(d=d, pkg=lerna_pkg, dev=dev_flag))
+        runner.add('Installing node dependency `{d}` for `{pkg}`'.format(d=d, pkg=target),
+                   'npx lerna add {d} {pkg} {dev}'.format(d=d, pkg=lerna_pkg, dev=dev_flag))
     runner.run()
 
 
@@ -163,19 +172,36 @@ def test(stage, target, args):
     export("STAGE", stage)
     runner = CmdRunner(must_run)
     if target in {'api', 'all'}:
-        runner.add('api tests', 'cd packages/api && npm run test -- --stage {s} {args}'.format(s=stage, args=' '.join(args)))
+        runner.add('api tests',
+                   'cd packages/api && npm run test -- --stage {s} {args}'.format(s=stage, args=' '.join(args)))
     runner.run()
 
 
 @cli.command()
 @stage_option
-@click.option('--skip-tests', default=False, type=bool)
-@click.argument('target', nargs=1, type=click.Choice(['api']))
+@click.option('--skip-tests', default=False, is_flag=True, type=click.BOOL)
+@click.option('--quick-sam', default=False, is_flag=True, type=click.BOOL)
+@click.argument('target', nargs=1, type=click.Choice(['api', 'sam']))
 @click.argument('args', nargs=-1)
-def deploy(stage, skip_tests, target, args):
+def deploy(stage, skip_tests, quick_sam, target, args):
     runner = CmdRunner(must_run)
     if target in {'api', 'all'}:
         runner.add('api', "cd packages/api && npm run deploy -- --stage {} {args}".format(stage, args=' '.join(args)))
+    if target in {'sam'}:
+        params = AttrDict(json.load(open('packages/api/sam-app/parameters.json', 'r')))
+        params_str = ' '.join([f'\"{k}={v}\"' for k, v in params.items()])
+        bucket = f'{params.pNamePrefix}-sam-cf-artifacts'
+        tmp_file = 'tmp-out.yaml'
+        sam_pre = f"aws s3 mb s3://{bucket} && echo 'created bucket {bucket}' || echo 'bucket {bucket} not created' && " \
+                  f"sam build && " if not quick_sam else ""
+        runner.add('sam', f"set -x && cd packages/api/sam-app && "
+                          f"{sam_pre} "
+                          f"sam validate && rm {tmp_file} || true && "
+                          f"sam package --s3-bucket {bucket} --output-template-file {tmp_file} && "
+                          f"sam deploy --template-file tmp-out.yaml "
+                          f"--stack-name flux-sam-app "
+                          f"--parameter-overrides {params_str} "
+                          f"--capabilities CAPABILITY_IAM --no-fail-on-empty-changeset")
     runner.run()
 
 
@@ -193,8 +219,8 @@ def build(target, build_args, stage):
             logging.info("Building for prod!")
             if is_netlify():
                 ## Don't checkout anymore, just exit; TODO: can we prevent netlify building?
-                #logging.error("PRODUCTION DEPLOY BUT LATEST COMMIT IS NOT A RELEASE - BAILING OUT")
-                #sys.exit(1)
+                # logging.error("PRODUCTION DEPLOY BUT LATEST COMMIT IS NOT A RELEASE - BAILING OUT")
+                # sys.exit(1)
                 logging.info("Checking out most recent version tag")
                 # reset_checkout_ref = os.environ.get('BRANCH', 'master')
                 real_checkout_tag = os.environ['MOST_RECENT_TAG']
@@ -208,7 +234,8 @@ def build(target, build_args, stage):
 
         def build_api():
             logging.info("### BUILDING API ###")
-            must_run("cd packages/api && npm run build --stage {stage} -- {remArgs}".format(stage=stage, remArgs=remArgs))
+            must_run(
+                "cd packages/api && npm run build --stage {stage} -- {remArgs}".format(stage=stage, remArgs=remArgs))
 
         def build_all():
             build_ui()
@@ -237,6 +264,7 @@ def dev(dev_target, stage):
 
     import libtmux
     api_port = 52700
+    sam_port = 52701
     ui_port = 32710
     TMP_SESSION = 'tmp-session'
     server = libtmux.Server(socket_name='flux-app-tmux-session')
@@ -244,6 +272,7 @@ def dev(dev_target, stage):
     server.cmd('set-option -g default-shell /bin/bash')
     session = server.new_session(session_name="main", start_directory='./', window_command="sleep 1")
     session.set_option('mouse', 'on')
+
     # session.set_option('destroy-unattached', 'off')
     # session.set_option('remain-on-exit', 'on')
 
@@ -255,7 +284,8 @@ def dev(dev_target, stage):
                     print(s.show_option('default-shell'))
                     s.kill_session()
             except Exception as e:
-                print('got an exception killing tmux sessions:', e)
+                if "no server running on" not in f"{e}":
+                    print('got an exception killing tmux sessions:', e)
 
     # kill_sessions()
     # session = None
@@ -264,13 +294,23 @@ def dev(dev_target, stage):
     print(session.list_windows())
     log_files = []
 
-    def run_dev_cmd(dir, cmd, name, active_pane=None, vertical=False):
+    def run_dev_cmd(dir, cmd, name, active_pane=None, vertical=False, wsl=False):
         nonlocal session, window, log_files
-        (to_run, l) = cmd_w_log(cmd, name, dir_offset='../../')
-        to_run = "printf '\\033]2;\%s\\033\\' '{title}'; _r(){{ if [ -e /usr/bin/read ]; then /usr/bin/read \"$@\"; else read \"$@\"; fi }}; endsess(){{ _r -p 'Press enter to terminate all...' && tmux kill-session -t main; }} ; trap 'endsess' SIGINT SIGTERM; ".format(title=name) + to_run
-        to_run += "; echo -e '\\n\\n' && endsess "
+        if not wsl:
+            (to_run, l) = cmd_w_log(cmd, name, dir_offset='../../')
+            log_files.append(l)
+        if wsl:
+            # to_run = cmd.replace('"', '\\"')
+            # to_run = f'powershell.exe -Command "\$Env:AWS_PROFILE = \'$AWS_PROFILE\' ; {to_run}"'
+            to_run = cmd
+        # to_run = "printf '\\033]2;\%s\\033\\' '{title}'; _r(){{ if [ -e /usr/bin/read ]; then /usr/bin/read \"$@\"; else read \"$@\"; fi }}; endsess(){{ _r -p 'Press enter to terminate all...' && tmux kill-session -t main; }} ; trap 'endsess' SIGINT SIGTERM; ".format(title=name) + to_run
+        trap_cmd = "trap 'endsess' SIGTERM"
+        to_run = f"printf '\\033]2;\%s\\033\\' '{name}'; " \
+            f"endsess(){{ tmux kill-session -t main || true; }} ; {trap_cmd}; " \
+            f"while sleep 1; " \
+            f"do {to_run}; " \
+            "echo -e '\\n\\nrestarting in 1s...'; done || endsess endsess"
         logging.debug('Running `{}` as cmd `{}`'.format(name, to_run))
-        log_files.append(l)
         if session is None:
             session = server.new_session(session_name="main", start_directory=dir, window_command=to_run)
             # session.set_option('remain-on-exit', 'on')
@@ -278,7 +318,6 @@ def dev(dev_target, stage):
             return window.attached_pane
         else:
             return window.split_window(start_directory=dir, shell=to_run, vertical=vertical)
-
 
     # uncomment the below if we need to compile flux-lib
     # lib_pane = run_dev_cmd('./packages/lib', 'npm run watch', 'dev-lib')
@@ -290,6 +329,12 @@ def dev(dev_target, stage):
         mongo_pane = run_dev_cmd('./packages/api', 'npm run mongo-dev', "mongo-dev", vertical=False)
         api_cmd = "npm run watch -- --stage dev --port %d" % (api_port,)
         api_pane = run_dev_cmd('./packages/api', api_cmd, "dev-api", vertical=True, active_pane=mongo_pane)
+        sam_cmd = f"C:\\Users\\Max\\AppData\\Local\\Programs\\Python\\Python36\\Scripts\\sam.exe local start-api --port {sam_port}"
+        env_file = "env.json"
+        envs = json.load(open(f"./packages/api/sam-app/{env_file}", 'r'))
+        sam_cmd = f"sam local start-api --skip-pull-image --port {sam_port} --env-vars {env_file} " \
+            f"--parameter-overrides ParameterKey=pNamePrefix,ParameterValue=flux-api-local-dev"
+        sam_pane = run_dev_cmd('./packages/api/sam-app', sam_cmd, "sam-api", vertical=False, wsl=True)
         # don't need to run tsc on the api atm
         # compile_pane = run_dev_cmd('./packages/api', 'npm run watch:build', 'api-watch', vertical=True)
 

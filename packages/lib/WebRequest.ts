@@ -124,4 +124,4 @@ export class WebRequest<E,D> {
 }
 
 export default WebRequest
-export const WS = WebRequest
+export const WR = WebRequest

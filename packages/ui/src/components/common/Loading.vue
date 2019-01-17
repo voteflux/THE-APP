@@ -1,5 +1,5 @@
 <template>
-    <center class="loading">
+    <div class="loading" style="text-align: center;">
          <v-progress-circular
             :size="size"
             indeterminate
@@ -9,7 +9,7 @@
         <div class="v-mid dib">
             <slot/>
         </div>
-    </center>
+    </div>
 </template>
 
 <script lang="ts">

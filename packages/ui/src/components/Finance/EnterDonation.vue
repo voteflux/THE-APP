@@ -120,9 +120,6 @@
     </div>
 </template>
 
-<script type="text/x-template" id="flx-input-template">
-</script>
-
 <script lang="ts">
 const JSError = Error;
 import Vue from 'vue'
@@ -131,7 +128,7 @@ import { UserV1Object, SortMethod, Donation as DonationT, DonationsResp, SM, Use
 import { validJuris } from 'flux-lib/types/db/api'
 import WebRequest from 'flux-lib/WebRequest';
 import FluxLogo from '@c/common/FluxLogo.vue';
-import { Error, UiSection, Donation, Paginate, EditableDate, AddressEditor, Section, StatusSuccess, Loading, DonationTable } from '@c/common';
+import { Error, UiSection, Donation, Paginate, EditableDate, AddressEditor, CollapsibleSection, StatusSuccess, Loading, DonationTable } from '@c/common';
 import { Auth, Paginated } from '@/lib/api';
 import { Req } from '@/lib/api';
 import { eitherDo, ER } from 'flux-lib/types'
@@ -168,7 +165,7 @@ const defaultDonation: DonationT = {
 
 
 export default Vue.extend({
-    components: { FluxLogo, Loading, UiSection, Error, Paginate, Donation, EditableDate, AddressEditor, Section, StatusSuccess, DonationTable },
+    components: { FluxLogo, Loading, UiSection, Error, Paginate, Donation, EditableDate, AddressEditor, Section:CollapsibleSection, StatusSuccess, DonationTable },
     props: {
         user: Object as () => Req<UserV1Object>,
         auth: Object as () => Auth

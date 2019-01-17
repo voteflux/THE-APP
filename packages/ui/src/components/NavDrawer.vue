@@ -2,7 +2,7 @@
     <v-navigation-drawer clipped :value="value" @input="updateInput" enable-resize-watcher app>
         <v-toolbar flat>The Flux App</v-toolbar>
         <v-list>
-            <NavItem v-for="item in navItems()" :key="item.name" :item="item" />
+            <NavItem v-for="item in navItems()" :key="item.name" :item="item"></NavItem>
         </v-list>
     </v-navigation-drawer>
 </template>
@@ -35,6 +35,7 @@ export default Vue.extend({
                 { name: "Your Details", route: R.EditUserDetails },
                 { name: "Revoke Your Membership", route: R.MembershipRevocation },
             ] },
+            { name: "Q And A (AGM)", icon: "question_answer", route: R.MembersQAndA },
             // { name: "Volunteer", items: [
             //     { name: "NDA Status", route: R.VolunteerNdaStatusAndSign },
             // ]},
@@ -48,6 +49,7 @@ export default Vue.extend({
     },
     methods: {
         navItems() {
+            console.log(this.items)
             if (this.roles.isSuccess()) {
                 const permissionedItems: [string, NavItemRec][] = [
                     [Roles.FINANCE, { name: "Finance", items: [

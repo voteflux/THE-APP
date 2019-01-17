@@ -6,6 +6,4 @@ enum Roles {
     REGO_OFFICER = "rego_officer",
 }
 
-export default {
-    ...Roles
-}
+export default Roles

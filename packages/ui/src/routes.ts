@@ -13,17 +13,22 @@ export enum Routes {
     VolunteerNdaStatusAndSign = "/volunteers/nda/status",
 
     CandidateDashboard = "/candidates",
+
+    MembersQAndA = "/members/qanda",
+    MembersAskQuestion = "/members/ask-a-question"
 };
 export default Routes
-const R = Routes
+const R = Routes;
 
 export const pageTitle = (route: Routes) => {
-    const _e = () => { throw Error(`Title for ${route} not set!`) }
+    const _e = () => { throw Error(`Title for ${route} not set!`) };
     return ({
         [R.EditUserDetails]: "Your Details",
         [R.Dashboard]: "Dashboard",
         [R.ValidateSelf]: "Electoral Roll Self-Validation",
         [R.MembershipRevocation]: "Revoke Your Membership",
+        [R.MembersQAndA]: "Q And A",
+        [R.MembersAskQuestion]: "Ask a Question",
 
         [R.FinanceMenu]: "Finance Utilities",
         [R.FinanceDonationLog]: "Donation Log",
@@ -35,4 +40,4 @@ export const pageTitle = (route: Routes) => {
 
         [R.CandidateDashboard]: "Candidate Dashboard",
     })[route] || _e()
-}
+};

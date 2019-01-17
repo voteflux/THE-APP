@@ -65,6 +65,9 @@ export default Vue.extend({
     mounted() {
         this.statusClass = this.$props.type || Types.INFO
         this.visible = HideState.VISIBLE
+    },
+    created(): void {
+        this.visible = HideState.VISIBLE
     }
 });
 </script>

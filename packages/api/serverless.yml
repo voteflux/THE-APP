@@ -42,7 +42,6 @@ custom:
   # by default functions with custom iamRoles will inherit the global role
   serverless-iam-roles-per-function:
     defaultInherit: true
-  profile: ${file(./sls-custom.yml):profile, 'default'}
   stage: ${file(./sls-custom.yml):stage}
   statsS3Bucket: ${file(./sls-params-${self:provider.stage}.yml):statsS3Bucket}
   openCageApiKey: ${file(./sls-custom.yml):openCageApiKey}
@@ -81,7 +80,7 @@ provider:
   # region: ap-southeast-2
   region: us-east-1
   runtime: nodejs8.10
-  profile: ${self:custom.profile}
+  # profile: ${self:custom.profile}
   stage: ${opt:stage, self:custom.stage}
   memorySize: 128
   environment:

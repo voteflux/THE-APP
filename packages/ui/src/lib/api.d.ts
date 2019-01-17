@@ -8,6 +8,7 @@ import { NdaStatus, NdaDraftCommit, GenerateDraftNdaReq } from 'flux-lib/types/d
 import { StdV1, GetArbitraryPartial, } from 'flux-lib/types/db/api'
 import { UserForFinance } from 'flux-lib/types/db';
 import { Option, some, none, isSome, isNone } from 'fp-ts/lib/Option'
+import {QandaQuestion} from "flux-lib/types/db/qanda";
 
 export interface HasAddr {
     addr_street_no: string;
@@ -42,6 +43,13 @@ export interface FluxApiMethods {
         getNdaStatus: (opts: Auth) => PR<NdaStatus>,
         submitNdaPdfAndSignature: (args: Auth & {pdf: string, sig: string}) => PR<NdaStatus>,
         ndaGenerateDraftPdf: (auth: AuthJWT, args: GenerateDraftNdaReq) => PR<NdaDraftCommit>,
+    },
+    v3: {
+        qanda: {
+            getMine: (o: Auth) => PR<{questions: QandaQuestion}>,
+            getAll: () => PR<{questions: QandaQuestion}>,
+            submit: (o: Auth) => PR<{submitted: string, qid: string}>,
+        }
     },
     utils: {
         // onGotUserObj: (r: R<UserV1Object>) => void,
