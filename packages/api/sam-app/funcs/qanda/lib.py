@@ -38,7 +38,12 @@ _eq = lambda v: {'$eq': v}
 
 
 def gen_status(status, body=None, headers=None):
-    ret = {'statusCode': status, 'headers': {'content-type': 'application/json'}}
+    ret = {'statusCode': status, 'headers': {
+        'content-type': 'application/json',
+        'access-control-allow-headers': '*',
+        'access-control-allow-methods': 'GET,POST,OPTIONS',
+        'access-control-allow-origin': '*'
+    }}
     ret.update({'body': body} if body is not None else {})
     ret['headers'].update(headers if headers is not None else {})
     return ret
