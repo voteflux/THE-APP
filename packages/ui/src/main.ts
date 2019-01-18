@@ -11,6 +11,7 @@ import Vuetify from 'vuetify/es5/components/Vuetify'
 import VIcon from 'vuetify/es5/components/VIcon'
 import * as VMenu from 'vuetify/es5/components/VMenu'
 import VBtn from 'vuetify/es5/components/VBtn'
+import VCard from 'vuetify/es5/components/VCard'
 import VDatePicker from 'vuetify/es5/components/VDatePicker'
 import * as VForm from 'vuetify/es5/components/VForm'
 import VProgressCircular from 'vuetify/es5/components/VProgressCircular'
@@ -62,6 +63,7 @@ Vue.use(Vuetify, {
         VSubheader,
         VTooltip,
         VDivider,
+        VCard,
     },
     directives,
     iconfont: 'md',

@@ -171,7 +171,9 @@ async def get_mine(data, user, *args, **kwargs):
 
 def get_all():
     global_log = UserQuestionsModel.get_or("global", default=UserQuestionsModel(uid="global", qs=[]))
-    qs = [q.strip_private() for q in QuestionModel.batch_get(global_log.qs)]
+    print('global_log', global_log)
+    qs = [q.strip_private() for q in QuestionModel.batch_get([q['qid'] for q in global_log.qs])]
+    print('qs', qs)
     return success({'questions': qs})
 
 

@@ -5,7 +5,7 @@
             <v-btn large color="info" @click="openAskPage()"><v-icon left>question_answer</v-icon> Ask a Question</v-btn>
         </div>
         <ui-collapsible title="Your Questions">
-            <div v-if="yourQsWR.isSuccess() && yourQsWR.unwrap().length > 0">
+            <div v-if="yourQsWR.isSuccess() && yourQsWR.unwrap().questions.length > 0">
                 <div v-for="q in yourQsWR.unwrap().questions" class="pv1">
                     <QuestionCard :q-doc="q"></QuestionCard>
                     <!--<h4 class="pb1">Title: {{q.title}}</h4>-->
@@ -22,7 +22,7 @@
             </div>
         </ui-collapsible>
         <ui-collapsible title="All Questions" start-collapsed>
-            <div v-if="allQsWR.isSuccess() && allQsWR.unwrap().length > 0">
+            <div v-if="allQsWR.isSuccess() && allQsWR.unwrap().questions.length > 0">
                 <div v-for="q in allQsWR.unwrap().questions" class="pv1">
                     <QuestionCard :q-doc="q"></QuestionCard>
                     <!--<h4 class="pb1">Title: {{q.title}}</h4>-->
@@ -45,11 +45,12 @@
 import Vue from "vue";
 import WebRequest from "flux-lib/WebRequest";
 import Routes from "@/routes";
-import QuestionCard from "./QuestionCard";
+import QuestionCard from "./QuestionCard.vue";
 
 export default Vue.extend({
     props: ['auth'],
-    components: ['QuestionCard'],
+    components: {QuestionCard},
+
     data: () => ({
         yourQsWR: WebRequest.NotRequested(),
         allQsWR: WebRequest.NotRequested(),
@@ -64,9 +65,8 @@ export default Vue.extend({
         },
 
         async getMoreQs() {
-            if (this.totalNAllQs < 0) {
-                this.allQsWR = await this.$flux.v3.qanda.getAll()
-            }
+            this.allQsWR = WebRequest.Loading()
+            this.allQsWR = await this.$flux.v3.qanda.getAll()
         },
 
         openAskPage() {

@@ -1,11 +1,18 @@
 <template>
-    <v-card>
+    <v-card class="mv3">
         <v-card-title primary-title>
-            <h3 class="headline mb-0">Q Title: {{qDoc.title}}</h3>
-            <h4 class="f-subheadline">Asked by {{qDoc.display_name}} at {{qDoc.ts}}</h4>
-            <v-divider light></v-divider>
-            <div>Q Body: {{qDoc.question}}</div>
+            <v-layout column>
+                <h3 class="db headline mb-0">Title: {{qDoc.title}}</h3>
+                <div>Asked by {{qDoc.display_name}} <sub>at {{qDoc.ts}}</sub></div>
+            </v-layout>
         </v-card-title>
+        <v-card-text>
+            <p>Question: {{qDoc.question}}</p>
+        </v-card-text>
+        <!--<v-card-actions>-->
+            <!--<v-btn grow>Downvote</v-btn>-->
+            <!--<v-btn grow>Upvote</v-btn>-->
+        <!--</v-card-actions>-->
     </v-card>
 </template>
 
@@ -13,11 +20,8 @@
 import Vue from 'vue';
 
 export default Vue.extend({
-    props: {
-        qDoc: Object as () => {title: string, display_name: string, question: string, ts: string, qid: string}
-    },
+    props: ['qDoc', 'auth'],
     methods: {
-
     },
 })
 </script>
