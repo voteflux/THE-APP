@@ -123,7 +123,7 @@ class UserQuestionsModel(BaseModel):
         region = env.AWS_REGION
 
     uid = UnicodeAttribute(hash_key=True)
-    qs = ListAttribute(of=UserQuestionLogEntry, default=list)
+    qs = ListAttribute(of=UserQuestionLogEntry, default=lambda: list())
 
 
 def auth(f):
@@ -171,7 +171,7 @@ async def get_mine(data, user, *args, **kwargs):
 
 def get_all():
     global_log = UserQuestionsModel.get_or("global", default=UserQuestionsModel(uid="global", qs=[]))
-    qs = [q.strip_private() for q in QuestionModel.batch_get([QuestionModel(qid=qid) for qid in global_log.qs])]
+    qs = [q.strip_private() for q in QuestionModel.batch_get(global_log.qs)]
     return success({'questions': qs})
 
 

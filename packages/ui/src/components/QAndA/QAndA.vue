@@ -7,9 +7,10 @@
         <ui-collapsible title="Your Questions">
             <div v-if="yourQsWR.isSuccess() && yourQsWR.unwrap().length > 0">
                 <div v-for="q in yourQsWR.unwrap().questions" class="pv1">
-                    <h4 class="pb1">Title: {{q.title}}</h4>
-                    <h5 class="pb1">Author: {{q.display_name}}, Date: {{q.ts}}</h5>
-                    <p>Question: {{q.question}}</p>
+                    <QuestionCard :q-doc="q"></QuestionCard>
+                    <!--<h4 class="pb1">Title: {{q.title}}</h4>-->
+                    <!--<h5 class="pb1">Author: {{q.display_name}}, Date: {{q.ts}}</h5>-->
+                    <!--<p>Question: {{q.question}}</p>-->
                 </div>
             </div>
             <h4 style="text-align: center;" v-else-if="yourQsWR.isSuccess()">You haven't asked any questions yet.</h4>
@@ -23,9 +24,10 @@
         <ui-collapsible title="All Questions" start-collapsed>
             <div v-if="allQsWR.isSuccess() && allQsWR.unwrap().length > 0">
                 <div v-for="q in allQsWR.unwrap().questions" class="pv1">
-                    <h4 class="pb1">Title: {{q.title}}</h4>
-                    <h5 class="pb1">Author: {{q.display_name}}, Date: {{q.ts}}</h5>
-                    <p>Question: {{q.question}}</p>
+                    <QuestionCard :q-doc="q"></QuestionCard>
+                    <!--<h4 class="pb1">Title: {{q.title}}</h4>-->
+                    <!--<h5 class="pb1">Author: {{q.display_name}}, Date: {{q.ts}}</h5>-->
+                    <!--<p>Question: {{q.question}}</p>-->
                 </div>
             </div>
             <h4 style="text-align: center;" v-else-if="allQsWR.isSuccess()">You haven't asked any questions yet.</h4>
@@ -43,10 +45,11 @@
 import Vue from "vue";
 import WebRequest from "flux-lib/WebRequest";
 import Routes from "@/routes";
+import QuestionCard from "./QuestionCard";
 
 export default Vue.extend({
     props: ['auth'],
-
+    components: ['QuestionCard'],
     data: () => ({
         yourQsWR: WebRequest.NotRequested(),
         allQsWR: WebRequest.NotRequested(),
