@@ -1,6 +1,7 @@
 import asyncio
 import datetime
 import json
+import logging
 import os
 import uuid
 from typing import Callable
@@ -13,20 +14,23 @@ from pynamodb.models import Model
 from pynamodb.attributes import UnicodeAttribute, BooleanAttribute, UTCDateTimeAttribute, ListAttribute, MapAttribute
 
 env = AttrDict(os.environ)
-print(env)
 
 ssm = boto3.client('ssm')
 
 
 def get_ssm(name, with_decryption=False):
     print(f"getting ssm: {name}")
-    return ssm.get_parameter(Name=name, WithDecryption=with_decryption)['Parameter']['Value']
+    ret = ssm.get_parameter(Name=name, WithDecryption=with_decryption)['Parameter']['Value']
+    print(f"got ssm value of length: {len(ret)}")
+    return ret
 
 
-mongodb_uri = env.MONGODB_URI if env.MONGODB_URI != '' else get_ssm(f'{env.pNamePrefix}-mongodb-uri',
-                                                                    with_decryption=True)
-mongo_client = AsyncIOMotorClient(env.MONGODB_URI)
-mongo = mongo_client[env.MONGODB_URI.rsplit('/')[-1].rsplit('?')[0]]
+mongodb_uri = env.get('MONGODB_URI', None)
+if not mongodb_uri:
+    mongodb_uri = get_ssm(f'{env.pNamePrefix}-mongodb-uri', with_decryption=True)
+mongo_client = AsyncIOMotorClient(mongodb_uri)
+logging.info(f"Mongo client: {mongo_client}")
+mongo = mongo_client[mongodb_uri.rsplit('/')[-1].rsplit('?')[0]]
 
 _eq = lambda v: {'$eq': v}
 
@@ -95,6 +99,11 @@ class QuestionModel(BaseModel):
     next_q = UnicodeAttribute(null=True)
     ts = UTCDateTimeAttribute()
 
+    def strip_private(self):
+        ret = self.to_python()
+        del ret['uid']
+        return ret
+
 
 class UserQuestionLogEntry(MapAttribute):
     ts = UTCDateTimeAttribute()
@@ -151,9 +160,10 @@ async def get_mine(data, user, *args, **kwargs):
     return success(qs)
 
 
-def get_all(data):
-    print(data)
-    return success({'questions': []})
+def get_all():
+    global_log = UserQuestionsModel.get_or("global", default=UserQuestionsModel(uid="global", qs=[]))
+    qs = [q.strip_private() for q in QuestionModel.batch_get([QuestionModel(qid=qid) for qid in global_log.qs])]
+    return success({'questions': qs})
 
 
 def mk_first_plus_initial(user):

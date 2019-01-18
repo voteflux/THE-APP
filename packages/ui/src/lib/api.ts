@@ -64,25 +64,32 @@ const mkErr = (path: string) => <r>(err: HttpResponse): WebRequest<string, r> =>
 const localDev = { v3: "http://localhost:52710/", v2: "http://localhost:52700/v2/", v1: "https://flux-api-dev.herokuapp.com/", prod: false }
 const remoteDev = { v3: "https://api.dev.sam.flux.party/", v2: "https://dev.api.flux.party/v2/", v1: "https://flux-api-dev.herokuapp.com/", prod: false }
 const remoteProd = { v3: "https://api.sam.flux.party/", v2: "https://api.flux.party/v2/", v1: "https://api.voteflux.org/", prod: true }
+
+const endpoints = {
+    'dev': localDev,
+    'staging': remoteDev,
+    'prod': remoteProd
+}
+
 const apiRoots = () => {
     switch (window.location.hostname) {
         case "127.0.0.1":
         case "localhost":
-            return localDev
+            return endpoints.dev;
         case "dev.app.flux.party":
         case "flux-app-dev.netlify.com":
-            return remoteDev
+            return endpoints.staging;
         case "app.flux.party":
         case "members.flux.party":
         case "api.voteflux.org":
         case "flux-app.netlify.com":
         case "staging.app.flux.party":
         case "flux-app-staging.netlify.com":
-            return remoteProd
+            return endpoints.prod;
         default:
             if (window.location.hostname.includes("flux-app-dev.netlify.com"))
-                return remoteDev
-            return remoteProd;
+                return endpoints.staging;
+            return endpoints.prod;
     }
 };
 
@@ -113,7 +120,7 @@ export function FluxApi(_Vue: VueConstructor, options?: any): void {
 
     const http = <Http>(<any>Vue).http;
 
-    const roots = apiRoots();
+    let roots = apiRoots();
 
     const _api3 = (_path: string) => {
         return roots.v3 + _path;
@@ -151,7 +158,7 @@ export function FluxApi(_Vue: VueConstructor, options?: any): void {
                 getMine: (args)=>
                     post(_api3("qanda/getMine"), args),
                 getAll: () =>
-                    get(_api3("qanda/getAll")),
+                    get(_api3("qanda/get")),
                 submit: (args) =>
                     post(_api3("qanda/submit"), args),
             },
@@ -262,7 +269,10 @@ export function FluxApi(_Vue: VueConstructor, options?: any): void {
                 sendSToUrlAsHashParam("https://flux.party/_record_login_param.html", s);
             }
         },
-        $dev: _isDev
+        $dev: _isDev,
+        setEndpoints(stage) {
+            roots = endpoints[stage] || roots;
+        }
     } as FluxApiMethods;
 
     Vue.prototype.$flux = fluxMethods

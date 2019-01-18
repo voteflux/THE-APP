@@ -132,6 +132,30 @@ export default /*class App extends Vue*/ Vue.extend({
         }
     },
     created() {
+        if (this.$route.query.s) {
+            const s = this.$route.query.s;
+            const toRemoveBase = `s=${s}`;
+            console.log("detected secret as hash param, saving and removing");
+            this.$flux.auth.saveSecret(s);
+            window.location.href = window.location.href.replace(`?${toRemoveBase}`, '?').replace(`&${toRemoveBase}`, '')
+            return
+        }
+
+        const url = new URL(window.location.href);
+        const s = url.searchParams.get('s');
+        if (s) {
+            console.log("detected secret as get param, saving and removing");
+            this.$flux.auth.saveSecret(s);
+            url.searchParams.delete('s');
+            window.location.href = url.href;
+            return;
+        }
+
+        if (this.$route.query.stage) {
+            console.log(`setting endpoints to stage: ${this.$route.query.stage}`)
+            this.$flux.setEndpoints(this.$route.query.stage);
+        }
+
         this.loadAuth();
 
         MsgBus.$on(M.REFRESH_AUTH, () => {
@@ -153,6 +177,22 @@ export default /*class App extends Vue*/ Vue.extend({
         MsgBus.$on(M.LOGOUT, this.logout)
 
         this.$store.commit(AppFs.initHistoryCount)
+    },
+
+    mounted(){
+    },
+
+    beforeRouteEnter(to, from, next) {
+        // check for s param
+        console.log(to.query)
+        if (Object.keys(to.query).length > 0) {
+            next(vm => {
+                if (to.query.s) {
+                    // this.auth.saveSecret(this.query.s)
+                    console.log('triggering saveSecret')
+                }
+            })
+        }
     }
 });
 </script>

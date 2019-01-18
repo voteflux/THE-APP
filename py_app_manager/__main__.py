@@ -188,18 +188,24 @@ def deploy(stage, skip_tests, quick_sam, target, args):
     if target in {'api', 'all'}:
         runner.add('api', "cd packages/api && npm run deploy -- --stage {} {args}".format(stage, args=' '.join(args)))
     if target in {'sam'}:
-        params = AttrDict(json.load(open('packages/api/sam-app/parameters.json', 'r')))
+        params = AttrDict(json.load(open(f'packages/api/sam-app/parameters.{stage}.json', 'r')))
+        params.pStage = stage
         params_str = ' '.join([f'\"{k}={v}\"' for k, v in params.items()])
         bucket = f'{params.pNamePrefix}-sam-cf-artifacts'
-        tmp_file = 'tmp-out.yaml'
+        stack_name = {
+            'prod': 'flux-sam-app',
+            'staging': 'flux-sam-app-dev',
+            'dev': 'flux-api-local-dev'
+        }[stage]
+        tmp_file = f'tmp-{stage}-out.yaml'
         sam_pre = f"aws s3 mb s3://{bucket} && echo 'created bucket {bucket}' || echo 'bucket {bucket} not created' && " \
                   f"sam build && " if not quick_sam else ""
-        runner.add('sam', f"set -x && cd packages/api/sam-app && "
+        runner.add('sam', f"set -x && set -e && cd packages/api/sam-app && "
                           f"{sam_pre} "
-                          f"sam validate && rm {tmp_file} || true && "
+                          f"(rm {tmp_file} || true) && "
                           f"sam package --s3-bucket {bucket} --output-template-file {tmp_file} && "
-                          f"sam deploy --template-file tmp-out.yaml "
-                          f"--stack-name flux-sam-app-dev "
+                          f"sam deploy --template-file {tmp_file} "
+                          f"--stack-name {stack_name} "
                           f"--parameter-overrides {params_str} "
                           f"--capabilities CAPABILITY_IAM --no-fail-on-empty-changeset")
     runner.run()
@@ -251,7 +257,7 @@ def build(target, build_args, stage):
 
 
 @cli.command()
-@click.argument('dev_target', type=click.Choice(['ui', 'api', 'all']))
+@click.argument('dev_target', type=click.Choice(['ui', 'api', 'sam', 'all']))
 @stage_option
 def dev(dev_target, stage):
     # # first check dynamodb install
@@ -267,10 +273,11 @@ def dev(dev_target, stage):
     sam_port = 52701
     ui_port = 32710
     TMP_SESSION = 'tmp-session'
+    sess_name = f"dev-{int(time.time())}"
     server = libtmux.Server(socket_name='flux-app-tmux-session')
     # server.cmd('set -g destroy-unattached off')
     server.cmd('set-option -g default-shell /bin/bash')
-    session = server.new_session(session_name="main", start_directory='./', window_command="sleep 1")
+    session = server.new_session(session_name=sess_name, start_directory='./', window_command="sleep 1")
     session.set_option('mouse', 'on')
 
     # session.set_option('destroy-unattached', 'off')
@@ -306,13 +313,13 @@ def dev(dev_target, stage):
         # to_run = "printf '\\033]2;\%s\\033\\' '{title}'; _r(){{ if [ -e /usr/bin/read ]; then /usr/bin/read \"$@\"; else read \"$@\"; fi }}; endsess(){{ _r -p 'Press enter to terminate all...' && tmux kill-session -t main; }} ; trap 'endsess' SIGINT SIGTERM; ".format(title=name) + to_run
         trap_cmd = "trap 'endsess' SIGTERM"
         to_run = f"printf '\\033]2;\%s\\033\\' '{name}'; " \
-            f"endsess(){{ tmux kill-session -t main || true; }} ; {trap_cmd}; " \
+            f"endsess(){{ tmux kill-session -t {sess_name} || true; }} ; {trap_cmd}; " \
             f"while sleep 1; " \
             f"do {to_run}; " \
             "echo -e '\\n\\nrestarting in 1s...'; done || endsess endsess"
         logging.debug('Running `{}` as cmd `{}`'.format(name, to_run))
         if session is None:
-            session = server.new_session(session_name="main", start_directory=dir, window_command=to_run)
+            session = server.new_session(session_name=sess_name, start_directory=dir, window_command=to_run)
             # session.set_option('remain-on-exit', 'on')
             window = session.list_windows()[0]
             return window.attached_pane
@@ -329,14 +336,16 @@ def dev(dev_target, stage):
         mongo_pane = run_dev_cmd('./packages/api', 'npm run mongo-dev', "mongo-dev", vertical=False)
         api_cmd = "npm run watch -- --stage dev --port %d" % (api_port,)
         api_pane = run_dev_cmd('./packages/api', api_cmd, "dev-api", vertical=True, active_pane=mongo_pane)
+        # don't need to run tsc on the api atm
+        # compile_pane = run_dev_cmd('./packages/api', 'npm run watch:build', 'api-watch', vertical=True)
+
+    if dev_target in {'sam', 'all'}:
         sam_cmd = f"C:\\Users\\Max\\AppData\\Local\\Programs\\Python\\Python36\\Scripts\\sam.exe local start-api --port {sam_port}"
         env_file = "env.json"
         envs = json.load(open(f"./packages/api/sam-app/{env_file}", 'r'))
         sam_cmd = f"sam local start-api --skip-pull-image --port {sam_port} --env-vars {env_file} " \
             f"--parameter-overrides ParameterKey=pNamePrefix,ParameterValue=flux-api-local-dev"
         sam_pane = run_dev_cmd('./packages/api/sam-app', sam_cmd, "sam-api", vertical=False, wsl=True)
-        # don't need to run tsc on the api atm
-        # compile_pane = run_dev_cmd('./packages/api', 'npm run watch:build', 'api-watch', vertical=True)
 
     window.select_layout('tiled')
 

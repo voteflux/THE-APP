@@ -62,7 +62,8 @@ export interface FluxApiMethods {
         sendSToAllFluxDomains: (s: string) => void,
         saveApiToken: (token: string) => void
     },
-    $dev: boolean
+    $dev: boolean,
+    setEndpoints: (stage: string) => void,
 }
 
 declare module "vue/types/vue" {

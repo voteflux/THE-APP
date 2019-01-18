@@ -6,20 +6,20 @@ import sys
 sys.path.insert(0, '/opt')
 sys.path.insert(0, './deps')
 
+print("altered path")
 
 from attrdict import AttrDict
-
-from lib import *
 
 def qanda(event, ctx):
     _e = AttrDict(event)
     path_tail = _e.resource.rsplit("/", 1)[1]
-    data = json.loads(_e.body)
+    print(f"About to call {path_tail}")
 
+    import lib
     ret = {
-        'getMine': lambda: get_mine(data),
-        'get': lambda: get_all(data),
-        'submit': lambda: submit(data)
+        'getMine': lambda: lib.get_mine(json.loads(_e.body)),
+        'get': lambda: lib.get_all(),
+        'submit': lambda: lib.submit(json.loads(_e.body))
     }[path_tail]()
 
     # ret = {"statusCode": 200, "headers": {"Access-Control-Allow-Origin": "*"}, 'body': {'questions': []}}
