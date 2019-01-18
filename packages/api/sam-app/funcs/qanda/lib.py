@@ -14,7 +14,6 @@ from pynamodb.models import Model
 from pynamodb.attributes import UnicodeAttribute, BooleanAttribute, UTCDateTimeAttribute, ListAttribute, MapAttribute
 
 env = AttrDict(os.environ)
-print(env)
 
 ssm = boto3.client('ssm')
 

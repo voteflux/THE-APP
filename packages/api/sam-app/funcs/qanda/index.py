@@ -17,9 +17,9 @@ def qanda(event, ctx):
     print(f"About to call {path_tail}")
 
     ret = {
-        'getMine': lambda: lib.get_mine(json.loads(_e.body)),
+        'getMine': lambda: lib.get_mine(json.loads(_e.get('body', '{}'))),
         'get': lambda: lib.get_all(),
-        'submit': lambda: lib.submit(json.loads(_e.body))
+        'submit': lambda: lib.submit(json.loads(_e.get('body', '{}')))
     }[path_tail]()
 
     # ret = {"statusCode": 200, "headers": {"Access-Control-Allow-Origin": "*"}, 'body': {'questions': []}}
