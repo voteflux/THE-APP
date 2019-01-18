@@ -14,10 +14,9 @@ import Vue from 'vue';
 
 export default Vue.extend({
     name: "QuestionCard",
-    props: [{
-            Name: 'qDoc',
-            Type: Object as () => {title: string, display_name: string, question: string, ts: string, qid: string}
-        }],
+    props: {
+        qDoc: Object as () => {title: string, display_name: string, question: string, ts: string, qid: string}
+    },
     methods: {
 
     },
