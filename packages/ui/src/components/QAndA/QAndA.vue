@@ -1,7 +1,7 @@
 <template>
     <ui-section title="Questions and Answers">
         <h4 class="pa3">Flux AGM for 2018 calendar year held 19th January 2019.</h4>
-        <h5 v-if="" style="text-align: center" class="pa2">Sorry about the brief downtime everyone, should be good now.</h5>
+        <h5 v-if="" style="text-align: center" class="pa2">We're aware of issues for some people and looking in to it. Apologies for the inconvenience.</h5>
         <div style="text-align: center;">
             <v-btn large color="info" @click="openAskPage()"><v-icon left>question_answer</v-icon> Ask a Question</v-btn>
         </div>
