@@ -14,6 +14,7 @@ from pynamodb.models import Model
 from pynamodb.attributes import UnicodeAttribute, BooleanAttribute, UTCDateTimeAttribute, ListAttribute, MapAttribute
 
 env = AttrDict(os.environ)
+print(env)
 
 ssm = boto3.client('ssm')
 
@@ -25,20 +26,21 @@ def get_ssm(name, with_decryption=False):
     return ret
 
 
+print('orig mongo')
 mongodb_uri = env.get('MONGODB_URI', None)
 if not mongodb_uri:
+    print('alt mongo')
     mongodb_uri = get_ssm(f'{env.pNamePrefix}-mongodb-uri', with_decryption=True)
 mongo_client = AsyncIOMotorClient(mongodb_uri)
-logging.info(f"Mongo client: {mongo_client}")
 mongo = mongo_client[mongodb_uri.rsplit('/')[-1].rsplit('?')[0]]
 
 _eq = lambda v: {'$eq': v}
 
 
 def gen_status(status, body=None, headers=None):
-    ret = {'statusCode': status}
+    ret = {'statusCode': status, 'headers': {'content-type': 'application/json'}}
     ret.update({'body': body} if body is not None else {})
-    ret.update({'headers': headers} if headers is not None else {'content-type': 'application/json'})
+    ret['headers'].update(headers if headers is not None else {})
     return ret
 
 
@@ -124,10 +126,12 @@ def auth(f):
         async def inner2():
             print("started", {'s': _eq(data['s'])})
             user = await mongo.users.find_one({'s': _eq(data['s'])})
-            print("user done", user)
+            if user is not None:
+                print("got user", user['_id'])
             data.update({'s': '*************'})
             if user is not None:
                 return await f(data, user, *args, **kwargs)
+            print("user failed auth")
             return gen_status(403, err("Unauthorized"))
 
         try:
@@ -157,7 +161,7 @@ async def get_mine(data, user, *args, **kwargs):
         print(q_log)
         q = QuestionModel.get_or(q_log.qid, default={})
         qs.append(q if type(q) is dict else q.to_python())
-    return success(qs)
+    return success({"questions": qs})
 
 
 def get_all():

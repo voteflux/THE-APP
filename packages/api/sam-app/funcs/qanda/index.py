@@ -9,13 +9,13 @@ sys.path.insert(0, './deps')
 print("altered path")
 
 from attrdict import AttrDict
+import lib
 
 def qanda(event, ctx):
     _e = AttrDict(event)
     path_tail = _e.resource.rsplit("/", 1)[1]
     print(f"About to call {path_tail}")
 
-    import lib
     ret = {
         'getMine': lambda: lib.get_mine(json.loads(_e.body)),
         'get': lambda: lib.get_all(),

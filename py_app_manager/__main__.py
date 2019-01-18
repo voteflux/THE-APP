@@ -199,15 +199,15 @@ def deploy(stage, skip_tests, quick_sam, target, args):
         }[stage]
         tmp_file = f'tmp-{stage}-out.yaml'
         sam_pre = f"aws s3 mb s3://{bucket} && echo 'created bucket {bucket}' || echo 'bucket {bucket} not created' && " \
-                  f"sam build && " if not quick_sam else ""
-        runner.add('sam', f"set -x && set -e && cd packages/api/sam-app && "
+                  f"sam build -b .aws-sam-{stage} && " if not quick_sam else ""
+        runner.add('sam', f"set -x && set -e && cd packages/api/sam-app && sam validate && "
                           f"{sam_pre} "
                           f"(rm {tmp_file} || true) && "
                           f"sam package --s3-bucket {bucket} --output-template-file {tmp_file} && "
                           f"sam deploy --template-file {tmp_file} "
                           f"--stack-name {stack_name} "
                           f"--parameter-overrides {params_str} "
-                          f"--capabilities CAPABILITY_IAM --no-fail-on-empty-changeset")
+                          f"--capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM --no-fail-on-empty-changeset")
     runner.run()
 
 
@@ -340,7 +340,7 @@ def dev(dev_target, stage):
         # compile_pane = run_dev_cmd('./packages/api', 'npm run watch:build', 'api-watch', vertical=True)
 
     if dev_target in {'sam', 'all'}:
-        sam_cmd = f"C:\\Users\\Max\\AppData\\Local\\Programs\\Python\\Python36\\Scripts\\sam.exe local start-api --port {sam_port}"
+        # sam_cmd = f"C:\\Users\\Max\\AppData\\Local\\Programs\\Python\\Python36\\Scripts\\sam.exe local start-api --port {sam_port}"
         env_file = "env.json"
         envs = json.load(open(f"./packages/api/sam-app/{env_file}", 'r'))
         sam_cmd = f"sam local start-api --skip-pull-image --port {sam_port} --env-vars {env_file} " \

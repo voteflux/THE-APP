@@ -19,7 +19,7 @@ Parameters:
 # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
   Function:
-    Timeout: 15
+    Timeout: 120
   Api:
     Cors: # "'*'"
       AllowMethods: "'GET,POST,OPTIONS'"
@@ -36,6 +36,7 @@ Resources:
       CodeUri: "funcs/qanda"
       Handler: "index.qanda"
       Runtime: "python3.6"
+      Role: !GetAtt rQandaFuncRole.Arn
       Environment:
         Variables:
           MONGODB_URI: ""
@@ -56,7 +57,15 @@ Resources:
           Properties:
             Path: /qanda/get
             Method: get
-      Policies:
+
+
+  rQandaFuncPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      ManagedPolicyName: !Sub ${pNamePrefix}-qanda-lambda-policy
+      Roles:
+        - !Ref rQandaFuncRole
+      PolicyDocument:
         Version: 2012-10-17
         Statement:
           - Effect: Allow
@@ -65,6 +74,34 @@ Resources:
               - ssm:DecryptParameter
             Resource:
               - !Sub 'arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${pNamePrefix}-mongodb-uri'
+          - Effect: Allow
+            Action:
+              - dynamodb:*
+            Resource:
+              - !GetAtt rUserQuestionsTable.Arn
+              - !GetAtt rQuestionsTable.Arn
+#          - Effect: Allow
+#            Action:
+#              - logs:CreateLogGroup
+#              - logs:CreateLogStream
+#              - logs:PutLogEvents
+#            Resource:
+#              - "*"
+
+  rQandaFuncRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${pNamePrefix}-qanda-lambda-role
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - "lambda.amazonaws.com"
+            Action: "sts:AssumeRole"
 
   rUserQuestionsTable:
     Type: AWS::Serverless::SimpleTable
