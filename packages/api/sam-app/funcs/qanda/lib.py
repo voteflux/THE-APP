@@ -128,7 +128,6 @@ class UserQuestionsModel(BaseModel):
 def auth(f):
     def inner(data, *args, **kwargs):
         async def inner2():
-            print("started", {'s': _eq(data['s'])})
             user = await mongo.users.find_one({'s': _eq(data['s'])})
             if user is not None:
                 print("got user", user['_id'])
