@@ -138,8 +138,8 @@ export function FluxApi(_Vue: VueConstructor, options?: any): void {
         return roots.v1 + _path;
     };
 
-    const post = <R>(url: string, data: any, options?: HttpOptions): PR<R> => {
-        const _opts = {...(options || {})}
+    const post = <R>(url: string, data: any, options = {headers: {}}): PR<R> => {
+    const _opts: HttpOptions = {...options}
         _opts.headers = {"x-flux": "true", "content-type": "application/json", ...(options.headers || {})}
         return http.post(url, data, _opts).then(mkResp, mkErr(url)) as PR<R>;
     };
