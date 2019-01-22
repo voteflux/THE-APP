@@ -16,9 +16,9 @@ def ensure_cors(ret):
     if 'headers' not in ret:
         ret['headers'] = dict()
     ret['headers'].update({
-        'access-control-allow-headers': "'*'",
-        'access-control-allow-methods': "'GET,POST,OPTIONS'",
-        'access-control-allow-origin': "'*'"
+        'access-control-allow-headers': "*",
+        'access-control-allow-methods': "GET,POST,OPTIONS",
+        'access-control-allow-origin': "*"
     })
 
 
