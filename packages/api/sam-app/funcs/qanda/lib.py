@@ -39,7 +39,7 @@ _eq = lambda v: {'$eq': v}
 def gen_status(status, body=None, headers=None):
     ret = {'statusCode': status, 'headers': {
         'content-type': 'application/json',
-        'access-control-allow-headers': "'*'",
+        'access-control-allow-headers': "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent,Referer'",
         'access-control-allow-methods': "'GET,POST,OPTIONS'",
         'access-control-allow-origin': "'*'"
     }}
@@ -84,6 +84,7 @@ class BaseModel(Model):
 
     def to_python(self):
         return json.loads(self.to_json())
+
 
 class Ix(GlobalSecondaryIndex):
     class Meta:

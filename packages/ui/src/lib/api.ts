@@ -49,12 +49,13 @@ const mkResp = <r>(data): WebRequest<string, r> => {
             return WebRequest.Failed("No response from API")
         }
     } else {
+        console.error('http req failed:', data);
         return WebRequest.Failed(`HTTP request failed with status: ${data.status}`);
     }
 };
 
 const mkErr = (path: string) => <r>(err: HttpResponse): WebRequest<string, r> => {
-    // console.log('Flux api got error', err);
+    console.error('Flux api got error', err);
     return WebRequest.Failed(`Request error at ${path}: ${err.status}`, err);
 };
 
