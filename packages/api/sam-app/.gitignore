@@ -2,6 +2,7 @@ deps
 env.json
 parameters.json
 tmp-out.yaml
+tmp-*
 
 # Created by https://www.gitignore.io/api/osx,node,linux,windows
 
