@@ -4,6 +4,9 @@ parameters.json
 tmp-out.yaml
 tmp-*
 
+.aws-sam
+.aws-sam*
+
 # Created by https://www.gitignore.io/api/osx,node,linux,windows
 
 ### Linux ###
