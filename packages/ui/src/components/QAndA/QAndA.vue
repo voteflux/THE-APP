@@ -1,7 +1,9 @@
 <template>
     <ui-section title="Questions and Answers">
-        <h4 class="pa3">Flux AGM for 2018 calendar year held 19th January 2019.</h4>
-        <h5 v-if="" style="text-align: center" class="pa2">Issues should be resolved, please email max.kaye@voteflux.org if you still have issues. (8:30am AEDT, 19th Jan)</h5>
+        <h4 class="pa3">
+            This is a place to publicly ask questions and have them answered.
+            In the future we'll add community answers, discussions, and upvote/downvote functionality.
+        </h4>
         <div style="text-align: center;">
             <v-btn large color="info" @click="openAskPage()"><v-icon left>question_answer</v-icon> Ask a Question</v-btn>
         </div>
