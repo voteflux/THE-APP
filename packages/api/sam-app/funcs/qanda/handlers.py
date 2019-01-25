@@ -7,53 +7,15 @@ import uuid
 from typing import Callable
 
 import boto3
+from flux.handler_utils import get_common, auth_common
 from motor.motor_asyncio import AsyncIOMotorClient
 from attrdict import AttrDict
 from pynamodb.indexes import GlobalSecondaryIndex, AllProjection
 from pynamodb.models import Model
 from pynamodb.attributes import UnicodeAttribute, BooleanAttribute, UTCDateTimeAttribute, ListAttribute, MapAttribute
 
-env = AttrDict(os.environ)
 
-ssm = boto3.client('ssm')
-
-
-def get_ssm(name, with_decryption=False):
-    print(f"getting ssm: {name}")
-    ret = ssm.get_parameter(Name=name, WithDecryption=with_decryption)['Parameter']['Value']
-    print(f"got ssm value of length: {len(ret)}")
-    return ret
-
-
-print('orig mongo')
-mongodb_uri = env.get('MONGODB_URI', None)
-if not mongodb_uri:
-    print('alt mongo')
-    mongodb_uri = get_ssm(f'{env.pNamePrefix}-mongodb-uri', with_decryption=True)
-mongo_client = AsyncIOMotorClient(mongodb_uri)
-mongo = mongo_client[mongodb_uri.rsplit('/')[-1].rsplit('?')[0]]
-
-_eq = lambda v: {'$eq': v}
-
-
-def gen_status(status, body=None, headers=None):
-    ret = {'statusCode': status, 'headers': {
-        'content-type': 'application/json',
-        'access-control-allow-headers': "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent,Referer'",
-        'access-control-allow-methods': "'GET,POST,OPTIONS'",
-        'access-control-allow-origin': "'*'"
-    }}
-    ret.update({'body': body} if body is not None else {})
-    ret['headers'].update(headers if headers is not None else {})
-    return ret
-
-
-def err(msg):
-    return {'error': msg}
-
-
-def success(body):
-    return gen_status(200, json.dumps(body))
+from flux import env
 
 
 def gen_table_name(name):
@@ -126,34 +88,8 @@ class UserQuestionsModel(BaseModel):
     qs = ListAttribute(of=UserQuestionLogEntry, default=lambda: list())
 
 
-def auth(f):
-    def inner(data, *args, **kwargs):
-        async def inner2():
-            user = await mongo.users.find_one({'s': _eq(data['s'])})
-            if user is not None:
-                print("got user", user['_id'])
-            data.update({'s': '*************'})
-            if user is not None:
-                return await f(data, user, *args, **kwargs)
-            print("user failed auth")
-            return gen_status(403, err("Unauthorized"))
-
-        try:
-            loop = asyncio.get_event_loop()
-            ret = loop.run_until_complete(inner2())
-            print(f"auth-inner got good return: {ret}")
-            return ret
-        except Exception as e:
-            import traceback
-            traceback.print_exc()
-            print(f"[ERROR]: {repr(e)} {str(e)}, {type(e)}")
-        return gen_status(500)
-
-    return inner
-
-
-@auth
-async def get_mine(data, user, *args, **kwargs):
+@auth_common
+async def get_mine(data, ctx, user, *args, **kwargs):
     # try:
     #     qs_log = UserQuestionsModel.get(str(user['_id'])).qs
     # except UserQuestionsModel.DoesNotExist as e:
@@ -165,15 +101,16 @@ async def get_mine(data, user, *args, **kwargs):
         print(q_log)
         q = QuestionModel.get_or(q_log.qid, default={})
         qs.append(q if type(q) is dict else q.to_python())
-    return success({"questions": qs})
+    return {"questions": qs}
 
 
-def get_all():
+@get_common
+async def get_all(event, ctx):
     global_log = UserQuestionsModel.get_or("global", default=UserQuestionsModel(uid="global", qs=[]))
     print('global_log', global_log)
     qs = [q.strip_private() for q in QuestionModel.batch_get([q['qid'] for q in global_log.qs])]
     print('qs', qs)
-    return success({'questions': qs})
+    return {'questions': qs}
 
 
 def mk_first_plus_initial(user):
@@ -188,8 +125,17 @@ def mk_full_name(user):
     return ' '.join([user['fname'].title(), user['sname'].title()])
 
 
-@auth
-async def submit(data, user, *args, **kwargs):
+def gen_display_name(user, display_choice):
+    return {
+        'anon': "Anonymous",
+        'first_plus_initial': mk_first_plus_initial(user),
+        'last_plus_initial': mk_last_plus_initial(user),
+        'full_name': mk_full_name(user)
+    }[display_choice]
+
+
+@auth_common
+async def submit(data, ctx, user, *args, **kwargs):
     uid = str(user['_id'])
     qid = str(uuid.uuid4())
     prev_q = data.get('prev_q', None)
@@ -201,19 +147,14 @@ async def submit(data, user, *args, **kwargs):
             raise Exception("prev_q does not match!")
     question = data['question']
     if not (20 < len(question) <= 4000):
-        return err("Your question is too large!")
+        raise Exception("Your question is too large!")
     if not (10 < len(title) <= 200):
-        return err("Your title is too long!")
+        raise Exception("Your title is too long!")
     ts = datetime.datetime.now()
     params = {
         'qid': qid,
         'uid': uid,
-        'display_name': {
-            'anon': "Anonymous",
-            'first_plus_initial': mk_first_plus_initial(user),
-            'last_plus_initial': mk_last_plus_initial(user),
-            'full_name': mk_full_name(user)
-        }[display_choice],
+        'display_name': gen_display_name(user, data.display_choice),
         'is_anon': display_choice == "anon",
         'question': question,
         'title': title,
@@ -228,4 +169,11 @@ async def submit(data, user, *args, **kwargs):
     UserQuestionsModel(uid="global").update(actions=[
         UserQuestionsModel.qs.set((UserQuestionsModel.qs | []).prepend([UserQuestionLogEntry(ts=ts, qid=q.qid)]))
     ])
-    return success({'submitted': True, 'qid': qid})
+    return {'submitted': True, 'qid': qid}
+
+
+@auth_common
+async def add_answer(data, ctx, user, *args, **kwargs):
+    uid = str(user['_id'])
+    answer_id = str(uuid.uuid4())
+

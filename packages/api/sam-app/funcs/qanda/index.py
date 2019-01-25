@@ -6,20 +6,8 @@ import sys
 sys.path.insert(0, '/opt')
 sys.path.insert(0, './deps')
 
-print("altered path")
-
 from attrdict import AttrDict
-import lib
-
-
-def ensure_cors(ret):
-    if 'headers' not in ret:
-        ret['headers'] = dict()
-    ret['headers'].update({
-        'access-control-allow-headers': "*",
-        'access-control-allow-methods': "GET,POST,OPTIONS",
-        'access-control-allow-origin': "*"
-    })
+import handlers
 
 
 def qanda(event, ctx):
@@ -28,13 +16,12 @@ def qanda(event, ctx):
     print(f"About to call {path_tail}")
 
     ret = {
-        'getMine': lambda: lib.get_mine(json.loads(_e.get('body', '{}'))),
-        'get': lambda: lib.get_all(),
-        'submit': lambda: lib.submit(json.loads(_e.get('body', '{}')))
-    }[path_tail]()
+        'getMine': handlers.get_mine,
+        'get': handlers.get_all,
+        'submit': handlers.submit
+    }[path_tail](event, ctx)
 
-    # ret = {"statusCode": 200, "headers": {"Access-Control-Allow-Origin": "*"}, 'body': {'questions': []}}
-    ensure_cors(ret)
+    # ensure_cors(ret)
     logging.info(f"[INFO] Returning {ret}")
     print(f"Returning {ret}")
     return ret

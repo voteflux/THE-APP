@@ -165,6 +165,20 @@ def add(dependencies, dev):
 
 
 @cli.command()
+def sam_pip():
+    dir_offset = f'packages/api/sam-app'
+    func_dirs = map(lambda x: f'{dir_offset}/funcs/{x}', os.listdir(f'{dir_offset}/funcs'))
+    targets = [f'{dir_offset}/libs'] + [p for p in func_dirs if os.path.exists(f'{p}/requirements.txt')]
+    runner = CmdRunner(must_run)
+    pip_install = 'pip3 install -t deps -r requirements.txt --upgrade'
+    for t in targets:
+        runner.add(f'Installing python deps for {t}/requirements.txt in {t}/deps',
+                   f'cd {t} && docker run --rm -v "$PWD":/var/task lambci/lambda:build-python3.6 {pip_install}')
+    runner.run()
+
+
+
+@cli.command()
 @stage_option
 @click.argument('target', nargs=1, type=click.Choice(['api', 'ui', 'all']))
 @click.argument('args', nargs=-1)

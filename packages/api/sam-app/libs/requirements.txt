@@ -1,0 +1,3 @@
+lambda-decorators==0.2.0
+attrdict==2.0.0
+motor==2.0.0

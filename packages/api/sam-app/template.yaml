@@ -30,6 +30,46 @@ Globals:
 
 Resources:
 
+  rBaseLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName: !Sub ${pNamePrefix}-function-base-layer
+      ContentUri: ./libs
+      CompatibleRuntimes:
+        - python3.6
+
+
+  rCorsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: funcs/cors
+      Handler: index.cors
+      Runtime: python3.6
+      Role: !GetAtt rCorsFuncRole.Arn
+      Events:
+        CorsOption:
+          Type: Api
+          Properties:
+            Path: /{proxy+}
+            Method: options
+
+
+  rCorsFuncRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub ${pNamePrefix}-cors-lambda-role
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - "lambda.amazonaws.com"
+            Action: "sts:AssumeRole"
+
+
   rQandaFunction:
     Type: AWS::Serverless::Function
     Properties:
@@ -37,6 +77,8 @@ Resources:
       Handler: "index.qanda"
       Runtime: "python3.6"
       Role: !GetAtt rQandaFuncRole.Arn
+      Layers:
+        - !Ref rBaseLayer
       Environment:
         Variables:
           MONGODB_URI: ""
