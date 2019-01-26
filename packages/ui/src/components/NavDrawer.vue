@@ -31,11 +31,11 @@ export default Vue.extend({
     data: () => ({
         items: [
             { name: "Home", icon: "home", route: R.Dashboard },
-            { name: "Your Profile", icon: "person", items: [
-                { name: "Your Details", route: R.EditUserDetails },
-                { name: "Revoke Your Membership", route: R.MembershipRevocation },
+            { name: "My Profile", icon: "person", items: [
+                { name: "My Details", route: R.EditUserDetails },
+                { name: "Revoke My Membership", route: R.MembershipRevocation },
             ] },
-            { name: "Q And A (AGM)", icon: "question_answer", route: R.MembersQAndA },
+            { name: "Q And A", icon: "question_answer", route: R.QAndA },
             // { name: "Volunteer", items: [
             //     { name: "NDA Status", route: R.VolunteerNdaStatusAndSign },
             // ]},

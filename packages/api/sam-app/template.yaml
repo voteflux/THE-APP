@@ -15,6 +15,14 @@ Parameters:
     Type: String
   pStage:
     Type: String
+  pFeedbackEmail:
+    Type: String
+  pQandaFromEmail:
+    Type: String
+  pSiteNameShort:
+    Type: String
+  pBaseUrl:
+    Type: String
 
 # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
@@ -83,6 +91,10 @@ Resources:
         Variables:
           MONGODB_URI: ""
           pNamePrefix: !Ref pNamePrefix
+          pQandaFromEmail: !Ref pQandaFromEmail
+          pSiteNameShort: !Ref pSiteNameShort
+          pFeedbackEmail: !Ref pFeedbackEmail
+          pBaseUrl: !Ref pBaseUrl
       Events:
         GetMyQs:
           Type: Api
@@ -94,10 +106,30 @@ Resources:
           Properties:
             Path: /qanda/submit
             Method: post
+        SubmitReply:
+          Type: Api
+          Properties:
+            Path: /qanda/submitReply
+            Method: post
         GetAllQs:
           Type: Api
           Properties:
             Path: /qanda/get
+            Method: get
+        GetQ:
+          Type: Api
+          Properties:
+            Path: /qanda/question/{qid}
+            Method: get
+        GetReplyIds:
+          Type: Api
+          Properties:
+            Path: /qanda/replyIds/{qid}
+            Method: get
+        GetReply:
+          Type: Api
+          Properties:
+            Path: /qanda/reply/{rid}
             Method: get
 
 
@@ -120,8 +152,7 @@ Resources:
             Action:
               - dynamodb:*
             Resource:
-              - !GetAtt rUserQuestionsTable.Arn
-              - !GetAtt rQuestionsTable.Arn
+              - !Sub arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${pNamePrefix}-*
 #          - Effect: Allow
 #            Action:
 #              - logs:CreateLogGroup
@@ -161,6 +192,36 @@ Resources:
       TableName: !Sub ${pNamePrefix}-qanda-questions-ddb
       PrimaryKey:
         Name: qid
+        Type: String
+      SSESpecification:
+        SSEEnabled: True
+
+  rReplyIdsTable:
+    Type: AWS::Serverless::SimpleTable
+    Properties:
+      TableName: !Sub ${pNamePrefix}-qanda-reply-ids-ddb
+      PrimaryKey:
+        Name: qid
+        Type: String
+      SSESpecification:
+        SSEEnabled: True
+
+  rReplyIdsByUidTable:
+    Type: AWS::Serverless::SimpleTable
+    Properties:
+      TableName: !Sub ${pNamePrefix}-qanda-reply-ids-by-uid-ddb
+      PrimaryKey:
+        Name: qid
+        Type: String
+      SSESpecification:
+        SSEEnabled: True
+
+  rRepliesTable:
+    Type: AWS::Serverless::SimpleTable
+    Properties:
+      TableName: !Sub ${pNamePrefix}-qanda-replies-ddb
+      PrimaryKey:
+        Name: rid
         Type: String
       SSESpecification:
         SSEEnabled: True

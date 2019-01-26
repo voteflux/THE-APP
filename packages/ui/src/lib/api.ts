@@ -112,6 +112,17 @@ const onGotUserObj = (fullUserDeetsR: Req<UserV1Object>): Req<UserV1Object> => {
 }
 
 
+// transforms on data from API
+const tform = {
+    qandaQResp: (wr) => {
+        return wr.mapSuccess((resp) => {
+            resp.questions.map(q => q.ts = new Date(q.ts));
+            return resp
+        });
+    }
+}
+
+
 
 export function FluxApi(_Vue: VueConstructor, options?: any): void {
     const Vue = _Vue; //as (VueConstructor & {http: Http});
@@ -158,12 +169,20 @@ export function FluxApi(_Vue: VueConstructor, options?: any): void {
     const fluxMethods = {
         v3: {
             qanda: {
-                getMine: (args)=>
-                    post(_api3("qanda/getMine"), args),
+                getMine: (args) =>
+                    post(_api3("qanda/getMine"), args).then(tform.qandaQResp),
                 getAll: () =>
-                    get(_api3("qanda/get")),
+                    get(_api3("qanda/get")).then(tform.qandaQResp),
+                getQuestion: (rid) =>
+                    get(_api3(`qanda/question/${rid}`)),
+                submitReply: (args) =>
+                    post(_api3("qanda/submitReply"), args),
                 submit: (args) =>
                     post(_api3("qanda/submit"), args),
+                getReplyIds: (qid) =>
+                    get(_api3(`qanda/replyIds/${qid}`)),
+                getReply: (rid) =>
+                    get(_api3(`qanda/reply/${rid}`)),
             },
         },
         v2: {

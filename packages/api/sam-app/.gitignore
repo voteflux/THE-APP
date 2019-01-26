@@ -1,6 +1,6 @@
 deps
 env.json
-parameters.json
+parameters.dev.json
 tmp-out.yaml
 tmp-*
 

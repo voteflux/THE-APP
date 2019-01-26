@@ -12,14 +12,26 @@ import handlers
 
 def qanda(event, ctx):
     _e = AttrDict(event)
-    path_tail = _e.resource.rsplit("/", 1)[1]
-    print(f"About to call {path_tail}")
+    path_tail = _e.resource.split("/")[2]
+    print(f"About to call {path_tail}, {_e.pathParameters}")
+    print(_e)
+
+    get_handlers = {
+        'get': handlers.get_all,
+        'question': handlers.get_question,
+        'replyIds': handlers.get_reply_ids,
+        'reply': handlers.get_reply,
+    }
+    post_handlers = {
+        'getMine': handlers.get_mine,
+        'submit': handlers.submit,
+        'submitReply': handlers.submit_reply,
+    }
 
     ret = {
-        'getMine': handlers.get_mine,
-        'get': handlers.get_all,
-        'submit': handlers.submit
-    }[path_tail](event, ctx)
+        'GET': get_handlers,
+        'POST': post_handlers,
+    }[_e.httpMethod.upper()][path_tail](_e, ctx)
 
     # ensure_cors(ret)
     logging.info(f"[INFO] Returning {ret}")

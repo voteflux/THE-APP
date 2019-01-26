@@ -3,5 +3,9 @@
   "pHostedZoneId": "Z2YZD2OKDQ4OEF",
   "pSubdomain": "dev.sam",
   "pDomain": "flux.party",
-  "pCertificateArn": "arn:aws:acm:ap-southeast-2:076866892044:certificate/da203ff5-49ff-43ce-bf58-207cf0ddcde6"
+  "pCertificateArn": "arn:aws:acm:ap-southeast-2:076866892044:certificate/da203ff5-49ff-43ce-bf58-207cf0ddcde6",
+  "pSiteNameShort": "FLUX-STAGING",
+  "pQandaFromEmail": "qanda-staging@flux.party",
+  "pFeedbackEmail": "qanda-staging@flux.party",
+  "pBaseUrl": "http://dev.app.flux.party/v/#"
 }

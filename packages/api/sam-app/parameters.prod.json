@@ -3,5 +3,9 @@
   "pHostedZoneId": "Z2YZD2OKDQ4OEF",
   "pSubdomain": "sam",
   "pDomain": "flux.party",
-  "pCertificateArn": "arn:aws:acm:ap-southeast-2:076866892044:certificate/9b7e1c68-6ae9-453e-9236-e645076fc4c5"
+  "pCertificateArn": "arn:aws:acm:ap-southeast-2:076866892044:certificate/9b7e1c68-6ae9-453e-9236-e645076fc4c5",
+  "pSiteNameShort": "FLUX",
+  "pQandaFromEmail": "qanda@flux.party",
+  "pFeedbackEmail": "qanda@flux.party",
+  "pBaseUrl": "https://app.flux.party/v/#"
 }

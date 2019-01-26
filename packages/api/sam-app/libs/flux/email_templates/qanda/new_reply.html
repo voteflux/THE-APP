@@ -1,0 +1,26 @@
+<p>
+    Hi ${fname}
+</p>
+
+<h3>Your question "${q.title | h}" has a new reply!</h3>
+
+<a href="${reply_url}">View reply.</a>
+
+<p style="white-space: pre">
+--- START REPLY ---
+
+<strong>Date:</strong> ${r.ts}
+<strong>Author:</strong> ${r.display_name | h}
+
+<strong>Reply:</strong> ${r.body | h}
+
+--- END REPLY ---
+</p>
+
+<p>
+    Note: This message was sent automatically
+</p>
+
+<p>
+    Feedback, complaints, and moral support can be sent to ${feedbackEmail}
+</p>

@@ -6,6 +6,8 @@ export enum Messages {
     REFRESH_ROLES = "REFRESH_ROLES",
     GOT_USER_DETAILS = "GOT_USER_DETAILS",
     LOGOUT = "LOGOUT",
+
+    PAGE_TITLE_UPDATE = "PAGE_TITLE_UPDATE",
 }
 
 export const M = Messages;

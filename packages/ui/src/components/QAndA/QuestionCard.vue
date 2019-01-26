@@ -2,27 +2,53 @@
     <v-card class="mv3">
         <v-card-title primary-title>
             <v-layout column>
-                <h3 class="db headline mb-0">Title: {{qDoc.title}}</h3>
-                <div>Asked by {{qDoc.display_name}} <sub>at {{qDoc.ts}}</sub></div>
+                <h3 class="db headline">Title: {{qDoc.title}}</h3>
+                <div>Asked by <em>{{qDoc.display_name}} </em><br><small>at {{ qDoc.ts.toString() }}</small></div>
             </v-layout>
         </v-card-title>
         <v-card-text>
-            <p>Question: {{qDoc.question}}</p>
+            <h4>Question: {{ showQ ? '' : '(hidden)' }}</h4>
+            <p v-if="showQ" style="white-space: pre-line" class="b--light-gray ba br3 pa2">{{qDoc.question}}</p>
         </v-card-text>
-        <!--<v-card-actions>-->
-            <!--<v-btn grow>Downvote</v-btn>-->
-            <!--<v-btn grow>Upvote</v-btn>-->
-        <!--</v-card-actions>-->
+        <v-card-actions>
+            <v-btn flat color="orange" @click="showQ = !showQ">{{ showQ ? 'hide q' : 'show q' }}</v-btn>
+            <v-btn flat color="orange" @click="doReply()">Reply</v-btn>
+            <v-btn flat color="orange" @click="showThread()" :disabled="this.reply_ids.unwrapOrDefault([]).length === 0">View Thread ({{ this.reply_ids.map(rids => rids.length).unwrapOrDefault('...') }})</v-btn>
+        </v-card-actions>
     </v-card>
 </template>
 
 <script lang=ts>
 import Vue from 'vue';
+import { WebRequest } from 'flux-lib/WebRequest';
+import Routes from "@/routes";
+import * as R from 'ramda'
 
 export default Vue.extend({
     props: ['qDoc', 'auth'],
+    data: () => ({
+        showQ: false,
+        reply_ids: WebRequest.NotRequested(),
+        // replies: {},
+    }),
     methods: {
+        async get_reply_ids() {
+            this.reply_ids = WebRequest.Loading();
+            this.reply_ids = await this.$flux.v3.qanda.getReplyIds(this.qDoc.qid)
+        },
+
+        doReply() {
+            this.$router.push(Routes.QandaReply.replace(":id", this.qDoc.qid))
+        },
+
+        showThread() {
+            this.$router.push(Routes.QandaThread.replace(":id", this.qDoc.qid))
+        },
     },
+
+    created(): void {
+        this.get_reply_ids()
+    }
 })
 </script>
 

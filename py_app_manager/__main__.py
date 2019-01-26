@@ -23,6 +23,7 @@ from py_app_manager.cmd_runner import CmdRunner
 
 
 WSL = os.path.exists('/bin/wslpath')
+pwd_cmd = "wslpath -w $(pwd)" if WSL else "pwd"
 
 
 def is_netlify():
@@ -173,7 +174,6 @@ def sam_pip():
     func_dirs = map(lambda x: f'{dir_offset}/funcs/{x}', os.listdir(f'{dir_offset}/funcs'))
     targets = [f'{dir_offset}/libs'] + [p for p in func_dirs if os.path.exists(f'{p}/requirements.txt')]
     runner = CmdRunner(must_run)
-    pwd_cmd = "wslpath -w $(pwd)" if WSL else "pwd"
     pip_install = 'pip3 install -t deps -r requirements.txt --upgrade'
     for t in targets:
         runner.add(f'Installing python deps for {t}/requirements.txt in {t}/deps',
@@ -296,7 +296,7 @@ def dev(dev_target, stage):
     # server.cmd('set -g destroy-unattached off')
     server.cmd('set-option -g default-shell /bin/bash')
     session = server.new_session(session_name=sess_name, start_directory='./', window_command="sleep 1")
-    session.set_option('mouse', 'on')
+    session.set_option('mouse', True)
 
     # session.set_option('destroy-unattached', 'off')
     # session.set_option('remain-on-exit', 'on')
@@ -362,8 +362,10 @@ def dev(dev_target, stage):
         env_file = "env.json"
         envs = json.load(open(f"./packages/api/sam-app/{env_file}", 'r'))
         # --skip-pull-image
-        sam_cmd = f"sam local start-api --port {sam_port} --env-vars {env_file} " \
+        # --docker-volume-basedir \"$({pwd_cmd})\"
+        sam_cmd = f"sam local start-api --skip-pull-image --port {sam_port} --env-vars {env_file} " \
             f"--parameter-overrides ParameterKey=pNamePrefix,ParameterValue=flux-api-local-dev"
+        logging.info(f"sam_cmd: {sam_cmd}")
         sam_pane = run_dev_cmd('./packages/api/sam-app', sam_cmd, "sam-api", vertical=False, wsl=True)
 
     window.select_layout('tiled')

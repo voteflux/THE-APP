@@ -6,8 +6,8 @@
         </h4>
         <div style="text-align: center;">
             <v-btn large color="info" @click="openAskPage()"><v-icon left>question_answer</v-icon> Ask a Question</v-btn>
-            <v-btn large color="" @click="setShowQs('mine')" v-if="showWhichQuestions !== 'mine'">My Questions</v-btn>
-            <v-btn large color="" @click="setShowQs('all')" v-if="showWhichQuestions !== 'all'">All Questions</v-btn>
+            <v-btn large color="" @click="setShowQs('mine')" v-if="showWhichQuestions !== 'mine'" :disabled="yourQsWR.isNotRequested()">Show My Questions</v-btn>
+            <v-btn large color="" @click="setShowQs('all')" v-if="showWhichQuestions !== 'all'">Show All Questions</v-btn>
         </div>
         <ui-collapsible title="Your Questions" no-collapse v-if="showWhichQuestions === 'mine'">
             <div v-if="yourQsWR.isSuccess() && yourQsWR.unwrap().questions.length > 0">
@@ -29,7 +29,7 @@
                     <QuestionCard :q-doc="q"></QuestionCard>
                 </div>
             </div>
-            <h4 style="text-align: center;" v-else-if="allQsWR.isSuccess()">You haven't asked any questions yet.</h4>
+            <h4 style="text-align: center;" v-else-if="allQsWR.isSuccess()">No questions have been asked yet.</h4>
             <loading v-else-if="allQsWR.isLoading() || allQsWR.isNotRequested()">Loading
             </loading>
             <div v-else-if="allQsWR.isFailed()">
@@ -60,8 +60,10 @@ export default Vue.extend({
 
     methods:{
         async refreshYourQs() {
-            this.yourQsWR = WebRequest.Loading();
-            this.yourQsWR = await this.$flux.v3.qanda.getMine(this.auth)
+            if (this.auth) {
+                this.yourQsWR = WebRequest.Loading();
+                this.yourQsWR = await this.$flux.v3.qanda.getMine(this.auth)
+            }
         },
 
         async refreshAllQs() {
@@ -74,11 +76,14 @@ export default Vue.extend({
         },
 
         openAskPage() {
-            this.$router.push(Routes.MembersAskQuestion)
+            this.$router.push(Routes.QandaAskQuestion)
         }
     },
 
     mounted(): void {
+    },
+
+    created(): void {
         this.refreshYourQs()
         this.refreshAllQs()
     }

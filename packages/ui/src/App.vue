@@ -12,7 +12,7 @@
                 <v-toolbar fixed app>
                     <v-toolbar-side-icon :light="true" @click.stop="navOpen = !navOpen" />
                     <v-toolbar-title>
-                        <flux-logo :title="getPageTitle()" />
+                        <flux-logo :title="pageTitle" />
                     </v-toolbar-title>
                 </v-toolbar>
                 <nav-drawer v-model="navOpen" :roles="req.roles" />
@@ -64,11 +64,12 @@ export default /*class App extends Vue*/ Vue.extend({
         user: {} as any,
         userO: {} as UserObject,
         navOpen: null as null | boolean,
+        pageTitle: "",
         ...Cs
     }),
     methods: {
-        getPageTitle() {
-            return pageTitle(this.$route.path as Routes)
+        pageTitleUpdate(opts?) {
+            this.pageTitle = pageTitle(this.$route, opts)
         },
         getRoles() {
             this.req.roles = WR.Loading();
@@ -175,6 +176,10 @@ export default /*class App extends Vue*/ Vue.extend({
 
         this.$on(M.LOGOUT, this.logout)
         MsgBus.$on(M.LOGOUT, this.logout)
+
+        this.$on(M.PAGE_TITLE_UPDATE, this.pageTitleUpdate)
+        MsgBus.$on(M.PAGE_TITLE_UPDATE, this.pageTitleUpdate)
+        this.pageTitleUpdate()
 
         this.$store.commit(AppFs.initHistoryCount)
     },

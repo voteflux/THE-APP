@@ -40,14 +40,14 @@ def auth(f):
             print("user failed auth")
             raise LambdaError(403, "Unauthorized")
         try:
-            # loop = asyncio.get_event_loop()
-            # ret = loop.run_until_complete(inner2())
-            # print(f"auth-inner got good return: {ret}")
             return await inner2()
         except Exception as e:
             import traceback
             traceback.print_exc()
             print(f"[ERROR]: {repr(e)} {str(e)}, {type(e)}")
-        raise LambdaError(403, "Unauthorized")
+            raise e
     return inner
 
+
+async def has_role(role_name, uid):
+    return await db.has_role(role_name, uid)

@@ -1,0 +1,17 @@
+Hi ${fname | h}
+
+Your question "${q.title | h}" has a new reply!
+
+View reply: ${reply_url}
+
+--- START REPLY ---
+
+Date: ${r.ts}
+Author: ${r.display_name | h}
+Reply: ${r.body | h}
+
+--- END REPLY ---
+
+Note: This message was sent automatically
+
+Feedback, complaints, and moral support can be sent to ${feedbackEmail}

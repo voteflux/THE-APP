@@ -10,13 +10,13 @@
                     required
             ></v-text-field>
 
-            <v-text-field
+            <v-textarea
                     v-model="question"
                     :rules="qRules"
                     label="Question"
                     :counter="4000"
                     required
-            ></v-text-field>
+            ></v-textarea>
 
             <v-select
                     v-model="display_choice"

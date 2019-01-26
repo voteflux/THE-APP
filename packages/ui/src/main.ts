@@ -108,8 +108,7 @@ import Dashboard from "@c/Dashboard.vue";
 import UserValidation from "@c/UserValidation.vue";
 import UserDetailsMain from "@c/UserDetails";
 import UserRevocation from "@c/UserRevocation.vue";
-import QAndA from "@c/QAndA/QAndA.vue";
-import AskQuestion from "@c/QAndA/AskQuestion.vue";
+import * as QAndA from "@c/QAndA";
 import * as Finance from "@c/Finance";
 import * as Volunteers from "@c/Volunteers"
 import * as Candidates from "@c/Candidates"
@@ -135,8 +134,12 @@ const routes = [
     { path: R.ValidateSelf, component: UserValidation },
     { path: R.EditUserDetails, component: UserDetailsMain },
     { path: R.MembershipRevocation, component: UserRevocation },
-    { path: R.MembersQAndA, component: QAndA },
-    { path: R.MembersAskQuestion, component: AskQuestion },
+
+    { path: R.QAndA, component: QAndA.QAndA },
+    { path: R.QandaAskQuestion, component: QAndA.AskQuestion },
+    { path: R.QandaReply, component: QAndA.QAndAReply },
+    // { path: R.QandaThread, component: QAndA.Thread },
+
     { path: R.AdminAuditRoles, component: AuditRoles },
     { path: R.FinanceMenu, component: Finance.Menu },
     { path: R.FinanceDonationEntry, component: Finance.EnterDonation },

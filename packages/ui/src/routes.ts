@@ -14,21 +14,26 @@ export enum Routes {
 
     CandidateDashboard = "/candidates",
 
-    MembersQAndA = "/members/qanda",
-    MembersAskQuestion = "/members/ask-a-question"
+    QAndA = "/qanda",
+    QandaAskQuestion = "/qanda/ask-a-question",
+    QandaReply = "/qanda/reply/:id",
+    QandaThread = "/qanda/thread/:id",
 };
 export default Routes
 const R = Routes;
 
-export const pageTitle = (route: Routes) => {
-    const _e = () => { throw Error(`Title for ${route} not set!`) };
-    return ({
-        [R.EditUserDetails]: "Your Details",
+export const pageTitle = (routes, arg1) => {
+    const _e = () => { throw Error(`Title for ${routes.path} not set!`) };
+    const title = ({
+        [R.EditUserDetails]: "My Details",
         [R.Dashboard]: "Dashboard",
         [R.ValidateSelf]: "Electoral Roll Self-Validation",
         [R.MembershipRevocation]: "Revoke Your Membership",
-        [R.MembersQAndA]: "Q And A",
-        [R.MembersAskQuestion]: "Ask a Question",
+
+        [R.QAndA]: "Q And A",
+        [R.QandaAskQuestion]: "Ask a Question",
+        [R.QandaReply]: qTitle => `Reply to ${qTitle}`,
+        [R.QandaThread]: qTitle => `Thread (${qTitle})`,
 
         [R.FinanceMenu]: "Finance Utilities",
         [R.FinanceDonationLog]: "Donation Log",
@@ -39,5 +44,6 @@ export const pageTitle = (route: Routes) => {
         [R.VolunteerNdaStatusAndSign]: "NDA Status",
 
         [R.CandidateDashboard]: "Candidate Dashboard",
-    })[route] || _e()
+    })[routes.matched[0].path || routes.path];
+    return (title.call ? title(arg1 || '...') : title) || _e()
 };
