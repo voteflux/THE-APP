@@ -37,11 +37,8 @@ def ensure_deps(force=False):
     if force or (not deps_up_to_date() and not _deps_updated):
         def install_deps():
             must_run("python3 -m pip install -r requirements.txt")
-            if is_netlify():
-                must_run("cd packages/api && npm i")
-            else:
-                must_run("npm i")
-                must_run("npx lerna bootstrap")
+            must_run("npm i")
+            must_run("npx lerna bootstrap")
             set_deps_up_to_date()
 
         if Repo is not None:
