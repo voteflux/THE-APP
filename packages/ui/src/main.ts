@@ -138,7 +138,7 @@ const routes = [
     { path: R.QAndA, component: QAndA.QAndA },
     { path: R.QandaAskQuestion, component: QAndA.AskQuestion },
     { path: R.QandaReply, component: QAndA.QAndAReply },
-    // { path: R.QandaThread, component: QAndA.Thread },
+    { path: R.QandaThread, component: QAndA.Thread },
 
     { path: R.AdminAuditRoles, component: AuditRoles },
     { path: R.FinanceMenu, component: Finance.Menu },
