@@ -189,7 +189,7 @@ def gen_display_name(user, display_choice):
 async def submit(event, ctx, user, *args, **kwargs):
     data = event.body
     uid = str(user['_id'])
-    qid = str(uuid.uuid4())
+    qid = 'q' + str(uuid.uuid4())[:13]
     prev_q = data.get('prev_q', None)
     display_choice = data['display_choice']
     title = data['title']
@@ -204,13 +204,8 @@ async def submit(event, ctx, user, *args, **kwargs):
         raise Exception("Your title is too long!")
     ts = datetime.datetime.now()
     params = {
-        'qid': qid,
-        'uid': uid,
-        'display_name': gen_display_name(user, data.display_choice),
-        'is_anon': display_choice == "anon",
-        'question': question,
-        'title': title,
-        'ts': ts
+        'qid': qid, 'uid': uid, 'display_name': gen_display_name(user, data.display_choice),
+        'is_anon': display_choice == "anon", 'question': question, 'title': title, 'ts': ts
     }
     params.update({'prev_q': prev_q} if prev_q else {})
     q = QuestionModel(**params)
@@ -226,7 +221,7 @@ async def submit(event, ctx, user, *args, **kwargs):
 async def submit_reply(event, ctx, user, *args, **kwargs):
     data = event.body
     uid = str(user['_id'])
-    rid = str(uuid.uuid4())
+    rid = 'r' + str(uuid.uuid4())[:13]
     qid = data.qid
     qM = QuestionModel.get_maybe(qid)
     if qM == Nothing:

@@ -24,10 +24,16 @@ Parameters:
   pBaseUrl:
     Type: String
 
+
+Conditions:
+  cIsProd: !Equals [ !Ref pStage, 'prod' ]
+
+
 # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
 Globals:
   Function:
     Timeout: 120
+    MemorySize: !If [ cIsProd, 256, 128 ]
   Api:
     Cors: # "'*'"
       AllowMethods: "'GET,POST,OPTIONS'"
