@@ -135,7 +135,8 @@ def gen_display_name(user, display_choice):
 
 
 @auth_common
-async def submit(data, ctx, user, *args, **kwargs):
+async def submit(event, ctx, user, *args, **kwargs):
+    data = AttrDict(event['body'])
     uid = str(user['_id'])
     qid = str(uuid.uuid4())
     prev_q = data.get('prev_q', None)

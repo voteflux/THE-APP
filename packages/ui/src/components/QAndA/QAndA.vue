@@ -38,7 +38,7 @@
             </loading>
             <div v-else-if="allQsWR.isFailed()">
                 <error>Failed to load your questions! 😢<br>{{ allQsWR.unwrapError() }}</error>
-                <v-btn color="warning" block @click="refreshYourQs()">Retry?</v-btn>
+                <v-btn color="warning" block @click="refreshAllQs()">Retry?</v-btn>
             </div>
         </ui-collapsible>
     </ui-section>
@@ -67,7 +67,7 @@ export default Vue.extend({
             this.yourQsWR = await this.$flux.v3.qanda.getMine(this.auth)
         },
 
-        async getMoreQs() {
+        async refreshAllQs() {
             this.allQsWR = WebRequest.Loading()
             this.allQsWR = await this.$flux.v3.qanda.getAll()
         },
@@ -79,7 +79,7 @@ export default Vue.extend({
 
     mounted(): void {
         this.refreshYourQs()
-        this.getMoreQs()
+        this.refreshAllQs()
     }
 
 })

@@ -22,6 +22,9 @@ from py_app_manager.pre_deps import *
 from py_app_manager.cmd_runner import CmdRunner
 
 
+WSL = os.path.exists('/bin/wslpath')
+
+
 def is_netlify():
     return 'IS_NETLIFY' in os.environ
 
@@ -34,8 +37,11 @@ def ensure_deps(force=False):
     if force or (not deps_up_to_date() and not _deps_updated):
         def install_deps():
             must_run("python3 -m pip install -r requirements.txt")
-            must_run("npm i")
-            must_run("npx lerna bootstrap")
+            if is_netlify():
+                must_run("cd packages/api && npm i")
+            else:
+                must_run("npm i")
+                must_run("npx lerna bootstrap")
             set_deps_up_to_date()
 
         if Repo is not None:
@@ -66,8 +72,8 @@ except Exception as e:
     print("Please run ./manage from the root directory (of the repository)")
     sys.exit(255)
 
-skip_ensure_deps = len(sys.argv) > 1 and ( \
-            sys.argv[1] == "mgr_set_up_to_date" \
+skip_ensure_deps = len(sys.argv) > 1 and (
+            sys.argv[1] == "mgr_set_up_to_date"
             or False
 )
 _deps_updated = skip_ensure_deps
@@ -170,10 +176,11 @@ def sam_pip():
     func_dirs = map(lambda x: f'{dir_offset}/funcs/{x}', os.listdir(f'{dir_offset}/funcs'))
     targets = [f'{dir_offset}/libs'] + [p for p in func_dirs if os.path.exists(f'{p}/requirements.txt')]
     runner = CmdRunner(must_run)
+    pwd_cmd = "wslpath -w $(pwd)" if WSL else "pwd"
     pip_install = 'pip3 install -t deps -r requirements.txt --upgrade'
     for t in targets:
         runner.add(f'Installing python deps for {t}/requirements.txt in {t}/deps',
-                   f'cd {t} && docker run --rm -v "$PWD":/var/task lambci/lambda:build-python3.6 {pip_install}')
+                   f'cd {t} && docker run --rm -v $({pwd_cmd}):/var/task lambci/lambda:build-python3.6 {pip_install}')
     runner.run()
 
 
@@ -330,7 +337,7 @@ def dev(dev_target, stage):
             f"endsess(){{ tmux kill-session -t {sess_name} || true; }} ; {trap_cmd}; " \
             f"while sleep 1; " \
             f"do {to_run}; " \
-            "echo -e '\\n\\nrestarting in 1s...'; done || endsess endsess"
+            "echo -e '\\n\\nrestarting in 1s...'; done || endsess"
         logging.debug('Running `{}` as cmd `{}`'.format(name, to_run))
         if session is None:
             session = server.new_session(session_name=sess_name, start_directory=dir, window_command=to_run)
@@ -357,7 +364,8 @@ def dev(dev_target, stage):
         # sam_cmd = f"C:\\Users\\Max\\AppData\\Local\\Programs\\Python\\Python36\\Scripts\\sam.exe local start-api --port {sam_port}"
         env_file = "env.json"
         envs = json.load(open(f"./packages/api/sam-app/{env_file}", 'r'))
-        sam_cmd = f"sam local start-api --skip-pull-image --port {sam_port} --env-vars {env_file} " \
+        # --skip-pull-image
+        sam_cmd = f"sam local start-api --port {sam_port} --env-vars {env_file} " \
             f"--parameter-overrides ParameterKey=pNamePrefix,ParameterValue=flux-api-local-dev"
         sam_pane = run_dev_cmd('./packages/api/sam-app', sam_cmd, "sam-api", vertical=False, wsl=True)
 
