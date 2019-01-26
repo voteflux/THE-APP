@@ -6,14 +6,13 @@
         </h4>
         <div style="text-align: center;">
             <v-btn large color="info" @click="openAskPage()"><v-icon left>question_answer</v-icon> Ask a Question</v-btn>
+            <v-btn large color="" @click="setShowQs('mine')" v-if="showWhichQuestions !== 'mine'">My Questions</v-btn>
+            <v-btn large color="" @click="setShowQs('all')" v-if="showWhichQuestions !== 'all'">All Questions</v-btn>
         </div>
-        <ui-collapsible title="Your Questions">
+        <ui-collapsible title="Your Questions" no-collapse v-if="showWhichQuestions === 'mine'">
             <div v-if="yourQsWR.isSuccess() && yourQsWR.unwrap().questions.length > 0">
                 <div v-for="q in yourQsWR.unwrap().questions" class="pv1">
                     <QuestionCard :q-doc="q"></QuestionCard>
-                    <!--<h4 class="pb1">Title: {{q.title}}</h4>-->
-                    <!--<h5 class="pb1">Author: {{q.display_name}}, Date: {{q.ts}}</h5>-->
-                    <!--<p>Question: {{q.question}}</p>-->
                 </div>
             </div>
             <h4 style="text-align: center;" v-else-if="yourQsWR.isSuccess()">You haven't asked any questions yet.</h4>
@@ -24,13 +23,10 @@
                 <v-btn color="warning" block @click="refreshYourQs()">Retry?</v-btn>
             </div>
         </ui-collapsible>
-        <ui-collapsible title="All Questions" start-collapsed>
+        <ui-collapsible title="All Questions" no-collapse v-if="showWhichQuestions === 'all'">
             <div v-if="allQsWR.isSuccess() && allQsWR.unwrap().questions.length > 0">
                 <div v-for="q in allQsWR.unwrap().questions" class="pv1">
                     <QuestionCard :q-doc="q"></QuestionCard>
-                    <!--<h4 class="pb1">Title: {{q.title}}</h4>-->
-                    <!--<h5 class="pb1">Author: {{q.display_name}}, Date: {{q.ts}}</h5>-->
-                    <!--<p>Question: {{q.question}}</p>-->
                 </div>
             </div>
             <h4 style="text-align: center;" v-else-if="allQsWR.isSuccess()">You haven't asked any questions yet.</h4>
@@ -57,19 +53,24 @@ export default Vue.extend({
     data: () => ({
         yourQsWR: WebRequest.NotRequested(),
         allQsWR: WebRequest.NotRequested(),
+        showWhichQuestions: 'all',
         gotNAllQs: 0,
         totalNAllQs: -1
     }),
 
     methods:{
         async refreshYourQs() {
-            this.yourQsWR = WebRequest.Loading()
+            this.yourQsWR = WebRequest.Loading();
             this.yourQsWR = await this.$flux.v3.qanda.getMine(this.auth)
         },
 
         async refreshAllQs() {
-            this.allQsWR = WebRequest.Loading()
+            this.allQsWR = WebRequest.Loading();
             this.allQsWR = await this.$flux.v3.qanda.getAll()
+        },
+
+        setShowQs(setTo) {
+            this.showWhichQuestions = setTo;
         },
 
         openAskPage() {
