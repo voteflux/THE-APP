@@ -119,6 +119,12 @@ const tform = {
             resp.questions.map(q => q.ts = new Date(q.ts));
             return resp
         });
+    },
+    mapTs: (field) => (wr) => {
+        return wr.mapSuccess(resp => {
+            resp[field].ts = new Date(resp[field].ts)
+            return resp
+        })
     }
 }
 
@@ -174,17 +180,18 @@ export function FluxApi(_Vue: VueConstructor, options?: any): void {
                 getAll: () =>
                     get(_api3("qanda/get")).then(tform.qandaQResp),
                 getQuestion: (rid) =>
-                    get(_api3(`qanda/question/${rid}`)),
-                submitReply: (args) =>
-                    post(_api3("qanda/submitReply"), args),
+                    get(_api3(`qanda/question/${rid}`)).then(tform.mapTs('question')),
                 submit: (args) =>
-                    post(_api3("qanda/submit"), args),
+                    post(_api3("qanda/submit"), args).then(tform.mapTs('question')),
+                submitReply: (args) =>
+                    post(_api3("qanda/submitReply"), args).then(tform.mapTs('reply')),
                 getReplyIds: (qid) =>
                     get(_api3(`qanda/replyIds/${qid}`)),
                 getReply: (rid) =>
-                    get(_api3(`qanda/reply/${rid}`)),
+                    get(_api3(`qanda/reply/${rid}`)).then(tform.mapTs('reply')),
             },
         },
+
         v2: {
             checkEmailToOnboard({ email }): PR<any> {
                 return post(_api2("user/check_email"), { email });

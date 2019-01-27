@@ -48,11 +48,11 @@ export interface FluxApiMethods {
         qanda: {
             getMine: (o: Auth) => PR<{questions: QandaQuestion}>,
             getAll: () => PR<{questions: QandaQuestion}>,
-            getQuestion: (id: string) => PR<QandaQuestion>,
-            submit: (o: Auth) => PR<{submitted: string, qid: string}>,
-            submitReply: (o: Auth) => PR<{submitted: string, rid: string}>,
-            getReplyIds: (qid: string) => PR<string[]>,
-            getReply: (rid: string) => PR<QandaReply>,
+            getQuestion: (id: string) => PR<{question: QandaQuestion}>,
+            submit: (o: Auth) => PR<{submitted: string, qid: string, question: QandaQuestion}>,
+            submitReply: (o: Auth) => PR<{submitted: string, rid: string, reply: QandaReply}>,
+            getReplyIds: (qid: string) => PR<{reply_ids: string[]}>,
+            getReply: (rid: string) => PR<{reply: QandaReply}>,
         }
     },
     utils: {

@@ -9,7 +9,7 @@
         <ui-section v-else :title="`Reply to ${orig_q.unwrap().title}`">
             <div style="text-align: center;"><v-btn color="warning" @click="back()">Back</v-btn></div>
             <h4>Original Question:</h4>
-            <p style="white-space: pre-line" class="b1 ba br3 pa2">{{orig_q.unwrap().question}}</p>
+            <p style="white-space: pre-line" class="b1 ba br3 pa2">{{orig_q.unwrap().question.question}}</p>
             <v-form v-model="valid">
                 <v-textarea
                         v-model="body"
@@ -83,7 +83,7 @@ export default Vue.extend({
                 ...this.auth
             })
             this.submitWR.do({
-                // 'success': () => this.back()
+                'success': () => this.back()
             })
         },
 
@@ -91,7 +91,7 @@ export default Vue.extend({
             this.orig_q = WebRequest.Loading()
             this.orig_q = await this.$flux.v3.qanda.getQuestion(this.qid)
             this.orig_q.do({
-                success: q => MsgBus.$emit(M.PAGE_TITLE_UPDATE, (q as {title: string}).title)
+                success: ({question: q}) => MsgBus.$emit(M.PAGE_TITLE_UPDATE, (q as {title: string}).title)
             })
         }
     },

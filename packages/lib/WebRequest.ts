@@ -125,3 +125,7 @@ export class WebRequest<E,D> {
 
 export default WebRequest
 export const WR = WebRequest
+
+
+export const wrMap = <E,D,D2>(wr: WebRequest<E,D>) => (f): WebRequest<E,D2> => wr.fmap(f);
+export const wrMapError = <E,D,E2>(wr: WebRequest<E,D>) => (f): WebRequest<E2,D> => wr.mapFailed(f);

@@ -20,9 +20,11 @@
 
 <script lang=ts>
 import Vue from 'vue';
-import { WebRequest } from 'flux-lib/WebRequest';
+import { WebRequest, wrMap } from 'flux-lib/WebRequest';
 import Routes from "@/routes";
 import * as R from 'ramda'
+
+import * as L from '@/lambda'
 
 export default Vue.extend({
     props: ['qDoc', 'auth'],
@@ -33,8 +35,9 @@ export default Vue.extend({
     }),
     methods: {
         async get_reply_ids() {
+            console.log(this.qDoc)
             this.reply_ids = WebRequest.Loading();
-            this.reply_ids = await this.$flux.v3.qanda.getReplyIds(this.qDoc.qid)
+            this.reply_ids = await this.$flux.v3.qanda.getReplyIds(this.qDoc.qid).then(wrMap(L.get('reply_ids')))
         },
 
         doReply() {
