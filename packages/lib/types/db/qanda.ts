@@ -1,6 +1,11 @@
 export type QandaQuestion = {
-    isAnon: boolean
-    askerName: string
+    uid: string | undefined,
+    qid: string,
+    author_name: string,
+    question: string,
+    title: string,
+    ts: Date,
+    is_anon: boolean,
 }
 
 export type QandaReply = {

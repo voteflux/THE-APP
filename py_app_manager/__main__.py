@@ -239,10 +239,8 @@ def build(target, build_args, stage):
     try:
         if stage == "prod":
             logging.info("Building for prod!")
+            # note: this won't trigger normally due to an early exit from ./manage
             if is_netlify():
-                ## Don't checkout anymore, just exit; TODO: can we prevent netlify building?
-                # logging.error("PRODUCTION DEPLOY BUT LATEST COMMIT IS NOT A RELEASE - BAILING OUT")
-                # sys.exit(1)
                 logging.info("Checking out most recent version tag")
                 # reset_checkout_ref = os.environ.get('BRANCH', 'master')
                 real_checkout_tag = os.environ['MOST_RECENT_TAG']
@@ -287,7 +285,7 @@ def dev(dev_target, stage):
     import libtmux
     api_port = 52700
     sam_port = 52701
-    ui_port = 32710
+    ui_port = 52710
     TMP_SESSION = 'tmp-session'
     sess_name = f"dev-{int(time.time())}"
     server = libtmux.Server(socket_name='flux-app-tmux-session')
@@ -350,7 +348,7 @@ def dev(dev_target, stage):
     if dev_target in {'api', 'all'}:
         # mongo dev server port: 53799
         mongo_pane = run_dev_cmd('./packages/api', 'npm run mongo-dev', "mongo-dev", vertical=False)
-        api_cmd = "npm run watch -- --stage dev --port %d" % (api_port,)
+        api_cmd = "npx sls dynamodb install && npm run watch -- --stage dev --port %d" % (api_port,)
         api_pane = run_dev_cmd('./packages/api', api_cmd, "dev-api", vertical=True, active_pane=mongo_pane)
         # don't need to run tsc on the api atm
         # compile_pane = run_dev_cmd('./packages/api', 'npm run watch:build', 'api-watch', vertical=True)

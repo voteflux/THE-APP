@@ -3,7 +3,14 @@ import { fluxHandler } from './_stdWrapper';
 import { DB } from './../db';
 const handlerUtils = require('./handlerUtils')
 
-import { NdaStatus, NdaStage, GenerateDraftNdaReqRT, GenerateDraftNdaRespRT, NdaDraftCommit } from 'flux-lib/types/db/vols'
+import {
+    NdaStatus,
+    NdaStage,
+    GenerateDraftNdaReqRT,
+    GenerateDraftNdaRespRT,
+    NdaDraftCommit,
+    GenerateDraftNdaResp
+} from 'flux-lib/types/db/vols'
 import { _Auth, UserV1Object } from 'flux-lib/types/db';
 import { genNdaDetailsFromUser } from 'flux-lib/pdfs/nda/generatePdf';
 import { uriHash } from 'flux-lib/pdfs/index';
@@ -102,26 +109,25 @@ const wrapHandler = (f, fName, obj) => async (event, context) => {
 */
 
 
+toExport.generateDraft = (db: DB, event, context) => {
+    return auth(db).user(async (event, context, {user}): Promise<GenerateDraftNdaResp> => {
+        const {_id} = user;
+        const {sigPng} = event.body;
 
-export const generateDraft = async (event, ctx) =>
-    (await fluxHandler(
-        { auth: _Auth.User(), inType: GenerateDraftNdaReqRT, outType: GenerateDraftNdaRespRT, logParams: false },
-        async function generateDraftInner(db: DB, {reqUser, reqBody}, event, context) {
+        const ndaDeets = genNdaDetailsFromUser(user)
+        const { genPdf } = await import("flux-lib/pdfs/nda/generatePdf")
+        const { uri } = await genPdf( ndaDeets.fullName, ndaDeets.fullAddr, sigPng )
 
-            const ndaDeets = genNdaDetailsFromUser(reqUser)
-            const { genPdf } = await import("flux-lib/pdfs/nda/generatePdf")
-            const { uri } = await genPdf( ndaDeets.fullName, ndaDeets.fullAddr, reqBody.sigPng )
+        const pdfHash = uriHash(uri)
+        const sigHash = uriHash(sigPng)
 
-            const pdfHash = uriHash(uri)
-            const sigHash = uriHash(reqBody.sigPng)
-
-            return {
-                pdfHash,
-                sigHash,
-                pdfData: uri
-            }
+        return {
+            pdfHash,
+            sigHash,
+            pdfData: uri
         }
-    ))(event, ctx)
+    })(event, context)
+}
 
 
 // export const generateDraft = (db: DB, event, context) => {

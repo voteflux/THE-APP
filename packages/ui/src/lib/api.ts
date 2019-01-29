@@ -217,9 +217,11 @@ export function FluxApi(_Vue: VueConstructor, options?: any): void {
             submitNdaPdfAndSignature(args: Auth & { pdf: string; sig: string }): PR<NdaStatus> {
                 return post(_api2("volunteers/nda/submitPdfAndSig"), args);
             },
-            ndaGenerateDraftPdf: (auth: AuthJWT, args: GenerateDraftNdaReq): PR<NdaDraftCommit> => {
-                return post_jwt("volunteers/nda/generateDraft", auth, args);
+            ndaGenerateDraftPdf: (auth: Auth, args: GenerateDraftNdaReq): PR<NdaDraftCommit> => {
+                return post(_api2("volunteers/nda/generateDraft"), {...auth, ...args});
             },
+            ndaFinalizeSubmission: (auth: Auth, args: {signatureImage: string, pdfHash: string, sigHash: string}) =>
+                post(_api2("volunteers/nda/finalizeSubmission"), {...auth, ...args}),
             login: {
                 getJWTNoPermissions: (): PR<{jwt: string}> => {
                     return post(_api2("login/getJWTNoPermissions"), {})
@@ -309,6 +311,6 @@ export function FluxApi(_Vue: VueConstructor, options?: any): void {
     return Vue.prototype.$flux;
 }
 
-Plugin;
 
 export default FluxApi;
+export type FluxApiMethods = FluxApiMethods;

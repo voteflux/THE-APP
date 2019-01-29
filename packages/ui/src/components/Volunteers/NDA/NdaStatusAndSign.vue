@@ -14,7 +14,7 @@
             </div>
 
             <div v-else-if="req.ndaStatus.unwrap().stage === NdaStage.APPROVED" :key="NdaStage.APPROVED">
-                Your NDA submission has been accepted by Flux. You are now eligable to apply for access to member details.
+                Your NDA submission has been accepted by Flux. You are now eligible to apply for access to member details.
             </div>
 
             <div v-else-if="req.ndaStatus.unwrap().stage === NdaStage.NOT_APPROVED" :key="NdaStage.NOT_APPROVED">
@@ -47,7 +47,7 @@
                             <div class="flex justify-between ma3 w-100">
                                 <v-btn color="info" class="mh2" @click="generateDraftPdf({ useDefaultSig: true })">Show Unsigned NDA</v-btn>
                                 <v-btn color="" class="mh2" @click="makeNewSig()">Make New Signature</v-btn>
-                                <v-btn color="success" class="mh2" @click="reviewFinalPdf()">Generate Signed NDA and Finalize</v-btn>
+                                <v-btn color="success" class="mh2" @click="reviewFinalPdf()">Generate Signed NDA & Review</v-btn>
                             </div>
                         </div>
                         <PDFViewer :pdfMaybe="unsignedPdf" title="Unsigned NDA" />
@@ -120,6 +120,7 @@ export default Vue.extend({
         req: {
             ndaStatus: WebRequest.NotRequested(),
             ndaDraft: WebRequest.NotRequested() as Req<GenerateDraftNdaResp>,
+            ndaSubmit: WebRequest.NotRequested() as Req<GenerateDraftNdaResp>,
         },
         pdfBytes: new Uint8Array(0),
         unsignedPdf: none,
@@ -135,10 +136,10 @@ export default Vue.extend({
 
     computed: {
         signatureImage(): string {
-            return this.$store.state.vol.ndaSignature.valueOr(yourSignaturePlaceholder)
+            return this.$store.state.vol.ndaSignature.getOrElse(yourSignaturePlaceholder)
         },
         sigHash(): string {
-            return uriHash(this.$store.state.vol.ndaSignature.valueOrThrow())
+            return uriHash(this.$store.state.vol.ndaSignature.getOrElseL(() => { throw new Error() }))
         },
         signatureIsSet(): boolean {
             return isSome(this.$store.state.vol.ndaSignature as Option<string>)
@@ -147,16 +148,17 @@ export default Vue.extend({
 
     methods: {
         async generateDraftPdf(opts = { useDefaultSig: false }) {
-            console.log("DRAFT_PDF: Starting")
-            const name = this.userO.fullName()
-            const addr = this.userO.formalAddress()
-            const sig = opts.useDefaultSig === true ? yourSignaturePlaceholder : this.signatureImage
-            console.log("DRAFT_PDF: Importing genPdf")
-            // const {genPdf} = await import('flux-lib/pdfs/nda/generatePdf')
-            // console.log("DRAFT_PDF: Running genPdf")
-            // const result = await genPdf(name, addr, sig)
-            // this.draftPdf = some(result.uri)
-            // console.log("DRAFT_PDF: Finished")
+            console.log("DRAFT_PDF: Starting");
+            const name = this.userO.fullName();
+            const addr = this.userO.formalAddress();
+            const sig = opts.useDefaultSig ? yourSignaturePlaceholder : this.signatureImage;
+            console.log("DRAFT_PDF: Importing genPdf");
+            const {genPdf} = await import('flux-lib/pdfs/nda/generatePdf');
+            console.log("DRAFT_PDF: Running genPdf");
+            const result = await genPdf(name, addr, sig);
+            this.draftPdf = some(result.uri);
+            console.log("DRAFT_PDF: Finished")
+            return this.draftPdf
         },
 
         redoSubmission() {
@@ -198,24 +200,26 @@ export default Vue.extend({
 
         reviewPositive() {
             this.wizardStage = WIZ.S4_SUBMITTING
+            this.req.ndaStatus = WebRequest.Loading()
             const { pdfHash, sigHash } = this.req.ndaDraft.caseOfDefault({
                 success: d => d,
                 default: () => new Proxy({}, { get: () => "NULL" })
             })
             const mySigHash = this.sigHash()
             if (sigHash !== mySigHash) {
-                this.req.ndaDraft = WebRequest.Failed("Protocol failure between Flux UI and backend: The hash of your signature calculated by the UI and by the Flux backend is different. This is unexpected but probably okay. Please try again and let us know at feedback@app.flux.party if this keeps happening.")
+                this.req.ndaSubmit = WebRequest.Failed("Protocol failure between Flux UI and backend: The hash of your signature calculated by the UI and by the Flux backend is different. This is unexpected but probably okay. Please try again and let us know at feedback@app.flux.party if this keeps happening.")
                 return
             }
             this.$flux.v2.ndaFinalizeSubmission(this.auth, {pdfHash, sig: this.signatureImage, sigHash: this.sigHash()})
-                .then(() => {
+                .then((ret) => {
                     this.wizardStage = WIZ.S0_UNREAD
+                    this.req.ndaSubmit = ret
                     this.loadNdaStatus()
                 })
         },
 
         loadNdaStatus() {
-            this.pdfURL = none
+            this.unsignedPdf = this.draftPdf = none
             this.req.ndaStatus = WebRequest.Loading()
             return this.$flux.v2.getNdaStatus(this.auth).then(r => {
                 this.req.ndaStatus = r as Req<NdaStatus>
@@ -226,9 +230,9 @@ export default Vue.extend({
 
     mounted() {
         this.loadNdaStatus()
-            .then(r => {
+            .then(async r => {
                 if (r.isSuccess() && r.unwrap().stage === NdaStage.NOT_STARTED) {
-                    this.generateDraftPdf({ useDefaultSig: true })
+                    this.unsignedPdf = await this.generateDraftPdf({ useDefaultSig: true })
                 }
             })
     }

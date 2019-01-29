@@ -40,12 +40,13 @@
 import Vue from "vue";
 import WebRequest from "flux-lib/WebRequest";
 import {MsgBus, M} from "@/messages";
+import {QandaQuestion} from "flux-lib/types/db/qanda";
 
 export default Vue.extend({
     props: ['auth'],
 
     data: () => ({
-        orig_q: WebRequest.NotRequested(),
+        orig_q: WebRequest.NotRequested() as WebRequest<string, {question:QandaQuestion}>,
         valid: false,
         display_choice: 'full_name',
         displayOpts: [
@@ -91,7 +92,7 @@ export default Vue.extend({
             this.orig_q = WebRequest.Loading()
             this.orig_q = await this.$flux.v3.qanda.getQuestion(this.qid)
             this.orig_q.do({
-                success: ({question: q}) => MsgBus.$emit(M.PAGE_TITLE_UPDATE, (q as {title: string}).title)
+                success: ({question: q}) => { MsgBus.$emit(M.PAGE_TITLE_UPDATE, q.title) }
             })
         }
     },

@@ -42,7 +42,8 @@ export interface FluxApiMethods {
         getRoleAudit: (opts: Auth) => PR<RoleResp[]>,
         getNdaStatus: (opts: Auth) => PR<NdaStatus>,
         submitNdaPdfAndSignature: (args: Auth & {pdf: string, sig: string}) => PR<NdaStatus>,
-        ndaGenerateDraftPdf: (auth: AuthJWT, args: GenerateDraftNdaReq) => PR<NdaDraftCommit>,
+        ndaGenerateDraftPdf: (auth: Auth, args: GenerateDraftNdaReq) => PR<NdaDraftCommit>,
+        ndaFinalizeSubmission: (auth: Auth, args: {signatureImage: string, pdfHash: string, sigHash: string}) => PR<{}>,
     },
     v3: {
         qanda: {

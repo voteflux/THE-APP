@@ -1,7 +1,7 @@
 import * as R from 'ramda'
-import { TextEncoder, TextDecoder } from 'util';
 
 import * as B64ToAB from 'base64-arraybuffer';
+import {TextDecoder, TextEncoder} from "util";
 
 // (predicate: (t: any) => boolean, obj: {[k:string]:any}): any => {
 //     const ret = {} as any

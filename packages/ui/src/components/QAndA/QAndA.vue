@@ -45,14 +45,17 @@ import Vue from "vue";
 import WebRequest from "flux-lib/WebRequest";
 import Routes from "@/routes";
 import QuestionCard from "./QuestionCard.vue";
+import {QandaFs} from "@/store/qanda";
+import {FluxApiMethods} from "@/lib/api";
+import {shouldRefresh} from "@/store";
 
 export default Vue.extend({
     props: ['auth'],
     components: {QuestionCard},
 
     data: () => ({
-        yourQsWR: WebRequest.NotRequested(),
-        allQsWR: WebRequest.NotRequested(),
+        yourQsWR: WebRequest.NotRequested() as any,
+        allQsWR: WebRequest.NotRequested() as any,
         showWhichQuestions: 'all',
         gotNAllQs: 0,
         totalNAllQs: -1
@@ -60,15 +63,17 @@ export default Vue.extend({
 
     methods:{
         async refreshYourQs() {
-            if (this.auth) {
+            if (this.auth && shouldRefresh(this.$store, QandaFs.setYourQs)) {
                 this.yourQsWR = WebRequest.Loading();
                 this.yourQsWR = await this.$flux.v3.qanda.getMine(this.auth)
+                this.yourQsWR.do({success: (r) => this.$store.commit(QandaFs.setYourQs, r.questions)})
             }
         },
 
         async refreshAllQs() {
             this.allQsWR = WebRequest.Loading();
             this.allQsWR = await this.$flux.v3.qanda.getAll()
+            this.allQsWR.do({success: (r) => this.$store.commit(QandaFs.setAllQs, r.questions)})
         },
 
         setShowQs(setTo) {

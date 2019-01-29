@@ -36,9 +36,9 @@ export default Vue.extend({
                 { name: "Revoke My Membership", route: R.MembershipRevocation },
             ] },
             { name: "Q And A", icon: "question_answer", route: R.QAndA },
-            // { name: "Volunteer", items: [
-            //     { name: "NDA Status", route: R.VolunteerNdaStatusAndSign },
-            // ]},
+            { name: "Volunteer", items: [
+                { name: "NDA Status", route: R.VolunteerNdaStatusAndSign },
+            ]},
             // { name: "Be a Candidate", items: [
                 //
             // ]},

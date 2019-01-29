@@ -1,3 +1,3 @@
 
 
-export const get = (k: string) => (o: object) => o[k];
+export const get = (k: string) => <D>(o: D) => o[k];

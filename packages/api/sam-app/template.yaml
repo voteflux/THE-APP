@@ -33,7 +33,7 @@ Conditions:
 Globals:
   Function:
     Timeout: 120
-    MemorySize: !If [ cIsProd, 256, 128 ]
+    MemorySize: 256
   Api:
     Cors: # "'*'"
       AllowMethods: "'GET,POST,OPTIONS'"
