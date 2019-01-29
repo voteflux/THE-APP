@@ -56,6 +56,7 @@ else
 fi
 if tmux -V >/dev/null 2>&1; then
     echo 'Found tmux'
+    [[ -e ~/.tmux.conf ]] || touch ~/.tmux.conf
     if [ ! "$(grep 'destroy-unattached' ~/.tmux.conf)" ]; then
         echo "set -g destroy-unattached off" >> ~/.tmux.conf
     fi

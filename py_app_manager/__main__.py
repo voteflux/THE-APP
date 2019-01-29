@@ -3,9 +3,6 @@
 
 import sys, os, json, logging, subprocess
 
-import boto3
-from attrdict import AttrDict
-
 logging.basicConfig(level=logging.INFO)
 
 from time import sleep
@@ -87,7 +84,8 @@ except Exception as e:
 
 # main UI
 
-
+import boto3
+from attrdict import AttrDict
 import click
 
 stage_option = click.option('--stage', type=click.Choice(['prod', 'staging', 'dev']), default='dev')
