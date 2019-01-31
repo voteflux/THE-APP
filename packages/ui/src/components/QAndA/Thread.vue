@@ -12,7 +12,7 @@
                 <div v-else-if="getReplyWR(rid).isSuccess()">
                     {{ getReply(rid).body }}
                     <hr>
-                    <small>{{ getReply(rid).display_name }} at {{ renderHour(getReply(rid).ts) }} on {{ renderDate(getReply(rid).ts) }} replying to {{ getReply(rid).qid }} | This Reply's ID: {{ getReply(rid).rid }}</small>
+                    <small><span :class="getClasses(rid)">{{ getReply(rid).display_name }}</span> at {{ renderHour(getReply(rid).ts) }} on {{ renderDate(getReply(rid).ts) }} replying to {{ getReply(rid).qid }} | This Reply's ID: {{ getReply(rid).rid }}</small>
                 </div>
                 <loading v-else class="pa3">Loading reply ({{ rid }})...</loading>
             </div>
@@ -87,6 +87,13 @@
                 return `${d.getDate()} / ${d.getMonth() + 1} / ${d.getFullYear()}`
             },
 
+            getClasses(rid) {
+                let wr = this.getReplyWR(rid)
+                if (wr.isSuccess() && wr.unwrap().is_staff)
+                    return "staff-reply"
+                return ""
+            },
+
             doInitialRefresh() {
                 this.qDocWR = WebRequest.Loading();
                 this.ridsWR = WebRequest.Loading();
@@ -125,6 +132,11 @@
     }
     .stripe-replies > .a-reply:nth-child(even) {
         background-color: #e0e0e0;
+    }
+
+    .staff-reply {
+        color: teal;
+        font-weight: bold;
     }
 
 </style>
