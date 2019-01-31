@@ -152,9 +152,9 @@ export default /*class App extends Vue*/ Vue.extend({
             return;
         }
 
-        if (this.$route.query.stage) {
-            console.log(`setting endpoints to stage: ${this.$route.query.stage}`)
-            this.$flux.setEndpoints(this.$route.query.stage);
+        if (this.$route.query.stage || localStorage.getItem('stage')) {
+            console.log(`setting endpoints to stage: ${this.$route.query.stage || console.log(`setting endpoints to stage: ${this.$route.query.stage }`)}`)
+            this.$flux.setEndpoints(this.$route.query.stage || localStorage.getItem('stage') || '');
         }
 
         this.loadAuth();

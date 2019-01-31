@@ -6,8 +6,8 @@
         </h4>
         <div style="text-align: center;">
             <v-btn large color="info" @click="openAskPage()"><v-icon left>question_answer</v-icon> Ask a Question</v-btn>
-            <v-btn large color="" @click="setShowQs('mine')" v-if="showWhichQuestions !== 'mine'" :disabled="yourQsWR.isNotRequested()">Show My Questions</v-btn>
-            <v-btn large color="" @click="setShowQs('all')" v-if="showWhichQuestions !== 'all'">Show All Questions</v-btn>
+            <v-btn large color="success" @click="setShowQs('mine')" v-if="showWhichQuestions !== 'mine'" :disabled="yourQsWR.isNotRequested()">Show My Questions</v-btn>
+            <v-btn large color="warning" @click="setShowQs('all')" v-if="showWhichQuestions !== 'all'">Show All Questions</v-btn>
         </div>
         <ui-collapsible title="Your Questions" no-collapse v-if="showWhichQuestions === 'mine'">
             <div v-if="yourQsWR.isSuccess() && yourQsWR.unwrap().questions.length > 0">

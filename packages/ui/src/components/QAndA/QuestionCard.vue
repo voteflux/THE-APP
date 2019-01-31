@@ -12,11 +12,11 @@
                 <v-btn small v-if="!showQ" @click="showQ = !showQ">Show</v-btn></h4>
             <p v-if="showQ" style="white-space: pre-line" class="b--light-gray ba br3 pa2">{{qDoc.question}}</p>
         </v-card-text>
-        <!--<v-card-actions>-->
+        <v-card-actions>
             <!--<v-btn flat color="orange" @click="showQ = !showQ">{{ showQ ? 'hide q' : 'show q' }}</v-btn>-->
-            <!--<v-btn flat color="orange" @click="doReply()">Reply</v-btn>-->
-            <!--<v-btn flat color="orange" @click="showThread()" :disabled="this.reply_ids.unwrapOrDefault([]).length === 0">View Thread ({{ this.reply_ids.map(rids => rids.length).unwrapOrDefault('...') }})</v-btn>-->
-        <!--</v-card-actions>-->
+            <v-btn flat color="orange" @click="doReply()">Reply</v-btn>
+            <v-btn v-if="!shouldHide('thread')" flat color="orange" @click="showThread()" :disabled="this.reply_ids.unwrapOrDefault([]).length === 0">View Thread ({{ this.reply_ids.map(rids => rids.length).unwrapOrDefault('...') }})</v-btn>
+        </v-card-actions>
     </v-card>
 </template>
 
@@ -29,7 +29,7 @@ import * as R from 'ramda'
 import * as L from '@/lambda'
 
 export default Vue.extend({
-    props: ['qDoc', 'auth'],
+    props: ['qDoc', 'auth', 'hideBtns', 'showQuestion'],
     data: () => ({
         showQ: false,
         reply_ids: WebRequest.NotRequested(),
@@ -49,10 +49,15 @@ export default Vue.extend({
         showThread() {
             this.$router.push(Routes.QandaThread.replace(":id", this.qDoc.qid))
         },
+
+        shouldHide(str) {
+            return (this.hideBtns || []).includes(str)
+        }
     },
 
     created(): void {
         this.get_reply_ids()
+        this.showQ = !!this.showQuestion
     }
 })
 </script>
