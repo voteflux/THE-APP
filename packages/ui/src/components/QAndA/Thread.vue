@@ -85,6 +85,27 @@
             },
             renderDate(d: Date) {
                 return `${d.getDate()} / ${d.getMonth() + 1} / ${d.getFullYear()}`
+            },
+
+            doInitialRefresh() {
+                this.qDocWR = WebRequest.Loading();
+                this.ridsWR = WebRequest.Loading();
+                const p1 = this.$flux.v3.qanda.getReplyIds(this.qId).then(wr => {
+                    this.ridsWR = wr.map(r => r['reply_ids'])
+                    this.ridsWR.do({
+                        success: (rids: any) => (rids as string[]).map(rid => {
+                            this.repliesWR[rid] = WebRequest.Loading()
+                            this.$flux.v3.qanda.getReply(rid).then(wr => {
+                                this.repliesWR[rid] = wr.map(r => r['reply'])
+                                this.$forceUpdate();
+                            })
+                        })
+                    })
+                })
+                const p2 = this.$flux.v3.qanda.getQuestion(this.qId).then(wr => {
+                    this.qDocWR = wr.map(d => d['question'])
+                })
+                return Promise.all([p1, p2] as Promise<any>[])
             }
         },
 
@@ -93,22 +114,7 @@
 
         created() {
             this.qId = this.$route.params.id;
-            this.qDocWR = WebRequest.Loading();
-            this.ridsWR = WebRequest.Loading();
-            this.$flux.v3.qanda.getReplyIds(this.qId).then(wr => {
-                this.ridsWR = wr.map(r => r['reply_ids'])
-                this.ridsWR.do({
-                    success: (rids: any) => (rids as string[]).map(rid => {
-                        this.repliesWR[rid] = WebRequest.Loading()
-                        this.$flux.v3.qanda.getReply(rid).then(wr => {
-                            this.repliesWR[rid] = wr.map(r => r['reply'])
-                        })
-                    })
-                })
-            })
-            this.$flux.v3.qanda.getQuestion(this.qId).then(wr => {
-                this.qDocWR = wr.map(d => d['question'])
-            })
+            this.doInitialRefresh();
         }
     })
 </script>
