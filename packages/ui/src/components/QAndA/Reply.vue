@@ -6,7 +6,7 @@
             <error v-if="orig_q.errObj && orig_q.errObj.status === 404">Question not found, so cannot reply to it.</error>
             <error v-else>{{orig_q.unwrapError()}}</error>
         </div>
-        <ui-section v-else :title="`Reply to ${orig_q.unwrap().title}`">
+        <ui-section v-else :title="`Reply to ${orig_q.unwrap().question.title}`">
             <div style="text-align: center;"><v-btn color="warning" @click="back()">Back</v-btn></div>
             <h4>Original Question:</h4>
             <p style="white-space: pre-line" class="b1 ba br3 pa2">{{orig_q.unwrap().question.question}}</p>

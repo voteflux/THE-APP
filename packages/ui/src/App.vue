@@ -67,6 +67,11 @@ export default /*class App extends Vue*/ Vue.extend({
         pageTitle: "",
         ...Cs
     }),
+    watch: {
+        $route (to, from){
+            this.pageTitleUpdate();
+        }
+    },
     methods: {
         pageTitleUpdate(opts?) {
             this.pageTitle = pageTitle(this.$route, opts)
