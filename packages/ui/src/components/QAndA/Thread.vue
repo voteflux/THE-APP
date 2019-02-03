@@ -10,7 +10,7 @@
             <div v-for="rid in ridsWR.unwrap()" class="ma1 pa2 ba b1 a-reply">
                 <error v-if="getReplyWR(rid).isFailed()">getReplyWR(rid).unwrapError()</error>
                 <div v-else-if="getReplyWR(rid).isSuccess()">
-                    <span style="white-space: pre">{{ getReply(rid).body }}</span>
+                    <span style="white-space: pre-line">{{ getReply(rid).body }}</span>
                     <hr>
                     <small><span :class="getClasses(rid)">{{ getReply(rid).display_name }}</span> at {{ renderHour(getReply(rid).ts) }} on {{ renderDate(getReply(rid).ts) }} replying to {{ getReply(rid).qid }} | This Reply's ID: {{ getReply(rid).rid }}</small>
                 </div>
