@@ -78,11 +78,11 @@ async def submit(event, ctx, user, *args, **kwargs):
 @auth_common
 async def submit_reply(event, ctx, user, *args, **kwargs):
     data = event.body
-    uid = str(user['_id'])
+    replier_uid = str(user['_id'])
     rid = 'r' + str(uuid.uuid4())[:13]
     qid = data.qid
-    qM = QuestionModel.get_maybe(qid)
-    if qM == Nothing:
+    q_m = QuestionModel.get_maybe(qid)
+    if q_m == Nothing:
         raise LambdaError(404, 'question not found')
     body = data.body
     if not (0 < len(body) <= 4000):
@@ -91,14 +91,14 @@ async def submit_reply(event, ctx, user, *args, **kwargs):
     parent_rid = data.get('parent_rid', None)
     child_rids = list()
     is_staff = await has_role('qanda_staff', user['_id'])
-    r = Reply(rid=rid, qid=qid, uid=uid, body=body, ts=ts, parent_rid=parent_rid, child_rids=child_rids,
+    r = Reply(rid=rid, qid=qid, uid=replier_uid, body=body, ts=ts, parent_rid=parent_rid, child_rids=child_rids,
               is_staff=is_staff, display_name=gen_display_name(user, data.display_choice))
     r.save()
     update_actions = [ReplyIdsByQid.rids.set((ReplyIdsByQid.rids | []).prepend([GenericPointer(ts=ts, id=rid)]))]
     ReplyIdsByQid(qid="global").update(actions=update_actions)
     ReplyIdsByQid(qid=qid).update(actions=update_actions)
-    ReplyIdsByUid(uid=uid).update(actions=update_actions)
-    await email_notify_new_reply(uid, r, qM.getValue())
+    ReplyIdsByUid(uid=replier_uid).update(actions=update_actions)
+    await email_notify_new_reply(replier_uid, r, q_m.getValue())
     return {'reply': r.to_python(), 'submitted': True, 'rid': rid}
 
 

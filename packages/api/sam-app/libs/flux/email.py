@@ -1,5 +1,8 @@
+import asyncio
+
 import boto3
 import os
+import logging
 
 import flux.db as db
 from mako.template import Template
@@ -8,6 +11,8 @@ from flux import env
 from bson import ObjectId
 
 ses = boto3.client('ses', region_name='us-east-1')
+log = logging.getLogger('email')
+log.setLevel(logging.INFO)
 
 
 def default_params():
@@ -39,19 +44,22 @@ def send_email(source=None, to_addrs=None, cc_addrs=None, bcc_addrs=None, subjec
     }, ReplyToAddresses=reply_tos or [source])
 
 
-async def email_notify_new_reply(uid, reply, question):
+async def email_notify_new_reply(replier_uid, reply, question):
     render = render_factory('qanda/new_reply')
-    user = await db.find_user({'_id': ObjectId(uid)})
-    if user is None:
-        raise Exception(f'User with uid {uid} not found.')
+    reply_user_f = asyncio.ensure_future(db.find_user({'_id': ObjectId(replier_uid)}))
+    question_user = await db.find_user({'_id': ObjectId(question.uid)})
+    reply_user = await reply_user_f
+    if reply_user is None or question_user is None:
+        log.warning(f"Unable to find reply_user / question_user: {replier_uid} / {question.uid}")
+        return
     params = default_params()
     params.update({
         'r': reply,
-        'fname': user.get('fname', ''),
+        'fname': question_user.get('fname', ''),
         'q': question,
         'reply_url': f'{env.pBaseUrl}/qanda/thread/{question.qid}',
     })
-    print(env.pQandaFromEmail, user.email, env)
-    send_email(source=env.pQandaFromEmail, to_addrs=[user.email],
+    print(env.pQandaFromEmail, question_user.email, env)
+    send_email(source=env.pQandaFromEmail, to_addrs=[question_user.email],
                subject=f'[{env.pSiteNameShort}/QAndA] new reply to "{question.title}"',
                body_txt=render('txt', **params), body_html=render('html', **params))
