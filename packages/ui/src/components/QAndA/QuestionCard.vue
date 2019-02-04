@@ -1,23 +1,28 @@
 <template>
-    <v-card class="mv3">
-        <v-card-title primary-title>
+    <div class="ba pa2">
+        <div>
             <v-layout column>
-                <h3 class="db headline">Title: {{qDoc.title}}</h3>
-                <div>Asked by <em>{{qDoc.display_name}} </em><br><small>at {{ qDoc.ts.toString() }}</small></div>
+                <h3 class="db">
+                    <span v-if="showQ">Title: {{qDoc.title}}</span>
+                    <a v-else="showQ" class="db h3" @click="showThread()">Title: {{qDoc.title}}</a>
+                </h3>
+                <div>Asked by <em>{{qDoc.display_name}} </em><small>on {{ qDoc.ts.toString() }}</small></div>
             </v-layout>
-        </v-card-title>
-        <v-card-text>
-            <h4>Question:
-                <v-btn small v-if="showQ" @click="showQ = !showQ">Hide</v-btn>
-                <v-btn small v-if="!showQ" @click="showQ = !showQ">Show</v-btn></h4>
-            <p v-if="showQ" style="white-space: pre-line" class="b--light-gray ba br3 pa2">{{qDoc.question}}</p>
-        </v-card-text>
-        <v-card-actions>
+        </div>
+        <!--<v-card-text>-->
+        <div v-if="showQ">
+            <h4>Question:</h4>
+                <!--<v-btn small v-if="showQ" @click="showQ = !showQ">Hide</v-btn>-->
+                <!--<v-btn small v-if="!showQ" @click="showQ = !showQ">Show</v-btn></h4>-->
+            <p v-linkified v-if="showQ" style="white-space: pre-line" class="b--light-gray ba br3 pa2">{{qDoc.question}}</p>
+        </div>
+        <!--</v-card-text>-->
+        <div class="bt pt1">
             <!--<v-btn flat color="orange" @click="showQ = !showQ">{{ showQ ? 'hide q' : 'show q' }}</v-btn>-->
-            <v-btn flat color="orange" @click="doReply()">Reply</v-btn>
-            <v-btn v-if="!shouldHide('thread')" flat color="orange" @click="showThread()" :disabled="this.reply_ids.unwrapOrDefault([]).length === 0">View Thread ({{ this.reply_ids.map(rids => rids.length).unwrapOrDefault('...') }})</v-btn>
-        </v-card-actions>
-    </v-card>
+            <a class="" @click="doReply()">Reply</a> |
+            <a v-if="!shouldHide('thread')" flat color="orange" @click="showThread()">View ({{ this.reply_ids.map(rids => rids.length).unwrapOrDefault('...') }} replies)</a>
+        </div>
+    </div>
 </template>
 
 <script lang=ts>

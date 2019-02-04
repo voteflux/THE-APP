@@ -10,8 +10,8 @@
             <v-btn large color="warning" @click="setShowQs('all')" v-if="showWhichQuestions !== 'all'">Show All Questions</v-btn>
         </div>
         <ui-collapsible title="Your Questions" no-collapse v-if="showWhichQuestions === 'mine'">
-            <div v-if="yourQsWR.isSuccess() && yourQsWR.unwrap().questions.length > 0">
-                <div v-for="q in yourQsWR.unwrap().questions" class="pv1">
+            <div v-if="yourQsWR.isSuccess() && yourQsWR.unwrap().questions.length > 0" class="stripe-children">
+                <div v-for="q in yourQsWR.unwrap().questions" class="pv1 to-stripe">
                     <QuestionCard :q-doc="q"></QuestionCard>
                 </div>
             </div>
@@ -24,8 +24,8 @@
             </div>
         </ui-collapsible>
         <ui-collapsible title="All Questions" no-collapse v-if="showWhichQuestions === 'all'">
-            <div v-if="allQsWR.isSuccess() && allQsWR.unwrap().questions.length > 0">
-                <div v-for="q in allQsWR.unwrap().questions" class="pv1">
+            <div v-if="allQsWR.isSuccess() && allQsWR.unwrap().questions.length > 0" class="stripe-children">
+                <div v-for="q in allQsWR.unwrap().questions" class="pv1 to-stripe">
                     <QuestionCard :q-doc="q"></QuestionCard>
                 </div>
             </div>
@@ -95,3 +95,14 @@ export default Vue.extend({
 
 })
 </script>
+
+<style lang="scss">
+    .stripe-children > .to-stripe {
+        background-color: #fafafa;
+    }
+    .stripe-children > .to-stripe:nth-child(even) {
+        background-color: #e0e0e0;
+    }
+
+</style>
+

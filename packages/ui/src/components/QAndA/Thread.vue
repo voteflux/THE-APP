@@ -10,9 +10,15 @@
             <div v-for="rid in ridsWR.unwrap()" class="ma1 pa2 ba b1 a-reply">
                 <error v-if="getReplyWR(rid).isFailed()">getReplyWR(rid).unwrapError()</error>
                 <div v-else-if="getReplyWR(rid).isSuccess()">
-                    <span style="white-space: pre-line">{{ getReply(rid).body }}</span>
+                    <span style="white-space: pre-line" v-linkified>{{ getReply(rid).body }}</span>
                     <hr>
-                    <small><span :class="getClasses(rid)">{{ getReply(rid).display_name }}</span> at {{ renderHour(getReply(rid).ts) }} on {{ renderDate(getReply(rid).ts) }} replying to {{ getReply(rid).qid }} | This Reply's ID: {{ getReply(rid).rid }}</small>
+                    <small>
+                        <span :class="getClasses(rid)">{{ getReply(rid).display_name }}</span>
+                        at {{ renderHour(getReply(rid).ts) }}
+                        on {{ renderDate(getReply(rid).ts) }}
+                        replying to {{ getReply(rid).qid }}
+                        | This Reply's ID: {{ getReply(rid).rid }}
+                    </small>
                 </div>
                 <loading v-else class="pa3">Loading reply ({{ rid }})...</loading>
             </div>
@@ -61,6 +67,7 @@
     import Routes from "@/routes";
     import QuestionCard from './QuestionCard.vue';
     import * as R from 'ramda'
+    import {M, MsgBus} from "@/messages";
 
     export default Vue.extend({
         props: ['auth'],
@@ -112,6 +119,9 @@
                 })
                 const p2 = this.$flux.v3.qanda.getQuestion(this.qId).then(wr => {
                     this.qDocWR = wr.map(d => d['question'])
+                    wr.do({
+                        success: ({question: q}) => { MsgBus.$emit(M.PAGE_TITLE_UPDATE, q.title) }
+                    })
                 })
                 return Promise.all([p1, p2] as Promise<any>[])
             }

@@ -9,7 +9,7 @@
         <ui-section v-else :title="`Reply to ${orig_q.unwrap().question.title}`">
             <div style="text-align: center;"><v-btn color="warning" @click="back()">Back</v-btn></div>
             <h4>Original Question:</h4>
-            <p style="white-space: pre-line" class="b1 ba br3 pa2">{{orig_q.unwrap().question.question}}</p>
+            <p v-linkified style="white-space: pre-line" class="b1 ba br3 pa2">{{orig_q.unwrap().question.question}}</p>
             <v-form v-model="valid">
                 <v-textarea
                         v-model="body"

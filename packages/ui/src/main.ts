@@ -37,6 +37,9 @@ import VuetifyAll from 'vuetify'
 import 'vuetify/dist/vuetify.min.css'
 import colors from 'vuetify/es5/util/colors'
 
+import linkify from 'vue-linkify'
+Vue.directive('linkified', linkify)
+
 // @ts-ignore
 Vue.use(Vuetify, {
     components: {
