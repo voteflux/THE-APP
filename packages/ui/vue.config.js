@@ -8,7 +8,7 @@ function isProd() {
 }
 
 module.exports = {
-    baseUrl: '/v/',
+    publicPath: '/v/',
     outputDir: 'dist/v/',
     lintOnSave: true,
     parallel: !isProd(),

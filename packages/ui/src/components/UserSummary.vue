@@ -3,9 +3,9 @@
         <div v-if="user && user.loading !== true">
             <h3>Your Details:</h3>
             <v-btn outline color="info" @click="$router.push(R.EditUserDetails)">See/Edit Your Details</v-btn>
-            <div>
-                <router-link :to="R.EditUserDetails">See or Edit your details</router-link>
-            </div>
+            <!--<div>-->
+                <!--<router-link :to="R.EditUserDetails">See or Edit your details</router-link>-->
+            <!--</div>-->
 
             <UserDetailsValid :user="user" />
 
