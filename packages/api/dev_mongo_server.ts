@@ -1,12 +1,18 @@
+console.log('started dev_mongo_server')
+
 import MongodbMemoryServer from 'mongodb-memory-server';
-import { MongoClient } from 'mongodb'
+// import { MongoClient } from 'mongodb'
 import restore from 'mongodb-restore'
+
+console.log('imported monogodb memory server && mongodb restore')
 
 import DB from './flux/db'
 
 let port = 53799
 
+console.log("creating mongo memory server")
 const mongod = new MongodbMemoryServer({instance: {port, dbName: "flux"}, debug: true});
+console.log('created monogo memory server')
 
 async function main() {
     const uri = await mongod.getConnectionString()

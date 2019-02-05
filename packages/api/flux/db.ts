@@ -287,13 +287,14 @@ export class DBMethods {
 
         const all_members = (await this.find_members(_onRoll)
             .project({ timestamp: 1, address: 1, addr_postcode: 1, dobYear: 1 })
-            .toArray()) as any[];
+            .toArray());
         console.log(`Public Stats generator got ${all_members.length} members`);
 
         stats.signup_times = R.compose(
-            R.sort((a: any, b: any) => b - a),
+            R.sort((a: number, b: number) => b - a),
+
+            R.map((m: UserV1Object) => m.timestamp | 0),
             // @ts-ignore
-            R.map(m => m.timestamp | 0),
             R.filter((m: any) => m.timestamp !== undefined)
         )(all_members);
         console.log(`SIGNUP_TIMES: N=${stats.signup_times.length}, ${stats.signup_times.toString().slice(0, 300)}`);
@@ -328,6 +329,7 @@ export class DBMethods {
             R.map(R.countBy(R.identity)),
             // @ts-ignore
             R.map(R.map(R.last)),
+            // @ts-ignore
             R.groupBy(R.head),
             // @ts-ignore
             R.map(m => [utils.extractState(m), m.dobYear || "1066"])
@@ -338,6 +340,7 @@ export class DBMethods {
             R.map(R.sort((a, b) => a - b)),
             // @ts-ignore
             R.map(R.map(R.last)),
+            // @ts-ignore
             R.groupBy(R.head),
             // @ts-ignore
             R.map(m => [utils.extractState(m), (m.timestamp || 0) | 0])
@@ -381,17 +384,17 @@ export class DBMethods {
         return ndaStatusToSet
     }
 
-    // draft NDA
-    commitDraftNda = async (uid, pdfHash, sigHash, acceptSig): Promise<NdaDraftCommit> => {
-        const draftCommit = { uid, pdfHash, sigHash, ts: utils.now(), acceptSig }
-        await this.dbv1.volNdaDraftCommits.insertOne(draftCommit)
-        return draftCommit
-    }
-
-    acceptDraftNda = async (uid, pdfHash, sigHash): Promise<NdaStatus> => {
-        // return await this.dbv1.vol
-        return {} as any
-    }
+    // // draft NDA
+    // commitDraftNda = async (uid, pdfHash, sigHash, acceptSig): Promise<NdaDraftCommit> => {
+    //     const draftCommit = { uid, pdfHash, sigHash, ts: utils.now(), acceptSig }
+    //     await this.dbv1.volNdaDraftCommits.insertOne(draftCommit)
+    //     return draftCommit
+    // }
+    //
+    // acceptDraftNda = async (uid, pdfHash, sigHash): Promise<NdaStatus> => {
+    //     // return await this.dbv1.vol
+    //     return {} as any
+    // }
 
     /* Finance */
 

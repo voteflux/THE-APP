@@ -53,11 +53,12 @@ export default class DBAuthSecToken2 {
             name
         }
 
-        const _r = await this.dbv1.secToken2.insertOne(newSecToken)
-        if (_r.result.ok !== 1)
-            return left(`Adding auth token to database failed :(`)
-
-        return right({secToken, stid: _r.insertedId})
+        return left('unsupported / unimplemented')
+        // const _r = await this.dbv1.secToken2.insertOne(newSecToken)
+        // if (_r.result.ok !== 1)
+        //     return left(`Adding auth token to database failed :(`)
+        //
+        // return right({secToken, stid: _r.insertedId})
     }
 
 

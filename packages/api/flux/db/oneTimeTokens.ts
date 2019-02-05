@@ -57,12 +57,13 @@ export default class DBOneTimeTokens {
             uid,
         }
 
-        const _r = await this.dbv1.oneTimeTokens.insertOne(doc)
-
-        if (_r.result.ok !== 1)
-            return left(`Unable to create one-time-token`)
-
-        return right({token})
+        return left(`unimplemented addNewOneTimeToken`)
+        // const _r = await this.dbv1.oneTimeTokens.insertOne(doc)
+        //
+        // if (_r.result.ok !== 1)
+        //     return left(`Unable to create one-time-token`)
+        //
+        // return right({token})
     }
 
 

@@ -68,7 +68,6 @@ export const validJuris = R.reduce(
         )
     )
 )
-console.log(validJuris)
 
 
 // Auth + Juri 2.0 Stuff
