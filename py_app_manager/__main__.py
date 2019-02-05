@@ -27,6 +27,18 @@ def is_netlify():
     return 'IS_NETLIFY' in os.environ
 
 
+def _sam_pip():
+    dir_offset = f'packages/api/sam-app'
+    func_dirs = map(lambda x: f'{dir_offset}/funcs/{x}', os.listdir(f'{dir_offset}/funcs'))
+    targets = [f'{dir_offset}/libs'] + [p for p in func_dirs if os.path.exists(f'{p}/requirements.txt')]
+    runner = CmdRunner(must_run)
+    pip_install = 'pip3 install -t deps -r requirements.txt --upgrade'
+    for t in targets:
+        runner.add(f'Installing python deps for {t}/requirements.txt in {t}/deps',
+                   f'cd {t} && docker run --rm -v $({pwd_cmd}):/var/task lambci/lambda:build-python3.6 {pip_install}')
+    runner.run()
+
+
 _deps_updated = False
 
 
@@ -37,6 +49,7 @@ def ensure_deps(force=False):
             must_run("python3 -m pip install -r requirements.txt")
             must_run("npm i")
             must_run("npx lerna bootstrap")
+            _sam_pip()
             set_deps_up_to_date()
 
         if Repo is not None:
@@ -91,7 +104,8 @@ import click
 stage_option = click.option('--stage', type=click.Choice(['prod', 'staging', 'dev']), default='dev')
 type_pkg_choice = click.Choice(['api', 'ui', 'lib', 'all'])
 
-render_target = lambda target: defaultdict(lambda: target, {'all': '', 'lib': 'flux-lib'})[target]
+def render_target(target):
+    return {'all': '', 'lib': 'flux-lib'}.get(target, target)
 
 
 @click.group()
@@ -118,6 +132,15 @@ def clean():
         logging.debug("Running %s" % cmd)
         must_run(cmd)
     logging.debug("Done cleaning up.")
+
+
+@cli.command()
+def lerna_upgrade():
+    runner = CmdRunner(must_run)
+    runner.add('upgrade lerna', 'npm upgrade')
+    runner.add('upgarde packages', 'npx lerna exec --no-bail -- npm upgrade')
+    runner.add('clean and bootstrap', 'npx lerna clean && npx lerna bootstrap')
+    runner.run()
 
 
 @cli.command()
@@ -168,16 +191,7 @@ def add(dependencies, dev):
 
 @cli.command()
 def sam_pip():
-    dir_offset = f'packages/api/sam-app'
-    func_dirs = map(lambda x: f'{dir_offset}/funcs/{x}', os.listdir(f'{dir_offset}/funcs'))
-    targets = [f'{dir_offset}/libs'] + [p for p in func_dirs if os.path.exists(f'{p}/requirements.txt')]
-    runner = CmdRunner(must_run)
-    pip_install = 'pip3 install -t deps -r requirements.txt --upgrade'
-    for t in targets:
-        runner.add(f'Installing python deps for {t}/requirements.txt in {t}/deps',
-                   f'cd {t} && docker run --rm -v $({pwd_cmd}):/var/task lambci/lambda:build-python3.6 {pip_install}')
-    runner.run()
-
+    _sam_pip()
 
 
 @cli.command()
@@ -348,7 +362,7 @@ def dev(dev_target, stage):
     if dev_target in {'api', 'all'}:
         # mongo dev server port: 53799
         mongo_pane = run_dev_cmd('./packages/api', 'npm run mongo-dev', "mongo-dev", vertical=False)
-        api_cmd = "npx sls dynamodb install && npm run watch -- --stage dev --port %d" % (api_port,)
+        api_cmd = "npm run watch -- --stage dev --port %d" % (api_port,)
         api_pane = run_dev_cmd('./packages/api', api_cmd, "dev-api", vertical=True, active_pane=mongo_pane)
         # don't need to run tsc on the api atm
         # compile_pane = run_dev_cmd('./packages/api', 'npm run watch:build', 'api-watch', vertical=True)

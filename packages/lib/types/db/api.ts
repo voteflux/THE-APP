@@ -55,7 +55,7 @@ const calcJuriPerms = ([j1, v]) => {
     }
 }
 export const validJuris = R.reduce(
-    R.concat,
+    (acc, vs) => ([...acc, ...vs]),
     [] as string[],
     R.map(
         allJuriPerms => R.map(

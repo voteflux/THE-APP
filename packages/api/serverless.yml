@@ -17,7 +17,7 @@ service:
 plugins:
   - serverless-webpack
   - serverless-domain-manager
-  - serverless-dynamodb-local
+#  - serverless-dynamodb-local
   - serverless-iam-roles-per-function
   - serverless-plugin-aws-alerts
   - serverless-plugin-tracing

@@ -6,10 +6,10 @@
             <error v-if="orig_q.errObj && orig_q.errObj.status === 404">Question not found, so cannot reply to it.</error>
             <error v-else>{{orig_q.unwrapError()}}</error>
         </div>
-        <ui-section v-else :title="`Reply to ${orig_q.unwrap().question.title}`">
+        <ui-section v-else :title="`Reply to ${orig_q.unwrap().title}`">
             <div style="text-align: center;"><v-btn color="warning" @click="back()">Back</v-btn></div>
             <h4>Original Question:</h4>
-            <p v-linkified style="white-space: pre-line" class="b1 ba br3 pa2">{{orig_q.unwrap().question.question}}</p>
+            <p v-linkified style="white-space: pre-line" class="b1 ba br3 pa2">{{orig_q.unwrap().question}}</p>
             <v-form v-model="valid">
                 <v-textarea
                         v-model="body"
@@ -46,7 +46,7 @@ export default Vue.extend({
     props: ['auth'],
 
     data: () => ({
-        orig_q: WebRequest.NotRequested() as WebRequest<string, {question:QandaQuestion}>,
+        orig_q: WebRequest.NotRequested() as WebRequest<string, QandaQuestion>,
         valid: false,
         display_choice: 'full_name',
         displayOpts: [
@@ -90,9 +90,10 @@ export default Vue.extend({
 
         async getQ() {
             this.orig_q = WebRequest.Loading()
-            this.orig_q = await this.$flux.v3.qanda.getQuestion(this.qid)
+            const _q: QandaQuestion = this.$store.state.qanda.questions[this.qid]
+            this.orig_q = _q ? WebRequest.Success(_q) : await this.$flux.v3.qanda.getQuestion(this.qid).then(wr => wr.map(({question: q}) => q))
             this.orig_q.do({
-                success: ({question: q}) => { MsgBus.$emit(M.PAGE_TITLE_UPDATE, q.title) }
+                success: (q) => { MsgBus.$emit(M.PAGE_TITLE_UPDATE, q.title) }
             })
         }
     },

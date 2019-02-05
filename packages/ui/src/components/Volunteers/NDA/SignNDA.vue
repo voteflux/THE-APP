@@ -28,7 +28,7 @@ defaultFunc.isDefault = true
 export default Vue.extend({
     props: {
         onSave: {
-            default: (sig) => {}
+            default: (sig) => {},
         },
         onBack: {
             default: defaultFunc
@@ -48,7 +48,7 @@ export default Vue.extend({
         },
 
         back() {
-            this.onBack()
+            this.$props.onBack()
         },
 
         clear() {
@@ -65,7 +65,7 @@ export default Vue.extend({
             // @ts-ignore
             const sig = this.$refs.signature.save('image/png')
             this.$store.commit(VolFs.setNda, sig)
-            this.onSave(sig)
+            this.$props.onSave(sig)
         }
     }
 })

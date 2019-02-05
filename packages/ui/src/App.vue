@@ -142,7 +142,7 @@ export default /*class App extends Vue*/ Vue.extend({
             const s = this.$route.query.s;
             const toRemoveBase = `s=${s}`;
             console.log("detected secret as hash param, saving and removing");
-            this.$flux.auth.saveSecret(s);
+            this.$flux.auth.saveSecret(s as string);
             window.location.href = window.location.href.replace(`?${toRemoveBase}`, '?').replace(`&${toRemoveBase}`, '')
             return
         }
@@ -158,8 +158,8 @@ export default /*class App extends Vue*/ Vue.extend({
         }
 
         if (this.$route.query.stage || localStorage.getItem('stage')) {
-            console.log(`setting endpoints to stage: ${this.$route.query.stage || console.log(`setting endpoints to stage: ${this.$route.query.stage }`)}`)
-            this.$flux.setEndpoints(this.$route.query.stage || localStorage.getItem('stage') || '');
+            console.log(`setting endpoints to stage: ${this.$route.query.stage || localStorage.getItem('stage')}`)
+            this.$flux.setEndpoints(this.$route.query.stage as string || localStorage.getItem('stage') || '');
         }
 
         this.loadAuth();

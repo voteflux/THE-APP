@@ -1,13 +1,13 @@
 <template>
     <transition name="expand" mode="out-in">
         <div v-if="user.needsValidating" key="needsValidating">
-            <h4 class="">
-                ⚠️ Your details need validating. <v-btn color="info" @click="$router.push(R.ValidateSelf)" small>validate now</v-btn>
+            <h4 class="mv1">
+                ⚠️ Your details need validating against the Electoral Roll. <v-btn color="info" @click="$router.push(R.ValidateSelf)" small>validate now</v-btn>
             </h4>
         </div>
 
         <!-- If a user doesn't need validating and their details are invalid then they need to change their details -->
-        <div v-else-if="!user.detailsValid" key="notValid">
+        <div v-else-if="!user.detailsValid || true" key="notValid">
             <h4 class="">💥 Your details are not able to be validated against the electoral roll.</h4>
             <p>Reason: {{ user.validationReason }}</p>
             <!-- <p>Please <router-link :to="R.EditUserDetails">update your details</router-link>.</p> -->

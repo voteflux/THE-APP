@@ -33,7 +33,14 @@
         -->
 
         <Section title="Get Involved" :noCollapse="true" class="child-bg-alt" >
-            <EditableOpt class="row" name="I'm interested in standing as a candidate" :value="user.candidature_federal" :onSave="savePropFactory('candidature_federal')" />
+            <EditableOpt class="row" name="I'm interested in standing as a candidate" :value="user.candidature_federal" :onSave="savePropFactory('candidature_federal')">
+                <div class="pa2">
+                    Links:
+                    <v-icon v-if="notifyCandDashboard">notification_important</v-icon> <router-link :to="Routes.CandidateDashboard">Candidate Dashboard</router-link> |
+                    Edit Candidate Profile |
+                    Candidate Settings
+                </div>
+            </EditableOpt>
             <EditableOpt class="row" name="I'd like to volunteer" :value="user.volunteer" :onSave="savePropFactory('volunteer')" />
         </Section>
 
@@ -75,6 +82,7 @@ export default Vue.extend({
         Roles,
         Routes,
         M, MsgBus,
+        notifyCandDashboard: true,
     }),
     methods: {
         hasRole(r) {

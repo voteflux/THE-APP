@@ -2,14 +2,17 @@
     <div>
         <div v-if="user && user.loading !== true">
             <h3>Your Current Details:</h3>
-
-            <Table2Cols :data="userSummaryData()"></Table2Cols>
-
-            <UserDetailsValid :user="user" />
-
             <div>
                 <router-link :to="R.EditUserDetails">See or Edit your details</router-link>
             </div>
+
+            <UserDetailsValid :user="user" />
+
+            <v-expand-transition>
+                <Table2Cols v-if="showData" :data="userSummaryData()"></Table2Cols>
+            </v-expand-transition>
+            <v-btn @click="showData = !showData">{{ showData ? 'Hide Details' : 'Show Details' }}</v-btn>
+
         </div>
 
         <div v-if="user && user.loading === true">
@@ -35,7 +38,8 @@ export default Vue.extend({
     },
 
     data: () => ({
-        R
+        R,
+        showData: false,
     }),
 
     methods: {
