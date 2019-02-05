@@ -49,7 +49,8 @@ def ensure_deps(force=False):
             must_run("python3 -m pip install -r requirements.txt")
             must_run("npm i")
             must_run("npx lerna bootstrap")
-            _sam_pip()
+            if not is_netlify():
+                _sam_pip()
             set_deps_up_to_date()
 
         if Repo is not None:
