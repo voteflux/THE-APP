@@ -69,7 +69,7 @@ Vue.use(Vuetify, {
         VCard,
     },
     directives,
-    iconfont: 'md',
+    iconfont: 'mdi',
     // https://vuetifyjs.com/en/theme-generator
     theme: {
         primary: colors.blue.darken1,
@@ -158,7 +158,7 @@ const router = new VueRouter({ routes });
 
 import { store } from './store'
 import 'roboto-fontface/css/roboto/roboto-fontface.css'
-import 'material-design-icons-iconfont/dist/material-design-icons.css'
+import '@mdi/font/css/materialdesignicons.css'
 
 
 import VueGoodTablePlugin from 'vue-good-table'

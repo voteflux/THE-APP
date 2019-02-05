@@ -31,6 +31,7 @@
                 <EditableOpt class="row" name="I'm interested in standing as a candidate" :value="user.candidature_federal" :onSave="savePropFactory('candidature_federal')" />
                 <EditableOpt class="row" name="I'd like to volunteer" :value="user.volunteer" :onSave="savePropFactory('volunteer')" />
                 <EditableOpt class="row" name="Recieve SMSs?" trueName="None" falseName="All" :value="user.smsOptOut" :useDropdown="true" :default="false" :onSave="savePropFactory('smsOptOut')" />
+                <EditableOpt class="row" name="Is it okay to call you?" trueName="No" falseName="Yes" :value="user.do_not_call" :useDropdown="true" :default="false" :onSave="savePropFactory('do_not_call')" />
             </UiSection>
         </div>
     </div>

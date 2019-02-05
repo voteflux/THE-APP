@@ -51,7 +51,6 @@ export default Vue.extend({
     data: () => ({
         newValue: true,
         newValueInv: false,
-        optNames: [] as string[],
         loading: false,
         doNotSave: false,
     }),
@@ -81,7 +80,7 @@ export default Vue.extend({
         },
 
         renderValue() {
-            return this.$props.value === true ? this.optNames[0] : this.optNames[1]
+            return this.$props.value === true ? this.$props.trueName || "Yes" : this.$props.falseName || "No"
         },
 
         checkForSave() {
@@ -91,7 +90,6 @@ export default Vue.extend({
 
     mounted(){
         this._onReset()
-        this.optNames = [this.$props.trueName || "Yes", this.$props.falseName || "No" ]
     },
 })
 </script>

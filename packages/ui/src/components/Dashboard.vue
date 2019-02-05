@@ -34,10 +34,9 @@
 
         <Section title="Get Involved" :noCollapse="true" class="child-bg-alt" >
             <EditableOpt class="row" name="I'm interested in standing as a candidate" :value="user.candidature_federal" :onSave="savePropFactory('candidature_federal')">
-                <div class="pa2">
+                <div class="pa3">
                     Links:
-                    <v-icon v-if="notifyCandDashboard">notification_important</v-icon> <router-link :to="Routes.CandidateDashboard">Candidate Dashboard</router-link> |
-                    Edit Candidate Profile |
+                    <v-icon v-if="notifyCandProfile" small color="red">notification_important</v-icon> <router-link :to="Routes.CandidateDashboard">Candidate Profile</router-link> |
                     Candidate Settings
                 </div>
             </EditableOpt>
@@ -82,7 +81,7 @@ export default Vue.extend({
         Roles,
         Routes,
         M, MsgBus,
-        notifyCandDashboard: true,
+        notifyCandProfile: true,
     }),
     methods: {
         hasRole(r) {

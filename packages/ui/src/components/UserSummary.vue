@@ -11,7 +11,7 @@
             <v-expand-transition>
                 <Table2Cols v-if="showData" :data="userSummaryData()"></Table2Cols>
             </v-expand-transition>
-            <v-btn @click="showData = !showData">{{ showData ? 'Hide Details' : 'Show Details' }}</v-btn>
+            <v-btn outline @click="showData = !showData" color="orange">{{ showData ? 'Hide Details' : 'Show Details' }}</v-btn>
 
         </div>
 
