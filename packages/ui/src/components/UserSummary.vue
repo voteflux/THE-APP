@@ -1,7 +1,8 @@
 <template>
     <div>
         <div v-if="user && user.loading !== true">
-            <h3>Your Current Details:</h3>
+            <h3>Your Details:</h3>
+            <v-btn outline color="info" @click="$router.push(R.EditUserDetails)">See/Edit Your Details</v-btn>
             <div>
                 <router-link :to="R.EditUserDetails">See or Edit your details</router-link>
             </div>
@@ -10,6 +11,9 @@
 
             <v-expand-transition>
                 <Table2Cols v-if="showData" :data="userSummaryData()"></Table2Cols>
+            </v-expand-transition>
+            <v-expand-transition>
+                <div v-if="!showData" class="bg-light-gray tc"><span class="pv4 db b">Details Preview Hidden (click show)</span></div>
             </v-expand-transition>
             <v-btn outline @click="showData = !showData" color="orange">{{ showData ? 'Hide Details' : 'Show Details' }}</v-btn>
 
