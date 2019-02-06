@@ -1,6 +1,5 @@
 import { Store } from 'vuex'
 import WebRequest, {wrMap} from "flux-lib/WebRequest";
-import {identity} from "fp-ts/lib/function";
 import {FullStore, shouldRefresh} from "@/store";
 
 export const get = (k: string) => <D>(o: D) => o[k];
@@ -21,7 +20,7 @@ export function isStateEntryEmpty(v: object | any[] | any) {
 export async function get_from_state_or_cache<E,D,R>(store: FullStore, d: D, f: () => Promise<WebRequest<E,D>>, mutation: string, genArgs?) {
     console.log(mutation, 'data>', d)
     const d2 = await f()
-    const _genArgs = genArgs ? genArgs : identity
+    const _genArgs = genArgs ? genArgs : (x => x)
     d2.do({success: v => store.commit(mutation, _genArgs(v))})
     return d2
 }

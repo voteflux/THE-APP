@@ -1,8 +1,7 @@
 {
   "compilerOptions": {
-    "target": "es5",
-    "lib": ["es5"],
-    "module": "es2015",
+    "target": "es2017",
+    "module": "esnext",
     "jsx": "preserve",
     "strict": true,
     "moduleResolution": "node",

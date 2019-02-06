@@ -267,7 +267,7 @@ def build(target, build_args, stage):
 
         def build_ui():
             logging.info("### BUILDING UI ###")
-            must_run(f"cd packages/ui && npm run build -- --modern {remArgs}")
+            must_run(f"cd packages/ui && npm run build -- {remArgs}")
 
         def build_api():
             logging.info("### BUILDING API ###")

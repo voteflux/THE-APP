@@ -26,19 +26,6 @@ module.exports = {
         },
         module: {
             rules: [
-                {
-                    loader: 'thread-loader',
-                    options: {
-                        silent: false,
-                        workers: require('os').cpus().length - 1
-                    }
-                },
-                {
-                    loader: 'ts-loader',
-                    options: {
-                        transpileOnly: true
-                    }
-                }
             ]
         },
         plugins: [
