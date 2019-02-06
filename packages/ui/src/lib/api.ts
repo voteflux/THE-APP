@@ -73,24 +73,33 @@ const endpoints = {
 }
 
 const apiRoots = () => {
-    switch (window.location.hostname) {
-        case "127.0.0.1":
-        case "localhost":
-            return endpoints.dev;
-        case "dev.app.flux.party":
-        case "flux-app-dev.netlify.com":
-            return endpoints.staging;
-        case "app.flux.party":
-        case "members.flux.party":
-        case "api.voteflux.org":
-        case "flux-app.netlify.com":
-        case "staging.app.flux.party":
-        case "flux-app-staging.netlify.com":
-            return endpoints.prod;
-        default:
-            if (window.location.hostname.includes("flux-app-dev.netlify.com"))
+    const getDefaults = () => {
+        switch (window.location.hostname) {
+            case "127.0.0.1":
+            case "localhost":
+                return endpoints.dev;
+            case "dev.app.flux.party":
+            case "flux-app-dev.netlify.com":
                 return endpoints.staging;
-            return endpoints.prod;
+            case "app.flux.party":
+            case "members.flux.party":
+            case "api.voteflux.org":
+            case "flux-app.netlify.com":
+            case "staging.app.flux.party":
+            case "flux-app-staging.netlify.com":
+                return endpoints.prod;
+            default:
+                if (window.location.hostname.includes("flux-app-dev.netlify.com"))
+                    return endpoints.staging;
+                return endpoints.prod;
+        }
+    }
+    const roots = getDefaults()
+    return {
+        v3: localStorage.getItem('flux-api-override-endpoint-v3') || roots.v3,
+        v2: localStorage.getItem('flux-api-override-endpoint-v2') || roots.v2,
+        v1: localStorage.getItem('flux-api-override-endpoint-v1') || roots.v1,
+        prod: roots.prod
     }
 };
 

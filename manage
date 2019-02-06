@@ -28,6 +28,8 @@ if [ "$IS_NETLIFY" ]; then
         if [ "$CURR_COMMIT" != "$LAST_RELEASE_COMMIT" ]; then
             echo "Exiting as this is a production build but HEAD is not tagged as a release"
             exit 1
+        else
+            echo "This is a release! Building!"
         fi
     fi
 fi

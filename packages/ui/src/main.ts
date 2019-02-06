@@ -30,7 +30,10 @@ import VFooter from 'vuetify/es5/components/VFooter'
 import VDivider from 'vuetify/es5/components/VDivider'
 import VAlert from 'vuetify/es5/components/VAlert'
 import * as VGrid from 'vuetify/es5/components/VGrid'
+import VDialog from "vuetify/es5/components/VDialog";
+
 import transitions from 'vuetify/es5/components/transitions'
+
 import directives from 'vuetify/es5/directives'
 
 import VuetifyAll from 'vuetify'
@@ -67,6 +70,7 @@ Vue.use(Vuetify, {
         VTooltip,
         VDivider,
         VCard,
+        VDialog,
     },
     directives,
     iconfont: 'mdi',

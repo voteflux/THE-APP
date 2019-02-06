@@ -103,7 +103,7 @@ export default Vue.extend({
 })
 </script>
 
-<style lang="scss">
+<style scoped lang="scss">
     .stripe-children > .to-stripe {
         background-color: #fafafa;
     }

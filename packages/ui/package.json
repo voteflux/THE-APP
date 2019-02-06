@@ -28,6 +28,7 @@
     "@types/pdfmake": "^0.1.3",
     "@types/ramda": "^0.25.47",
     "@vue/cli": "^3.4.0",
+    "@vue/cli-plugin-pwa": "^3.4.0",
     "@vue/eslint-config-typescript": "^3.2.1",
     "aws-sdk": "^2.397.0",
     "base-x": "^3.0.5",

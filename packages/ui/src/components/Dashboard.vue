@@ -46,7 +46,18 @@
         <v-divider class="mt3" />
 
         <Section title="Log Out" :noCollapse="true">
-            <v-btn color="warning" class="mt2" v-on:click="MsgBus.$emit(M.LOGOUT)">Log Out Now</v-btn>
+            <v-dialog v-model="logoutDialog" width="60%" max-width="400px">
+                <v-btn slot="activator" color="warning" class="mt2">Log Out</v-btn>
+                <v-card>
+                    <v-card-title class="headline grey lighten-2" primary-title> Log Out? </v-card-title>
+                    <v-divider></v-divider>
+                    <v-card-actions>
+                        <v-btn color="primary" flat @click="logoutDialog = false">Cancel</v-btn>
+                        <v-spacer></v-spacer>
+                        <v-btn slot="activator" color="warning" class="mt2" v-on:click="MsgBus.$emit(M.LOGOUT)">Log Out Now</v-btn>
+                    </v-card-actions>
+                </v-card>
+            </v-dialog>
         </Section>
 
     </div>
@@ -82,6 +93,7 @@ export default Vue.extend({
         Routes,
         M, MsgBus,
         notifyCandProfile: true,
+        logoutDialog: false,
     }),
     methods: {
         hasRole(r) {
