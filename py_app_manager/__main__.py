@@ -142,7 +142,7 @@ def lerna_upgrade():
     runner = CmdRunner(must_run)
     runner.add('upgrade lerna', 'npm upgrade')
     runner.add('upgarde packages', 'npx lerna exec --no-bail -- npm upgrade')
-    runner.add('clean and bootstrap', 'npx lerna clean && npx lerna bootstrap')
+    runner.add('clean and bootstrap', 'npx lerna clean -y && npx lerna bootstrap')
     runner.run()
 
 

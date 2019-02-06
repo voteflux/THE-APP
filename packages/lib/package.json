@@ -35,7 +35,7 @@
     "ts-node": "^7.0.1",
     "tsc-resolve": "^1.0.6",
     "tsc-watch": "^1.1.36",
-    "tsconfig-paths": "^3.7.0",
+    "tsconfig-paths": "^3.8.0",
     "typescript": "^3.3.1"
   },
   "dependencies": {
@@ -53,7 +53,7 @@
     "fast-sha256": "^1.1.0",
     "fp-ts": "^1.13.0",
     "funfix": "^7.0.1",
-    "io-ts": "^1.8.0",
+    "io-ts": "^1.8.1",
     "jest": "^23.6.0",
     "jsonwebtoken": "^8.4.0",
     "mongodb": "^3.1.13",

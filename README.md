@@ -36,6 +36,10 @@ After you've set up your dev environment, run `git clone https://github.com/vote
 * [Install NVM](#install-nvm)
 * done
 
+### Fedora
+
+* You might need: `cairo-devel libpng-devel libjpeg-turbo-devel giflib-devel pango-devel`
+
 ### Install NVM
 
 * Install [`nvm`](https://github.com/creationix/nvm): `curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.33.11/install.sh | bash`

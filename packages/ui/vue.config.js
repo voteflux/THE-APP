@@ -24,10 +24,23 @@ module.exports = {
             filename: "[name].bundle.[hash].js",
             chunkFilename: "[name].chunk.[hash].js"
         },
-        // module: {
-        //     rules: [
-        //     ]
-        // },
+        module: {
+            rules: [
+                {
+                    loader: 'thread-loader',
+                    options: {
+                        silent: false,
+                        workers: require('os').cpus().length - 1
+                    }
+                },
+                {
+                    loader: 'ts-loader',
+                    options: {
+                        transpileOnly: true
+                    }
+                }
+            ]
+        },
         plugins: [
             new CopyWebpackPlugin([ { from: "static/", to: "../" } ]),
         ],
