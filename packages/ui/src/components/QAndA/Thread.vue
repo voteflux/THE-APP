@@ -14,14 +14,16 @@
                     <hr>
                     <small>
                         <v-layout row>
-                            <div>
-                                <span :class="getClasses(rid)">{{ getReply(rid).display_name }}</span>
-                                on {{ getReply(rid).ts.toLocaleString() }}
-                                <!--at {{ renderHour(getReply(rid).ts) }}-->
-                                <!--on {{ renderDate(getReply(rid).ts) }}-->
-                                replying to {{ getReply(rid).qid }}
-                            </div>
-                            <div class="tr">This Reply: {{ getReply(rid).rid }}</div>
+                            <v-flex>
+                                <span>
+                                    <span :class="getClasses(rid)">{{ getReply(rid).display_name }}</span>
+                                    on {{ getReply(rid).ts.toLocaleString() }}
+                                    <!--at {{ renderHour(getReply(rid).ts) }}-->
+                                    <!--on {{ renderDate(getReply(rid).ts) }}-->
+                                    replying to {{ getReply(rid).qid }}
+                                </span>
+                            </v-flex>
+                            <v-flex class="tr flex-grow-0">This Reply: {{ getReply(rid).rid }}</v-flex>
                         </v-layout>
                     </small>
                 </div>

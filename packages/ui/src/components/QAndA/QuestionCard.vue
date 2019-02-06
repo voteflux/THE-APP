@@ -10,12 +10,14 @@
             </v-layout>
         </div>
         <!--<v-card-text>-->
-        <div v-if="showQ">
-            <h4>Question:</h4>
-                <!--<v-btn small v-if="showQ" @click="showQ = !showQ">Hide</v-btn>-->
-                <!--<v-btn small v-if="!showQ" @click="showQ = !showQ">Show</v-btn></h4>-->
-            <p v-linkified v-if="showQ" style="white-space: pre-line" class="b--moon-gray ba pa2">{{qDoc.question}}</p>
-        </div>
+        <v-expand-transition>
+            <div v-if="showQ">
+                <h4>Question:</h4>
+                    <!--<v-btn small v-if="showQ" @click="showQ = !showQ">Hide</v-btn>-->
+                    <!--<v-btn small v-if="!showQ" @click="showQ = !showQ">Show</v-btn></h4>-->
+                <p v-linkified v-if="showQ" style="white-space: pre-line" class="b--moon-gray ba pa2">{{qDoc.question}}</p>
+            </div>
+        </v-expand-transition>
         <!--</v-card-text>-->
         <div class="bt pt1">
             <v-layout row>
