@@ -14,6 +14,16 @@ export const state = {
 }
 export type QandaState = typeof state
 
+// export const getters = {
+//     // qanda: {
+//     //
+//     // }
+// }
+
+// export const actions = {
+//
+// }
+
 export enum QandaFs {
     setQids = "setQids",
     setYourQs = "setYourQs",
@@ -28,7 +38,7 @@ export const mutations = {
     [QandaFs.setQids]: (state, newQids) => { state.qanda.qids = newQids },
     [QandaFs.setYourQs]: (state, qs) => { qs.map(q => state.qanda.yourQs[q.qid] = q) },
     [QandaFs.setAllQs]: (state, qs) => { qs.map(q => state.qanda.questions[q.qid] = q) },
-    [QandaFs.setReplyIds]: (state, qid, rids) => { state.qanda.replyIds[qid] = rids },
+    [QandaFs.setReplyIds]: (state, {qid, rids}) => { state.qanda.replyIds[qid] = rids },
     [QandaFs.setReplies]: (state, rs) => { rs.map(r => { state.qanda.replies[r.rid] = r }) },
     [QandaFs.setRecentReply]: (state, r) => { state.qanda.recentReply = r },
     [QandaFs.setRecentQuestion]: (state, q) => { state.qanda.recentQuestion = q },

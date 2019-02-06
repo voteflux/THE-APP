@@ -34,11 +34,11 @@
 
         <Section title="Get Involved" :noCollapse="true" class="child-bg-alt" >
             <EditableOpt class="row" name="I'm interested in standing as a candidate" :value="user.candidature_federal" :onSave="savePropFactory('candidature_federal')">
-                <div class="pa3">
-                    Links:
-                    <v-icon v-if="notifyCandProfile" small color="red">notification_important</v-icon> <router-link :to="Routes.CandidateDashboard">Candidate Profile</router-link> |
-                    Candidate Settings
-                </div>
+                <!--<div classs="pa3">-->
+                    <!--Links:-->
+                    <!--<v-icon v-if="notifyCandProfile" small color="red">notification_important</v-icon> <router-link :to="Routes.CandidateDashboard">Candidate Profile</router-link>-->
+                    <!--&lt;!&ndash;| Candidate Settings&ndash;&gt;-->
+                <!--</div>-->
             </EditableOpt>
             <EditableOpt class="row" name="I'd like to volunteer" :value="user.volunteer" :onSave="savePropFactory('volunteer')" />
         </Section>

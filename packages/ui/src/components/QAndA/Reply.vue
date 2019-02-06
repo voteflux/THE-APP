@@ -27,7 +27,7 @@
                         required
                 ></v-select>
             </v-form>
-            <div style="text-align: center;"><v-btn :disabled="!valid" color="info" @click="submit()">Submit</v-btn></div>
+            <div style="text-align: center;"><v-btn :disabled="!valid || submitWR.isLoading()" color="info" @click="submit()">Submit</v-btn></div>
             <div v-if="submitWR.isLoading()" style="text-align: center;"><loading>Submitting Reply...</loading></div>
             <div v-if="submitWR.isFailed()">
                 <error>Error while submitting reply: {{submitWR.unwrapError()}}</error>

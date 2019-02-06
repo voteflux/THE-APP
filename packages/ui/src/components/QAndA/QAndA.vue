@@ -10,8 +10,8 @@
             <v-btn large color="warning" @click="setShowQs('all')" v-if="showWhichQuestions !== 'all'">Show All Questions</v-btn>
         </div>
         <ui-collapsible title="Your Questions" no-collapse v-if="showWhichQuestions === 'mine'">
-            <div v-if="yourQsWR.isSuccess() && yourQsWR.unwrap().questions.length > 0" class="stripe-children">
-                <div v-for="q in yourQsWR.unwrap().questions" class="pv1 to-stripe">
+            <div v-if="yourQsWR.isSuccess() && yourQsWR.unwrap().length > 0" class="stripe-children">
+                <div v-for="q in yourQsWR.unwrap()" class="pv1 to-stripe">
                     <QuestionCard :q-doc="q"></QuestionCard>
                 </div>
             </div>
@@ -24,8 +24,8 @@
             </div>
         </ui-collapsible>
         <ui-collapsible title="All Questions" no-collapse v-if="showWhichQuestions === 'all'">
-            <div v-if="allQsWR.isSuccess() && allQsWR.unwrap().questions.length > 0" class="stripe-children">
-                <div v-for="q in allQsWR.unwrap().questions" class="pv1 to-stripe">
+            <div v-if="allQsWR.isSuccess() && allQsWR.unwrap().length > 0" class="stripe-children">
+                <div v-for="q in allQsWR.unwrap()" class="pv1 to-stripe">
                     <QuestionCard :q-doc="q"></QuestionCard>
                 </div>
             </div>
@@ -42,12 +42,13 @@
 
 <script lang="ts">
 import Vue from "vue";
-import WebRequest from "flux-lib/WebRequest";
+import WebRequest, {wrMap} from "flux-lib/WebRequest";
 import Routes from "@/routes";
 import QuestionCard from "./QuestionCard.vue";
 import {QandaFs} from "@/store/qanda";
 import {FluxApiMethods} from "@/lib/api";
 import {shouldRefresh} from "@/store";
+import * as L from '@/lambda'
 
 export default Vue.extend({
     props: ['auth'],
@@ -63,17 +64,23 @@ export default Vue.extend({
 
     methods:{
         async refreshYourQs() {
-            if (this.auth && shouldRefresh(this.$store, QandaFs.setYourQs)) {
+            if (this.auth) {
                 this.yourQsWR = WebRequest.Loading();
-                this.yourQsWR = await this.$flux.v3.qanda.getMine(this.auth)
-                this.yourQsWR.do({success: (r) => this.$store.commit(QandaFs.setYourQs, r.questions)})
+                this.yourQsWR = await L.get_from_state_or_cache(
+                    this.$store,
+                    this.$store.state.qanda.yourQs,
+                    () => this.$flux.v3.qanda.getMine(this.auth).then(wrMap(L.get('questions'))),
+                    QandaFs.setYourQs)
             }
         },
 
         async refreshAllQs() {
             this.allQsWR = WebRequest.Loading();
-            this.allQsWR = await this.$flux.v3.qanda.getAll()
-            this.allQsWR.do({success: (r) => this.$store.commit(QandaFs.setAllQs, r.questions)})
+            this.allQsWR = await L.get_from_state_or_cache(
+                this.$store,
+                this.$store.state.qanda.questions,
+                () => this.$flux.v3.qanda.getAll().then(wrMap(L.get('questions'))),
+                QandaFs.setAllQs)
         },
 
         setShowQs(setTo) {

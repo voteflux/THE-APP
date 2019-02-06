@@ -119,6 +119,8 @@ def cli(debug):
 
 @cli.command()
 def reinstall():
+    must_run('npx lerna clean -y')
+    must_run('rm -r node_modules')
     ensure_deps(force=True)
 
 
@@ -265,7 +267,7 @@ def build(target, build_args, stage):
 
         def build_ui():
             logging.info("### BUILDING UI ###")
-            must_run("cd packages/ui && npm run build -- {remArgs}".format(remArgs=remArgs))
+            must_run(f"cd packages/ui && npm run build -- --modern {remArgs}")
 
         def build_api():
             logging.info("### BUILDING API ###")

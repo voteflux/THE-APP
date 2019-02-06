@@ -1,6 +1,6 @@
 <template>
     <ui-section title="Original Question">
-        <QuestionCard v-if="qDocWR.isSuccess()" :q-doc="qDocWR.unwrap()" :hide-btns="['thread']" show-question="true"></QuestionCard>
+        <QuestionCard v-if="qDocWR.isSuccess()" :q-doc="qDocWR.unwrap()" :hide-btns="['thread', 'showQLink']" show-question="true"></QuestionCard>
         <error v-else-if="qDocWR.isFailed()">{{ qDocWR.unwrapError() }}</error>
         <loading v-else class="pb3">Loading question...</loading>
 
@@ -13,11 +13,16 @@
                     <span style="white-space: pre-line" v-linkified>{{ getReply(rid).body }}</span>
                     <hr>
                     <small>
-                        <span :class="getClasses(rid)">{{ getReply(rid).display_name }}</span>
-                        at {{ renderHour(getReply(rid).ts) }}
-                        on {{ renderDate(getReply(rid).ts) }}
-                        replying to {{ getReply(rid).qid }}
-                        | This Reply's ID: {{ getReply(rid).rid }}
+                        <v-layout row>
+                            <div>
+                                <span :class="getClasses(rid)">{{ getReply(rid).display_name }}</span>
+                                on {{ getReply(rid).ts.toLocaleString() }}
+                                <!--at {{ renderHour(getReply(rid).ts) }}-->
+                                <!--on {{ renderDate(getReply(rid).ts) }}-->
+                                replying to {{ getReply(rid).qid }}
+                            </div>
+                            <div class="tr">This Reply: {{ getReply(rid).rid }}</div>
+                        </v-layout>
                     </small>
                 </div>
                 <loading v-else class="pa3">Loading reply ({{ rid }})...</loading>

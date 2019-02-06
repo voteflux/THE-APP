@@ -11,7 +11,7 @@ module.exports = {
     publicPath: '/v/',
     outputDir: 'dist/v/',
     lintOnSave: true,
-    parallel: !isProd(),
+    parallel: true,
     configureWebpack: {
         mode: isProd() ? "production" : "development",
         optimization: {
@@ -24,13 +24,14 @@ module.exports = {
             filename: "[name].bundle.[hash].js",
             chunkFilename: "[name].chunk.[hash].js"
         },
-        module: {
-            rules: [
-            ]
-        },
+        // module: {
+        //     rules: [
+        //     ]
+        // },
         plugins: [
             new CopyWebpackPlugin([ { from: "static/", to: "../" } ]),
         ],
+        // stats: 'verbose',
     },
     devServer:{
         proxy:"http://localhost:52701"
