@@ -12,7 +12,7 @@
         <ui-collapsible title="Your Questions" no-collapse v-if="showWhichQuestions === 'mine'">
             <div v-if="yourQsWR.isSuccess() && yourQsWR.unwrap().length > 0" class="stripe-children">
                 <div v-for="q in yourQsWR.unwrap()" class="pv1 to-stripe">
-                    <QuestionCard :q-doc="q"></QuestionCard>
+                    <QuestionCard :q-doc="q" layout="list"></QuestionCard>
                 </div>
             </div>
             <h4 style="text-align: center;" v-else-if="yourQsWR.isSuccess()">You haven't asked any questions yet.</h4>
@@ -26,7 +26,7 @@
         <ui-collapsible title="All Questions" no-collapse v-if="showWhichQuestions === 'all'">
             <div v-if="allQsWR.isSuccess() && allQsWR.unwrap().length > 0" class="stripe-children">
                 <div v-for="q in allQsWR.unwrap()" class="pv1 to-stripe">
-                    <QuestionCard :q-doc="q"></QuestionCard>
+                    <QuestionCard :q-doc="q" layout="list"></QuestionCard>
                 </div>
             </div>
             <h4 style="text-align: center;" v-else-if="allQsWR.isSuccess()">No questions have been asked yet.</h4>

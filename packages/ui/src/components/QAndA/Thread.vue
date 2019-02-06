@@ -4,7 +4,7 @@
         <error v-else-if="qDocWR.isFailed()">{{ qDocWR.unwrapError() }}</error>
         <loading v-else class="pb3">Loading question...</loading>
 
-        <error v-if="ridsWR.isFailed()">{{ ridsWR.unwrapError() }}</error>
+        <error v-if="ridsWR.isFailed()">{{ ridsWR.unwrapError() }} <br> <v-btn @click="doInitialRefresh()">Retry</v-btn></error>
         <div v-else-if="ridsWR.isSuccess()" class="stripe-replies">
             <h3>Replies ({{ ridsWR.unwrap().length }})</h3>
             <div v-for="rid in ridsWR.unwrap()" class="ma1 pa2 ba b1 a-reply">
