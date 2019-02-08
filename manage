@@ -18,6 +18,8 @@ fi
 
 export MOST_RECENT_TAG="$(git tag --sort version:refname | tail -n 1)"
 if [ "$IS_NETLIFY" ]; then
+    echo "rming node modules to avoid build issues"
+    rm -rf node_modules
     CURR_COMMIT="$(git rev-parse HEAD)"
     LAST_RELEASE_COMMIT="$(git rev-list -n 1 $MOST_RECENT_TAG)"
     if [[ "$@" = *"--stage prod"* ]]; then
