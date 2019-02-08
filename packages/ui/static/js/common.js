@@ -42,7 +42,7 @@ function isEnv(envStr) {
 
 
 var __DEBUG_DOMAIN__ = _hn === 'localhost' || _hn === '127.0.0.1'
-var __DEV_DOMAIN__ = _hn === "flux-api-dev.herokuapp.com" || _hn === "dev.app.flux.party"
+var __DEV_DOMAIN__ = _hn === "dev.v1.api.flux.party" || _hn === "dev.app.flux.party"
 
 
 var __PROD_ENV__ = (isEnv("prod")) || isDefinitelyProduction()
@@ -128,15 +128,15 @@ function flux_api(path, useDebug){
         path = 'api/v0/' + path;
     }
     if (__PROD_ENV__ && !useDebug) {
-        return "https://api.voteflux.org/" + path;
+        return "https://prod.v1.api.flux.party/" + path;
     }
     if(__DEV_ENV__ && !useDebug) {
-        return "https://flux-api-dev.herokuapp.com/" + path;
+        return "https://dev.v1.api.flux.party/" + path;
     }
     if (__DEBUG_ENV__ || useDebug){
-        return "http://localhost:5000/" + path;
+        return "http://localhost:8080/" + path;
     }
-    return "https://api.voteflux.org/" + path;
+    return "https://prod.v1.api.flux.party/" + path;
 };
 
 

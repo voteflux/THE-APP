@@ -62,9 +62,9 @@ const mkErr = (path: string) => <r>(err: HttpResponse): WebRequest<string, r> =>
 // todo: check API paths against diff
 // "https://w184hkom33.execute-api.ap-southeast-2.amazonaws.com/Prod/"
 // "https://api.sam-flux-dev.fish.xk.io/"
-const localDev = { v3: "http://localhost:52701/", v2: "http://localhost:52700/v2/", v1: "https://flux-api-dev.herokuapp.com/", prod: false }
-const remoteDev = { v3: "https://api.dev.sam.flux.party/", v2: "https://dev.api.flux.party/v2/", v1: "https://flux-api-dev.herokuapp.com/", prod: false }
-const remoteProd = { v3: "https://api.sam.flux.party/", v2: "https://api.flux.party/v2/", v1: "https://api.voteflux.org/", prod: true }
+const localDev = { v3: "http://localhost:52701/", v2: "http://localhost:52700/v2/", v1: "https://dev.v1.app.flux.party/"", prod: false }
+const remoteDev = { v3: "https://api.dev.sam.flux.party/", v2: "https://dev.api.flux.party/v2/", v1: "https://dev.v1.app.flux.party/", prod: false }
+const remoteProd = { v3: "https://api.sam.flux.party/", v2: "https://api.flux.party/v2/", v1: "https://prod.v1.api.flux.party/", prod: true }
 
 const endpoints = {
     'dev': localDev,
@@ -83,7 +83,7 @@ const apiRoots = () => {
                 return endpoints.staging;
             case "app.flux.party":
             case "members.flux.party":
-            case "api.voteflux.org":
+            case "prod.v1.api.flux.party":
             case "flux-app.netlify.com":
             case "staging.app.flux.party":
             case "flux-app-staging.netlify.com":

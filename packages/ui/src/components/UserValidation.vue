@@ -112,6 +112,7 @@ export default Vue.extend({
                     this.validationReason = msg.validationReason;
                     this.captchaAnswer = "";
                     MsgBus.$emit(M.REFRESH_USER, {silent: true});
+                    if (this.socket) this.socket.close()
                 },
                 deliver_session: ({ session }) => {
                     this.session = session;
@@ -136,6 +137,7 @@ export default Vue.extend({
             this.socket.onclose = () => {
                 // if we've successfully validated then this doesn't matter
                 if (this.validationSuccess != true) this.state = Cs.SOCKET_CLOSED;
+                this.state = Cs.SOCKET_CLOSED
             };
 
             this.socket.onmessage = this.onSocketMessage;

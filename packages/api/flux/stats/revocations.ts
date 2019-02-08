@@ -41,13 +41,12 @@ export const dailyStats = async (db: DB) => {
     }, {x: "Date", y: "N"}, "Revocations by Date")
 
     const name = 'revocations'
-    const uploads = [
+
+    await Promise.all([
         s3.putObject({ ...nRevParams, Key: `${dStr}/${name}` }).promise(),
         s3.putObject({ ...nRevParams, Key: `latest/${name}` }).promise(),
         s3.putObject({ ...nRevParams, ContentType: 'image/svg+xml', Body: svg, Key: `graphs/${name}.svg` }).promise(),
-    ]
-
-    await Promise.all(uploads)
+    ])
 
     return {
         ...nRevParams

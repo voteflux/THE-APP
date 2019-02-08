@@ -12,7 +12,7 @@
             <div class="pa2 bl bb br b--moon-gray">
                 <p>Reason: {{ user.validationReason }}</p>
                 <!-- <p>Please <router-link :to="R.EditUserDetails">update your details</router-link>.</p> -->
-                <p>Please <v-btn small outline color="info" @click="$route.push(R.EditUserDetails)">update your details</v-btn></p>
+                <p>Please <v-btn small outline color="info" @click="$router.push(R.EditUserDetails)">update your details</v-btn></p>
                 You can manually check your details against the electoral roll yourself at <a href="https://check.aec.gov.au" target="_blank" rel="noopener">https://check.aec.gov.au</a>.
             </div>
         </div>
