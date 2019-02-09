@@ -105,7 +105,7 @@ export const mkDbV1 = (uri: string = mongoUrl): Promise<DBV1> =>
     new Promise((res, rej) => {
         MongoClient.connect(
             uri,
-            { useNewUrlParser: true },
+            { useNewUrlParser: true, poolSize: process.env.STAGE == "prod" ? 5 : 2 },
             (err, client) => {
                 if (err !== null) {
                     console.error(`mkDbV1 error: ${utils.j(err)}`);

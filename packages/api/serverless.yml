@@ -76,9 +76,8 @@ custom:
 
 provider:
   name: aws
-  # region should be us-east-1 for prod
-  # region: ap-southeast-2
-  region: us-east-1
+  # region should be ap-southeast-2 for prod
+  region: ap-southeast-2
   runtime: nodejs8.10
   # profile: ${self:custom.profile}
   stage: ${opt:stage, self:custom.stage}
