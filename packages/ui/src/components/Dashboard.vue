@@ -40,7 +40,9 @@
                     <!--&lt;!&ndash;| Candidate Settings&ndash;&gt;-->
                 <!--</div>-->
             </EditableOpt>
-            <EditableOpt class="row" name="I'd like to volunteer" :value="user.volunteer" :onSave="savePropFactory('volunteer')" />
+            <EditableOpt class="row" name="I'd like to volunteer" :value="user.volunteer" :onSave="savePropFactory('volunteer')">
+                <UserProfile type="volunteer"></UserProfile>
+            </EditableOpt>
         </Section>
 
         <v-divider class="mt3" />
