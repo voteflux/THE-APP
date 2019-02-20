@@ -1,6 +1,6 @@
 {
   "name": "api",
-  "version": "0.2.2-alpha.10",
+  "version": "0.2.2",
   "description": "flux api v2",
   "main": "index.js",
   "private": true,
@@ -39,7 +39,7 @@
     "bson": "^3.0.0",
     "dynamodb": "^1.2.0",
     "fast-sha256": "^1.1.0",
-    "flux-lib": "^0.2.2-alpha.7",
+    "flux-lib": "^0.2.2",
     "fp-ts": "^1.13.0",
     "funfix": "^7.0.1",
     "io-ts": "^1.8.2",
