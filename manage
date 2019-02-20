@@ -16,6 +16,7 @@ else
 fi
 
 
+# TODO: this is not reliable; e.g. 0.2.2 is sorted *before* 0.2.2-alpha.11
 export MOST_RECENT_TAG="$(git tag --sort version:refname | tail -n 1)"
 if [ "$IS_NETLIFY" ]; then
     echo "rming node modules to avoid build issues"
