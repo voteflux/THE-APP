@@ -67,6 +67,9 @@ export interface FluxApiMethods {
         sendSToAllFluxDomains: (s: string) => void,
         saveApiToken: (token: string) => void
     },
+    jwt: {
+        jwt_basic_post: (o: Auth) => PR<{token: string}>
+    },
     $dev: boolean,
     setEndpoints: (stage: string) => void,
 }

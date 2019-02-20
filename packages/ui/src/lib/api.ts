@@ -29,6 +29,8 @@ import { createSignedReq, PayloadDecoder, objToPayload } from 'flux-lib/types/db
 import { SignedReqCreationOpts, Payload } from '../../../lib/types/db/auth'
 import { SimpleEither } from '../../../lib/types/index'
 import {QandaQuestion} from "flux-lib/types/db/qanda";
+import {store} from "@/store";
+import {cons} from "fp-ts/lib/Array";
 export * from "flux-lib/types/db";
 export * from "flux-lib/types/db/api";
 export * from "flux-lib/types/db/vols";
@@ -62,7 +64,8 @@ const mkErr = (path: string) => <r>(err: HttpResponse): WebRequest<string, r> =>
 // todo: check API paths against diff
 // "https://w184hkom33.execute-api.ap-southeast-2.amazonaws.com/Prod/"
 // "https://api.sam-flux-dev.fish.xk.io/"
-const localDev = { v3: "http://localhost:52701/", v2: "http://localhost:52700/v2/", v1: "https://dev.v1.api.flux.party/", prod: false }
+// v1: "https://dev.v1.api.flux.party/",
+const localDev = { v3: "http://localhost:52701/", v2: "http://localhost:52700/v2/", v1: "http://localhost:8080/", prod: false }
 const remoteDev = { v3: "https://api.dev.sam.flux.party/", v2: "https://dev.api.flux.party/v2/", v1: "https://dev.v1.api.flux.party/", prod: false }
 const remoteProd = { v3: "https://api.sam.flux.party/", v2: "https://api.flux.party/v2/", v1: "https://prod.v1.api.flux.party/", prod: true }
 
@@ -175,6 +178,15 @@ export function FluxApi(_Vue: VueConstructor, options?: any): void {
         return http.get(url).then(mkResp, mkErr(url)) as PR<r>;
     };
 
+    // used for profiles since 2019-02-20 ish
+    const getWAuth = <r>(url: string): PR<r> => {
+        return http.get(url, {headers: {Authorization: `Bearer ${store.state.app.jwt_token}`}}).then(mkResp, mkErr(url)) as PR<r>;
+    };
+
+    const patchWAuth = <r>(url: string, doc: object): PR<r> => {
+        return http.patch(url, doc, {headers: {Authorization: `Bearer ${store.state.app.jwt_token}`}}).then(mkResp, mkErr(url)) as PR<r>;
+    }
+
     const post_jwt = <InTy extends object, OutTy>(apiPath: string, auth: AuthJWT, args: object): PR<OutTy> => {
         const payload = objToPayload(args)
         const body = mkSignedRequest(apiPath, payload, auth)
@@ -265,6 +277,19 @@ export function FluxApi(_Vue: VueConstructor, options?: any): void {
             }
         },
 
+        profiles: {
+            getFields(profile_type): PR<any> {
+                return (get(_api1(`api/v1/profile_fields/${profile_type}`)))
+            },
+            getMyProfile(profile_type): PR<any> {
+                return (getWAuth(_api1(`api/v1/profile/${profile_type}`)))
+            },
+            patchMyProfile(profile_type, patchDoc): PR<any> {
+                console.log(profile_type, patchDoc)
+                return (patchWAuth(_api1(`api/v1/profile/${profile_type}`), patchDoc))
+            }
+        },
+
         utils: {
             captchaImgUrl(session) {
                 return _api1("au/captcha_img/" + session);
@@ -276,7 +301,9 @@ export function FluxApi(_Vue: VueConstructor, options?: any): void {
             loadAuth(): Option<Auth> {
                 const memberSecret = localStorage.getItem("s") || undefined;
                 const apiToken = localStorage.getItem("flux.member.apiToken") || undefined;
-                if (memberSecret || apiToken) return some({ apiToken, s: memberSecret });
+                if (memberSecret || apiToken) {
+                    return some({ apiToken, s: memberSecret });
+                }
                 return none;
             },
 
@@ -309,6 +336,13 @@ export function FluxApi(_Vue: VueConstructor, options?: any): void {
                 sendSToUrlAsHashParam("https://flux.party/_record_login_param.html", s);
             }
         },
+
+        jwt: {
+            jwt_basic_post(o: Auth): PR<{token: string}> {
+                return post(_api1("api/v1/jwt_basic"), o)
+            }
+        },
+
         $dev: _isDev,
         setEndpoints(stage) {
             roots = endpoints[stage] || roots;

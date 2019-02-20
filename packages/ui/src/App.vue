@@ -100,6 +100,7 @@ export default /*class App extends Vue*/ Vue.extend({
                 auth => {
                     this.auth = auth;
                     this.loadUser();
+                    this.checkOrGetJWT();
                 }
             );
         },
@@ -135,7 +136,21 @@ export default /*class App extends Vue*/ Vue.extend({
             this.user = user
             this.userO = new UserObject(user, this.auth, this.$flux)
             this.req.user = WR.Success(user)
-        }
+        },
+        checkOrGetJWT(){
+            this.$flux.jwt.jwt_basic_post(this.auth).then(r =>
+                r.do({
+                    failed: (e, errObj) => {
+                        this.loginFailed('Error getting JWT')
+                        console.log("JWT Error", e, errObj)
+                        this.$unknownErr(e)
+                    },
+                    success: ({token}) => {
+                        this.$store.commit(AppFs.setJwtToken, token)
+                    }
+                })
+            )
+        },
     },
     created() {
         if (this.$route.query.s) {

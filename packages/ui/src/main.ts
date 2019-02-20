@@ -20,6 +20,7 @@ import * as VToolbar from 'vuetify/es5/components/VToolbar'
 import VTooltip from 'vuetify/es5/components/VTooltip'
 import VTextarea from 'vuetify/es5/components/VTextarea'
 import VTextField from 'vuetify/es5/components/VTextField'
+import VCheckbox from 'vuetify/es5/components/VCheckbox'
 import VAutocomplete from 'vuetify/es5/components/VAutocomplete'
 import VSelect from 'vuetify/es5/components/VSelect'
 import VSwitch from 'vuetify/es5/components/VSwitch'
@@ -60,6 +61,11 @@ Vue.use(Vuetify, {
         VIcon,
         VTextarea,
         VTextField,
+        VCheckbox,
+        VRadio,
+        VRadioGroup,
+        VRangeSlider,
+        VSlider,
         VAutocomplete,
         VSelect,
         VSwitch,
@@ -91,9 +97,6 @@ Vue.use(VueResource);
 
 import Notifications from "vue-notification";
 Vue.use(Notifications);
-
-import FluxApi from "./lib/api";
-Vue.use(FluxApi);
 
 import ErrHandlers from "./lib/errors";
 Vue.use(ErrHandlers);
@@ -169,10 +172,20 @@ import VueGoodTablePlugin from 'vue-good-table'
 import './css/vendor/vue-good-table.min.css'
 Vue.use(VueGoodTablePlugin)
 import { VueGoodTable } from 'vue-good-table'
+import {VRadio, VRadioGroup, VRangeSlider, VSlider} from "vuetify/lib";
 Vue.component('good-table', VueGoodTable)
 
 
-new Vue({
+Vue.use({store, install (_Vue, options) {
+    _Vue.prototype.$storeGlobal = store
+}})
+
+
+import FluxApi from "./lib/api";
+Vue.use(FluxApi);
+
+
+const vueApp = new Vue({
     router,
     store,
     render: h => h(App)
