@@ -10,7 +10,7 @@
             </div>
         </v-expand-transition>
         <v-expand-transition>
-            <div v-if="isSuccess()">
+            <div v-if="isSuccess()" class="pb2">
                 <ProfileField v-for="field in fieldsWR.unwrap().fields" :field="field" :key="field.name"
                               :profile-type="type" :init-value="myProfileWR.unwrap().profile_doc[field.name]">
                 </ProfileField>
