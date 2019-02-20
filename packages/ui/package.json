@@ -139,6 +139,6 @@
   "repository": "git@github.com:voteflux/members.flux.party.git",
   "type": "src/main.d.ts",
   "main": "src/main.ts",
-  "description": "static html file for current flux member ui",
+  "description": "static html + Vue.js app frontend for current flux member ui",
   "license": "MIT"
 }
