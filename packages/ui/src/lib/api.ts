@@ -67,7 +67,7 @@ const mkErr = (path: string) => <r>(err: HttpResponse): WebRequest<string, r> =>
 // v1: "https://dev.v1.api.flux.party/",
 const localDev = { v3: "http://localhost:52701/", v2: "http://localhost:52700/v2/", v1: "http://localhost:8080/", prod: false }
 const remoteDev = { v3: "https://api.dev.sam.flux.party/", v2: "https://dev.api.flux.party/v2/", v1: "https://dev.v1.api.flux.party/", prod: false }
-const remoteStaging = { v3: "https://api.sam.flux.party/", v2: "https://api.flux.party/v2/", v1: "https://staging.v1.api.flux.party/", prod: false }
+const remoteStaging = { v3: "https://api.dev.sam.flux.party/", v2: "https://dev.api.flux.party/v2/", v1: "https://staging.v1.api.flux.party/", prod: false }
 const remoteProd = { v3: "https://api.sam.flux.party/", v2: "https://api.flux.party/v2/", v1: "https://prod.v1.api.flux.party/", prod: true }
 
 const endpoints = {

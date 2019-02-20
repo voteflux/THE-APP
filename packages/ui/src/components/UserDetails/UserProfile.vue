@@ -4,16 +4,22 @@
             <loading v-if="isLoading()">Loading Profile Fields</loading>
         </v-expand-transition>
         <v-expand-transition>
-            <div v-if="isFailed()">
-                <error v-if="fieldsWR.errObj.status === 404">Profile {{type}} not found :(</error>
+            <div v-if="fieldsWR.isFailed()">
+                <error v-if="fieldsWR.errObj && fieldsWR.errObj.status === 404">Profile {{type}} not found :(</error>
                 <error v-else>{{fieldsWR.unwrapError()}}</error>
             </div>
         </v-expand-transition>
         <v-expand-transition>
-            <div v-if="isSuccess()" class="pb2">
-                <ProfileField v-for="field in fieldsWR.unwrap().fields" :field="field" :key="field.name"
-                              :profile-type="type" :init-value="myProfileWR.unwrap().profile_doc[field.name]">
-                </ProfileField>
+            <div v-if="fieldsWR.isSuccess()" class="pb2">
+                <div v-if="myProfileWR.isSuccess()">
+                    <ProfileField v-for="field in fieldsWR.unwrap().fields" :field="field" :key="field.name"
+                                  :profile-type="type" :init-value="myProfileWR.unwrap().profile_doc[field.name]">
+                    </ProfileField>
+                </div>
+                <div v-else-if="myProfileWR.isFailed()">
+                    <error>{{myProfileWR.unwrapError()}}</error>
+                </div>
+                <loading v-else>Loading Profile</loading>
             </div>
         </v-expand-transition>
     </div>
@@ -42,7 +48,11 @@
                     this.fieldsWR = wr;
                 })
                 this.$flux.profiles.getMyProfile(this.type).then(wr => {
-                    this.myProfileWR = wr;
+                    if (wr.errObj && wr.errObj.status === 404) {
+                        this.myProfileWR = WebRequest.Success({profile_type: this.type, profile_doc: {}})
+                    } else {
+                        this.myProfileWR = wr;
+                    }
                 })
             },
 
@@ -51,11 +61,11 @@
             },
 
             isFailed() {
-                return this.fieldsWR.isFailed() || this.myProfileWR.isFailed()
+                return this.fieldsWR.isFailed()
             },
 
             isSuccess() {
-                return this.fieldsWR.isSuccess() && this.myProfileWR.isSuccess()
+                return this.fieldsWR.isSuccess() && (this.myProfileWR.isSuccess() || (this.myProfileWR.isFailed() && this.myProfileWR.unwrapError().status === 404))
             }
         },
 
