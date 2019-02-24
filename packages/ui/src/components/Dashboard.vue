@@ -41,8 +41,7 @@
                 <!--</div>-->
             </EditableOpt>
             <EditableOpt class="row" name="I'd like to volunteer" :value="user.volunteer" :onSave="savePropFactory('volunteer')">
-                <div class="display-1 mv3">Volunteer Profile</div>
-                <UserProfile type="volunteer"></UserProfile>
+                <UserProfilePrompter type="volunteer"></UserProfilePrompter>
             </EditableOpt>
         </Section>
 
@@ -74,7 +73,6 @@ import UserSummary from "./UserSummary.vue";
 import OrganiserUtils from "./OrganiserUtils.vue";
 import FinanceUtils from "./FinanceUtils.vue"
 import { UiSection, Warning, CollapsibleSection, EditableOpt } from "@c/common";
-import UserProfile from "./UserDetails/UserProfile.vue";
 
 import Routes from "../routes"
 import Roles from "../lib/roles";
@@ -83,10 +81,11 @@ import {M, MsgBus} from "../messages"
 import WebRequest from "flux-lib/WebRequest";
 import { Auth } from 'flux-lib/types/db';
 import { Req, RolesResp } from 'flux-lib/types/db'
+import UserProfilePrompter from "./UserDetails/UserProfilePrompter.vue";
 
 export default Vue.extend({
     name: "Dashboard",
-    components: { UserSummary, UiSection, Warning, Section: CollapsibleSection, EditableOpt, UserProfile },
+    components: { UserSummary, UiSection, Warning, Section: CollapsibleSection, EditableOpt, UserProfilePrompter },
     props: {
         user: Object,
         roles: Object as () => Req<RolesResp>,

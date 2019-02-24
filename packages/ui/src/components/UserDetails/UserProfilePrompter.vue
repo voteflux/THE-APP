@@ -1,21 +1,23 @@
 <template>
-    <UiSection :title="'Edit Profile: ' + type">
         <div>
             <v-expand-transition>
                 <loading v-if="isLoading()">Loading Profile Fields</loading>
             </v-expand-transition>
             <v-expand-transition>
                 <div v-if="fieldsWR.isFailed()">
-                    <error v-if="fieldsWR.errObj && fieldsWR.errObj.status === 404">Profile {{type}} not found :(</error>
+                    <div v-if="fieldsWR.errObj && fieldsWR.errObj.status === 404"><v-btn color="success" @click="visitProfile()">Create your {{ type }} profile</v-btn></div>
                     <error v-else>{{fieldsWR.unwrapError()}}</error>
                 </div>
             </v-expand-transition>
             <v-expand-transition>
                 <div v-if="fieldsWR.isSuccess()" class="pb2">
                     <div v-if="myProfileWR.isSuccess()">
-                        <ProfileField v-for="field in fieldsWR.unwrap().fields" :field="field" :key="field.name"
-                                      :profile-type="type" :init-value="myProfileWR.unwrap().profile_doc[field.name]">
-                        </ProfileField>
+                        <div v-if="myProfileWR.unwrap().is_empty">
+                            <v-btn color="success" @click="visitProfile()">Create your {{ type }} profile</v-btn>
+                        </div>
+                        <div v-else>
+                            <v-btn color="info" @click="visitProfile()">Edit/Update {{ type }} Profile</v-btn>
+                        </div>
                     </div>
                     <div v-else-if="myProfileWR.isFailed()">
                         <error>{{myProfileWR.unwrapError()}}</error>
@@ -24,20 +26,19 @@
                 </div>
             </v-expand-transition>
         </div>
-    </UiSection>
 </template>
 
 <script>
     import Vue from 'vue';
     import {WebRequest} from "flux-lib/WebRequest";
     import ProfileField from "../common/ProfileField";
-    import UiSection from "../common/UiSection";
-    import {MsgBus, M} from '../../messages'
+    import R from "../../routes"
 
     export default Vue.extend({
         name: "UserProfile",
-        components: {ProfileField, UiSection},
+        components: {ProfileField},
         props: [
+            'type'
             //{name: 'type', require: true, type: String}
         ],
 
@@ -53,11 +54,16 @@
                 })
                 this.$flux.profiles.getMyProfile(this.type).then(wr => {
                     if (wr.errObj && wr.errObj.status === 404) {
-                        this.myProfileWR = WebRequest.Success({profile_type: this.type, profile_doc: {}})
+                        this.myProfileWR = WebRequest.Success({profile_type: this.type, profile_doc: {}, is_empty: true})
                     } else {
                         this.myProfileWR = wr;
                     }
                 })
+            },
+
+            visitProfile() {
+                this.$router.push(R.ProfileEdit.replace(':type', this.type))
+                console.log(R.ProfileEdit.replace(':type', this.type))
             },
 
             isLoading() {
@@ -74,8 +80,6 @@
         },
 
         created() {
-            this.type = this.$route.params.type;
-            MsgBus.$emit(M.PAGE_TITLE_UPDATE, this.type)
             this.getProfileFields()
         }
     })

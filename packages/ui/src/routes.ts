@@ -12,6 +12,8 @@ export enum Routes {
 
     VolunteerNdaStatusAndSign = "/volunteers/nda/status",
 
+    ProfileEdit = "/my_profile/:type",
+
     CandidateDashboard = "/candidates",
 
     QAndA = "/qanda",
@@ -40,6 +42,8 @@ export const pageTitle = (routes, arg1) => {
         [R.FinanceDonationEntry]: "Add a Donation",
 
         [R.AdminAuditRoles]: "Role Audit (v1)",
+
+        [R.ProfileEdit]: type => `Edit Profile: ${type}`,
 
         [R.VolunteerNdaStatusAndSign]: "NDA Status",
 

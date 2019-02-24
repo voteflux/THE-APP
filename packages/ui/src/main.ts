@@ -157,6 +157,7 @@ const routes = [
     { path: R.VolunteerNdaStatusAndSign, component: Volunteers.NdaStatusAndSign },
     // { path: R.VolunteerSignNDA, component: Volunteers.SignNDA },
     { path: R.CandidateDashboard, component: Candidates.Dashboard },
+    { path: R.ProfileEdit, component: UserProfile },
     { path: "*", redirect: "/" }
 ];
 
@@ -182,6 +183,7 @@ Vue.use({store, install (_Vue, options) {
 
 
 import FluxApi from "./lib/api";
+import UserProfile from "@c/UserDetails/UserProfile.vue";
 Vue.use(FluxApi);
 
 

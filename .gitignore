@@ -35,3 +35,6 @@ packages/api/sls-custom.yml
 report-*.html
 
 .env
+
+tmp*.bz2*
+report.20*.json
