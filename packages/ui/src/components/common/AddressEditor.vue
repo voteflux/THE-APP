@@ -40,7 +40,7 @@
                     </div>
                     <div v-if="state == INPUT_STREET" class="flex flex-row flex-wrap items-center">
                         <div class="w-30-ns w-100 pr2">
-                            <v-text-field autofocus label="Street No." type="text" v-model="newAddress.addr_street_no" size="10" v-on:keyup.enter="virtualSubmit()" :rules="[rules.nonEmpty]" />
+                            <v-text-field autofocus label="Unit/Street No." type="text" v-model="newAddress.addr_street_no" size="10" v-on:keyup.enter="virtualSubmit()" :rules="[rules.nonEmpty]" />
                         </div>
                         <div class="w-70-ns w-100">
                             <v-autocomplete label="Street" v-model="newAddress.addr_street" :items="streets" v-on:keyup.enter="virtualSubmit()" :rules="[rules.nonEmpty]" />
