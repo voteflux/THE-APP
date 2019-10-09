@@ -31,7 +31,7 @@ export default Vue.extend({
             donations: WebRequest.NotRequested()
         },
         pageN: 0,
-        limit: 50,
+        limit: 1000,
         Routes
     }),
     methods: {
