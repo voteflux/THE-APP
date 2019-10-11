@@ -50,7 +50,7 @@ fi
 if python3 -m virtualenv --version >/dev/null 2>&1; then
     echo 'Found virtualenv'
 else
-    pip3 install virtualenv
+    pip3 install --user virtualenv
 fi
 if which npm >/dev/null 2>&1; then
     echo 'Found npm'
@@ -66,8 +66,8 @@ if tmux -V >/dev/null 2>&1; then
         echo "set -g destroy-unattached off" >> ~/.tmux.conf
     fi
 else
-    echo "WARNING: tmux must be available for './manage dev' commands"
-    echo "Try 'sudo apt install tmux' or 'brew install tmux'"
+    echo "⚠ WARNING: tmux must be available for './manage dev' commands"
+    echo "⚠ Try 'sudo apt install tmux' or 'brew install tmux'"
 fi
 
 
@@ -78,7 +78,7 @@ fi
 
 if [ ! -e 'packages/api/sls-custom.yml' ]; then
     cp packages/api/sls-custom.yml.default packages/api/sls-custom.yml
-    echo 'Please edit packages/api/sls-custom.yml if you intend to do any API work.'
+    echo '⚠ Please edit packages/api/sls-custom.yml if you intend to do any API work.'
 fi
 
 

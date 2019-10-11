@@ -8,6 +8,8 @@ This will work for Windows, Macos, and Linux, though for Windows you'll need the
 
 Ultimately you'll need these in your path: `python3`, `pip3`, `virtualenv`, `npm`, `node` (v8) -- we'll set them up in a moment.
 
+If you don't use `pyenv` and `nvm` - they're very useful for this sort of thing (not to mention in avoiding permissions issues).
+
 Running `./manage` will set up dependencies and show you available commands.
 
 After you've set up your dev environment, run `git clone https://github.com/voteflux/THE-APP && cd THE-APP`. You'll then be able to run `./manage`, etc.

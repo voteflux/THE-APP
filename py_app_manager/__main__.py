@@ -271,8 +271,7 @@ def build(target, build_args, stage):
 
         def build_api():
             logging.info("### BUILDING API ###")
-            must_run(
-                "cd packages/api && npm run build --stage {stage} -- {remArgs}".format(stage=stage, remArgs=remArgs))
+            must_run(f"cd packages/api && npm run build -- --stage {stage} {remArgs}")
 
         def build_all():
             build_ui()
