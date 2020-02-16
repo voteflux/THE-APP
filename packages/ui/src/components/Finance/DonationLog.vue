@@ -4,6 +4,7 @@
             <Error v-if="req.donations.isFailed()">{{ req.donations.unwrapError() }}</Error>
             <Loading v-else-if="!req.donations.isSuccess()">Loading donations...</Loading>
             <div v-else>
+                <v-btn :disabled="dlBtn.disabled" :loading="dlBtn.loading" @click="getDonationArchive" large>Download all donations as zipped csv</v-btn>
                 <DonationTable :donations="req.donations.unwrap().donations" />
             </div>
         </UiSection>
@@ -19,7 +20,7 @@ import { Error, UiSection, DonationTable } from '@c/common';
 import WebRequest from 'flux-lib/WebRequest';
 import { Auth, Paginated } from '@/lib/api';
 
-import Routes from '@/routes'
+import Routes from '@/routes';
 
 export default Vue.extend({
     components: { FluxLogo, Error, Loading, UiSection, DonationTable },
@@ -32,6 +33,7 @@ export default Vue.extend({
         },
         pageN: 0,
         limit: 1000,
+        dlBtn: { disable: false, loading: false },
         Routes
     }),
     methods: {
@@ -41,6 +43,12 @@ export default Vue.extend({
             this.req.donations = WebRequest.Loading()
             this.$flux.v2.getDonations({...this.$props.auth, pageN, limit})
                 .then(r => this.req.donations = r)
+        },
+        getDonationArchive() {
+            this.dlBtn.disable = true;
+            this.dlBtn.loading = true;
+            this.$flux.v2.getDonationArchive(this.$props.auth)
+                .then(r => { this.dlBtn.loading = false; })
         },
         changePage(dir: 'next' | 'prev'): void {
             if (dir === 'next') {

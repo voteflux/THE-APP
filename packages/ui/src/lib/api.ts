@@ -65,12 +65,14 @@ const mkErr = (path: string) => <r>(err: HttpResponse): WebRequest<string, r> =>
 // "https://w184hkom33.execute-api.ap-southeast-2.amazonaws.com/Prod/"
 // "https://api.sam-flux-dev.fish.xk.io/"
 // v1: "https://dev.v1.api.flux.party/",
-const localDev = { v3: "http://localhost:52701/", v2: "http://localhost:52700/v2/", v1: "http://localhost:8080/", prod: false }
+const localDev = { v3: "http://127.0.0.1:52701/", v2: "http://127.0.0.1:52700/v2/", v1: "http://127.0.0.1:52600/", prod: false }
+const localPartialDev = { v3: "http://127.0.0.1:52701/", v2: "http://127.0.0.1:52700/v2/", v1: "https://dev.v1.api.flux.party/", prod: false }
 const remoteDev = { v3: "https://api.dev.sam.flux.party/", v2: "https://dev.api.flux.party/v2/", v1: "https://dev.v1.api.flux.party/", prod: false }
 const remoteStaging = { v3: "https://api.dev.sam.flux.party/", v2: "https://dev.api.flux.party/v2/", v1: "https://staging.v1.api.flux.party/", prod: false }
 const remoteProd = { v3: "https://api.sam.flux.party/", v2: "https://api.flux.party/v2/", v1: "https://prod.v1.api.flux.party/", prod: true }
 
 const endpoints = {
+    'localPartial': localPartialDev,
     'local': localDev,
     'dev': remoteDev,
     'staging': remoteStaging,
@@ -79,6 +81,10 @@ const endpoints = {
 
 const apiRoots = () => {
     const getDefaults = () => {
+        if (window.location.search.includes('env=localPartial')) {
+            return endpoints.localPartial
+        }
+
         switch (window.location.hostname) {
             case "127.0.0.1":
             case "localhost":
@@ -225,6 +231,17 @@ export function FluxApi(_Vue: VueConstructor, options?: any): void {
             },
             getDonations(args): PR<DonationsResp> {
                 return post(_api2("finance/getDonations"), args);
+            },
+            getDonationArchive({ s }): PR<any> {
+                return post(_api2("finance/getDonationArchive"), { s }, {responseType: 'blob'})
+                    .then(r => {
+                        const url = window.URL.createObjectURL(new Blob([r.data]));
+                        const link = document.createElement('a');
+                        link.href = url;
+                        link.setAttribute('download', `flux-donation-archive-${Date.now()/1000|0}.zip`);
+                        document.body.appendChild(link);
+                        link.click();
+                    })
             },
             addNewDonation(args) {
                 return post(_api2("finance/addNewDonation"), args);

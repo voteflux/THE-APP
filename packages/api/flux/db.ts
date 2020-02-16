@@ -83,8 +83,8 @@ export const _userInState = s => {
     const rgxPC = _rgx(utils.state_regex(s));
     if (s == "weirdstate") {
         return {
+            // @ts-ignore
             $nor: R.concat(
-                // @ts-ignore
                 R.map(ss => ({ address: _rgx(utils.state_regex(ss)) }), utils.all_states),
                 R.map(ss => ({ addr_postcode: _rgx(utils.state_regex(ss)) }), utils.all_states)
             )

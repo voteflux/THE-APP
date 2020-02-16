@@ -34,6 +34,6 @@ module.exports = {
         // stats: 'verbose',
     },
     devServer:{
-        proxy:"http://localhost:52701"
+        proxy:"http://127.0.0.1:52701"
     }
 }

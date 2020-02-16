@@ -9,4 +9,4 @@ export const base32ToUint8a = (b32Str: string): Uint8Array =>
     new Uint8Array(b32Coder.decode(b32Str))
 
 export const uint8aToBase32 = (bs: Uint8Array): string =>
-    b32Coder.encode(bs)
+    b32Coder.encode(Buffer.from(bs))

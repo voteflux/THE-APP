@@ -4,13 +4,13 @@ import { CacheDoc } from 'flux-lib/types/db/cache'
 import { PromE } from 'flux-lib/types'
 import sha256 from "fast-sha256";
 import { left, right, Either, Left, Right } from 'fp-ts/lib/Either';
-import {encodeBase64, decodeBase64, decodeUTF8} from 'tweetnacl-util';
+import {encodeBase64, decodeBase64, decodeUTF8, encodeUTF8} from 'tweetnacl-util';
 import { promiseToEither } from 'flux-lib/utils/either';
 import { _set } from '../db';
 import * as R from 'ramda';
 import { now } from '../utils';
 
-export const calcKey = (cacheRawKey: string) => sha256(decodeUTF8(cacheRawKey))
+export const calcKey = (cacheRawKey: string) => encodeBase64(sha256(decodeUTF8(cacheRawKey)))
 
 const DEFAULT_EXPIRE = 60 * 60 * 24 * 60  // 2 months
 
