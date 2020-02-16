@@ -81,9 +81,15 @@ const endpoints = {
 
 const apiRoots = () => {
     const getDefaults = () => {
-        if (window.location.search.includes('env=localPartial')) {
+        const checkGetQueryEnv = (eName) => window.location.search.includes(`env=${eName}`);
+
+        // todo: should probs use better test for search param
+        if (checkGetQueryEnv('localPartial')) {
             return endpoints.localPartial
+        } else if (checkGetQueryEnv('prod')) {
+            return endpoints.prod
         }
+        
 
         switch (window.location.hostname) {
             case "127.0.0.1":
@@ -178,13 +184,13 @@ export function FluxApi(_Vue: VueConstructor, options?: any): void {
     };
 
     const post = <R>(url: string, data: any, options = {headers: {}} as HttpOptions): PR<R> => {
-    const _opts: HttpOptions = {...options}
-        _opts.headers = {"content-type": "application/json", ...(options.headers || {})}
+        const _opts: HttpOptions = {...options};
+        _opts.headers = {"content-type": "application/json", ...(options.headers || {})};
         return http.post(url, data, _opts).then(mkResp, mkErr(url)) as PR<R>;
     };
 
-    const get = <r>(url: string): PR<r> => {
-        return http.get(url).then(mkResp, mkErr(url)) as PR<r>;
+    const get = <R>(url: string): PR<R> => {
+        return http.get(url).then(mkResp, mkErr(url)) as PR<R>;
     };
 
     // used for profiles since 2019-02-20 ish
@@ -233,14 +239,15 @@ export function FluxApi(_Vue: VueConstructor, options?: any): void {
                 return post(_api2("finance/getDonations"), args);
             },
             getDonationArchive({ s }): PR<any> {
-                return post(_api2("finance/getDonationArchive"), { s }, {responseType: 'blob'})
+                return post(_api2("finance/getDonationArchive"), { s })
                     .then(r => {
-                        const url = window.URL.createObjectURL(new Blob([r.data]));
+                        const url = window.URL.createObjectURL(new Blob([]));  //todo: figure out save zip stuff
                         const link = document.createElement('a');
                         link.href = url;
                         link.setAttribute('download', `flux-donation-archive-${Date.now()/1000|0}.zip`);
                         document.body.appendChild(link);
                         link.click();
+                        return r;
                     })
             },
             addNewDonation(args) {
