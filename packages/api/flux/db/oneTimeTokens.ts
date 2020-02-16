@@ -68,7 +68,7 @@ export default class DBOneTimeTokens {
 
 
     async redeemOneTimeToken(uid: ObjectID, namespace: TokenNamespaces, token: string, receipt: ReqReceipt): PromE<boolean> {
-        const tokenHash = calcOTTHash(uid, namespace, token)
+        const tokenHash = uint8aToBase64(calcOTTHash(uid, namespace, token))
         const ts = utils.now()
 
         const _r = await this.dbv1.oneTimeTokens.findOneAndUpdate(

@@ -15,6 +15,8 @@ import { UserForFinance } from 'flux-lib/types/db';
 import auth from './auth'
 
 import * as R from 'ramda'
+import { Response } from '../types';
+import JSZip = require('jszip');
 
 const utils = require('../utils')
 
@@ -24,7 +26,7 @@ module.exports.getDonations = (db, event, context) => {
     return auth(db).role(Roles.FINANCE, async (event, context, {user}): Promise<DonationsResp> => {
         const data = event.body as GetArbitraryPartial<Donation>;
         const pageN = data.pageN || 0;
-        const limit = data.limit || 10;
+        const limit = data.limit || 100;
         const sm = data.sortMethod || SortMethod.TS
         const query = data.query || {}
         const totalDonations = await db.getDonationsN()
@@ -34,6 +36,34 @@ module.exports.getDonations = (db, event, context) => {
             ...utils.genPagination(totalDonations, limit, pageN)
         }
         return toReturn
+    })(event, context)
+}
+
+
+module.exports.getDonationArchive = (db, event, context) => {
+    return auth(db).role(Roles.FINANCE, async (e, c, {user}): Promise<Response> => {
+        const allDonations: Donation[] = await db.getDonations(0, 1 + (await db.getDonationsN()), SortMethod.TS)
+        const keys = R.pipe(
+            R.map(R.keys),
+            R.reduce((acc, elem) => R.uniq(R.concat(acc, elem)), [] as string[]),
+            R.sortBy(a => a)
+        )(allDonations)
+        const header = R.join(',', R.map(JSON.stringify, keys))
+        const rows = R.map(R.pipe(
+            (d: Donation) => R.map(k => d[k] ? JSON.stringify(d[k]) : '', keys),
+            R.join(',')
+        ))(allDonations)
+        const rawCsv = R.join('/r/n', R.concat([header], rows))
+        const zip = new JSZip()
+        zip.file("donations.csv", rawCsv)
+        const zipFile = await zip.generateAsync({ type: "nodebuffer", compression: "DEFLATE" })  // todo: can we specify base64 here
+        return {
+            statusCode: 200,
+            body: bufferToBase64(zipFile),
+            headers: {
+                'Application-Type': 'application/zip'
+            }
+        }
     })(event, context)
 }
 

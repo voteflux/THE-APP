@@ -37,6 +37,7 @@ export interface FluxApiMethods {
     v2: {
         getRoles: (opts : Auth) => PR<RolesResp>,
         getDonations: (opts : GetArbitraryPartial<Donation>) => PR<DonationsResp>,
+        getDonationArchive: (opts: Auth) => PR<any>,
         addNewDonation: (opts: {doc: Donation} & Auth) => PR<StdSimpleEitherResp<boolean>>,
         donationAutoComplete: (opts: Auth & {email: string}) => PR<StdSimpleEitherResp<UserForFinance>>,
         getRoleAudit: (opts: Auth) => PR<RoleResp[]>,

@@ -22,6 +22,8 @@ plugins:
   - serverless-plugin-aws-alerts
   - serverless-plugin-tracing
   - serverless-offline  # keep this last
+  - serverless-apigw-binary
+  - serverless-apigwy-binary
 
 package:
   exclude:
@@ -38,6 +40,9 @@ package:
 # frameworkVersion: "=X.X.X"
 
 custom:
+  apigwBinary:
+    types:
+      - 'application/zip'
   prodYes: { prod: true }
   # by default functions with custom iamRoles will inherit the global role
   serverless-iam-roles-per-function:
@@ -193,6 +198,14 @@ functions:
           path: /v2/finance/getDonations
           method: post
           cors: true
+  getDonationArchive:
+    handler: ${self:custom.handlers}/admin-finance.getDonationArchive
+    events:
+      - http:
+          path: /v2/finance/getDonationArchive
+          method: post
+          cors: true
+          contentHandling: CONVERT_TO_BINARY
   addNewDonation:
     handler: ${self:custom.handlers}/admin-finance.addNewDonation
     events:

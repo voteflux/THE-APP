@@ -12,11 +12,11 @@ export class EitherProm<L,R> {
 
     private constructor(f?: (res: (e: Either<L,R>) => void, rej: (_: any) => void) => void, _pe?: _PE<L,R>) {
         if (f)
-            this.prom = new Promise(f).then(right).catch(left) as Promise<Either<L,R>>
+            this.prom = new Promise(f);
         else if (_pe)
-            this.prom = _pe
+            this.prom = _pe;
         else
-            throw TypeError("At least one of `f` or `_pe` must be provided to EitherProm constructor")
+            throw TypeError("At least one of `f` or `_pe` must be provided to EitherProm constructor");
     }
 
     private _setNewProm(e: Either<L,R>) {

@@ -11,15 +11,17 @@ const _r = body => ({
     body: JSON.stringify(body)
 });
 
-const beforeSend = response => {
-    response.headers = utils.R.merge(
-        {
-            "Access-Control-Allow-Origin": "*",
-            "Access-Control-Allow-Headers": "*"
-        },
-        response.headers || {}
-    );
-    return response;
+const beforeSend = (response: Response) => {
+    return {
+        ...response,
+        headers: utils.R.merge(
+            {
+                "Access-Control-Allow-Origin": "*",
+                "Access-Control-Allow-Headers": "*"
+            },
+            response.headers || {}
+        )
+    };
 };
 
 const beforeEnter = f => (db, event, context) => {
@@ -47,7 +49,7 @@ const j = utils.j;
 
 // wrap handlers to know about errors, do logging, etc.
 const wrapHandler = (f, fName, obj) => async (event, context) => {
-    console.log(`Wrapping ${fName} now.`);
+    console.debug(`Wrapping ${fName} now.`);
 
     let resp,
         didError = false,
