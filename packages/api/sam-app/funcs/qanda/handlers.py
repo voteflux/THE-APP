@@ -32,9 +32,9 @@ async def get_mine(event, ctx, user, *args, **kwargs):
 @get_common
 async def get_all(event, ctx):
     global_log = UserQuestionsModel.get_or("global", default=UserQuestionsModel(uid="global", qs=[]))
-    print('global_log', global_log)
+    # print('global_log', global_log)
     qs = sort_qs_by_ts([q.strip_private() for q in QuestionModel.batch_get([q['qid'] for q in global_log.qs])])
-    print('qs', qs)
+    # print('qs', qs)
     return {'questions': qs}
 
 
