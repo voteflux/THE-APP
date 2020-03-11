@@ -125,16 +125,16 @@ functions:
           #cors: true
     #iamRoleStatements: ${self:custom.iam.requestLoginToken}
   # stats
-  genStatsGetinfo:
-    handler: ${self:custom.scheduled}/stats.genStatsGetinfo
-    timeout: 60
-    events:
-      - schedule: rate(2 minutes)
-  genStatsPublic:
-    handler: ${self:custom.scheduled}/stats.genStatsPublic
-    timeout: 120
-    events:
-      - schedule: rate(5 minutes)
+#  genStatsGetinfo:
+#    handler: ${self:custom.scheduled}/stats.genStatsGetinfo
+#    timeout: 60
+#    events:
+#      - schedule: rate(2 minutes)
+#  genStatsPublic:
+#    handler: ${self:custom.scheduled}/stats.genStatsPublic
+#    timeout: 120
+#    events:
+#      - schedule: rate(5 minutes)
   genS3StatsDaily:
     handler: ${self:custom.scheduled}/stats.genS3StatsDaily
     timeout: 120
