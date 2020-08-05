@@ -134,7 +134,7 @@ function flux_api(path, useDebug){
         return "https://dev.v1.api.flux.party/" + path;
     }
     if (__DEBUG_ENV__ || useDebug){
-        return "http://localhost:8080/" + path;
+        return "http://" + _hn + ":52100/" + path;
     }
     return "https://prod.v1.api.flux.party/" + path;
 };

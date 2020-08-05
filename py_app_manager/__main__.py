@@ -287,7 +287,7 @@ def build(target, build_args, stage):
 
 
 @cli.command()
-@click.argument('dev_target', type=click.Choice(['ui', 'api', 'sam', 'all']))
+@click.argument('dev_target', type=click.Choice(['ui', 'ui-static', 'api', 'sam', 'all']))
 @stage_option
 def dev(dev_target, stage):
     # # first check dynamodb install
@@ -302,6 +302,7 @@ def dev(dev_target, stage):
     api_port = 52700
     sam_port = 52701
     ui_port = 52710
+    ui_static_port = 52711
     TMP_SESSION = 'tmp-session'
     sess_name = f"dev-{int(time.time())}"
     server = libtmux.Server(socket_name='flux-app-tmux-session')
@@ -360,6 +361,9 @@ def dev(dev_target, stage):
     # lib_pane = run_dev_cmd('./packages/lib', 'npm run watch', 'dev-lib')
     if dev_target in {'ui', 'all'}:
         ui_pane = run_dev_cmd('./packages/ui', "STAGE={} npm run serve".format(stage), 'dev-ui')
+
+    if dev_target in {'ui-static', 'all'}:
+        ui_static_pane = run_dev_cmd('./packages/ui', f"STAGE={stage} npm run static:serve", 'dev-ui-static')
 
     if dev_target in {'api', 'all'}:
         # mongo dev server port: 53799

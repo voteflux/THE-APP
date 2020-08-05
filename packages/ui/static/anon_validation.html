@@ -4,13 +4,12 @@
     <meta charset="UTF-8">
     <title>Flux - Magic Validation</title>
     <!-- vendor -->
-    <link rel='stylesheet' href='/css/basscss.min.css'>
+    <link rel='stylesheet' href='css/basscss.min.css'>
 
-    <link rel="stylesheet" href="/css/members.css">
-    <link rel="stylesheet" href="/css/spinners.css">
+    <link rel="stylesheet" href="css/members.css">
+    <link rel="stylesheet" href="css/spinners.css">
 </head>
 <body ng-controller="FluxController as flux">
-
 
     <div ng-show="flux.showLoading" class="absolute bg-white block col-12" style="height: 100%;">
         <h1 ng-show="flux.showLoading" class="block px2 center">Loading...</h1>
@@ -22,10 +21,33 @@
         </div>
     </div>
 
-
         <div class="clearfix" style="min-height: 200px;">
             <h3 ng-show="flux.error" class="m2 p2 rounded bg-red white">A (probably) non-fatal error has occured: {{flux.error}}</h3>
             <h2 class="m2 p2 rounded bg-green white">Validation queue: {{flux.stats.toValidate}} / {{flux.stats.totalMembers}}. Validations so far: {{flux.stats.totalValidations}}</h2>
+
+            <hr>
+
+            <div class="m2 p2" ng-show="!flux.started">
+                <h3>Settings</h3>
+                <form>
+                    <label for="settings-state" class="block">State:
+                        <select id="settings-state" class="field" ng-model="flux.state" ng-options="opt.name for opt in flux.stateOptions" ng-change="flux.doGetInfo()"></select>
+                    </label>
+
+                    <label class="block mt1">Selection Method:
+                        <select id="settings-method" class="field" ng-model="flux.selectionMethod" ng-options="opt.name for opt in flux.selectionMethodOptions"></select>
+                    </label>
+
+                    <label class="block mt1">N. Parallel Sessions:
+                        <input class="field" type="number" ng-model="flux.nSessions" />
+                    </label>
+
+                    <button class="btn btn-primary mt2 block" ng-click="flux.startValidation()">Start Validation</button>
+                </form>
+            </div>
+
+            <hr>
+
             <h1 class="m1 p1 rounded bg-white black">{{ flux.currentSession.status }}</h1>
             <h2 ng-if="flux.sessions[flux.curSocN].validMsg && flux.sessions[flux.curSocN].goodResponse" class="green">{{ flux.sessions[flux.curSocN].validMsg }}</h2>
             <h2 ng-if="flux.sessions[flux.curSocN].validMsg && !flux.sessions[flux.curSocN].goodResponse" class="red">{{ flux.sessions[flux.curSocN].validMsg }}</h2>
@@ -34,7 +56,9 @@
 
             <!--<h1 class="white bg-red rounded p3 m2">Notice 8/8/17: We seem to be getting a lot of false negative "CAPTCHA incorrect messages"; will investigate over the next few days. For now this page will only run 1 session simultaneously.</h1>-->
 
-            <div ng-show="!flux.sessions[flux.curSocN].disableCaptcha" class="m3 block">
+
+            <div ng-show="flux.started && !flux.sessions[flux.curSocN].disableCaptcha" class="m3 block">
+                <h3 class="">#{{ flux.sessions[flux.curSocN].i }} - Input Captcha</h3>
                 <img ng-src="{{ flux.sessions[flux.curSocN].imageUrl }}">
                 <form ng-submit="flux.submitCaptcha()">
                     <strong>NB:</strong> input is not case sensitive. <br>
@@ -75,11 +99,11 @@
             </div>
         </div>
 
-    <script src="/js/angular.min.js"></script>
-    <script src="/js/lodash.min.js"></script>
-    <script src="/js/qrcode.js"></script>
-    <script src="/js/common.js"></script>
-    <script src="/js/vendor/socket.io-1.4.5.js"></script>
+    <script src="js/angular.min.js"></script>
+    <script src="js/lodash.min.js"></script>
+    <script src="js/qrcode.js"></script>
+    <script src="js/common.js"></script>
+    <script src="js/vendor/socket.io-1.4.5.js"></script>
 
     <script type="text/javascript">
         var app = angular.module('fluxMembersApp', []);
@@ -96,19 +120,39 @@
             flux.getinfo = {};
             flux.stats = {toValidate: 0, totalMembers: 0, totalValidations: 0}
 
-            flux.state = null;
-            if (getParam('state') !== undefined)
-                flux.state = getParam('state')
+            flux.stateOptions = [
+                {name: "None (All Members)", value: ""},
+                {name: "nsw", value: "nsw"},
+                {name: "vic", value: "vic"},
+                {name: "wa", value: "wa"},
+                {name: "tas", value: "tas"},
+                {name: "qld", value: "qld"},
+                {name: "act", value: "act"},
+                {name: "sa", value: "sa"},
+                {name: "nt", value: "nt"},
+            ];
+
+            flux.state = flux.stateOptions[0];
+            if (getParam('state') !== undefined) {
+                let tmpState = getParam('state');
+                flux.state = flux.stateOptions.filter(o => o.value === tmpState)[0];
+            }
+
+            flux.selectionMethodOptions = [
+                {name: "Most recent signups first", value:"recent-signups"},
+                {name: "Random", value: "random"},
+            ];
+            flux.selectionMethod = flux.selectionMethodOptions[0];
 
             flux.doGetInfo = function() {
                 $http.get(flux_api('getinfo'))
                     .then(function(resp) {
                         flux.getinfo = resp.data;
 
-                        if (flux.state) {
-                            flux.stats.toValidate = flux.getinfo['validation_queue_state'][flux.state];
-                            flux.stats.totalMembers = flux.getinfo['n_members_state'][flux.state];
-                            flux.stats.totalValidations = flux.getinfo['n_members_validated_state'][flux.state];
+                        if (flux.state.value !== "") {
+                            flux.stats.toValidate = flux.getinfo['validation_queue_state'][flux.state.value];
+                            flux.stats.totalMembers = flux.getinfo['n_members_state'][flux.state.value];
+                            flux.stats.totalValidations = flux.getinfo['n_members_validated_state'][flux.state.value];
                         } else {
                             flux.stats.toValidate = flux.getinfo['validation_queue'];
                             flux.stats.totalMembers = flux.getinfo['n_members'];
@@ -154,33 +198,40 @@
 
             flux.sendInit = function(soc){
                 var toSend = {method: 'begin'};
+                if (flux.state.value !== "")
+                    toSend.state = flux.state.value
+                toSend.selectionMethod = flux.selectionMethod.value;
+                console.log(toSend);
                 if (getParam('s') !== undefined)
                     toSend.s = getParam('s')
-                if (getParam('state') !== undefined)
-                    toSend.state = getParam('state')
-                console.log(toSend);
                 sendJson(toSend, soc);
             }
 
-            _.forEach(_.range(flux.nSessions), function(i){
+            flux.started = false;
+
+            flux.initSocket = function (i) {
                 flux.sockets[i] = flux.newSocket();
-                flux.sessions[i] = {};
+                flux.sessions[i] = {i: i};
                 var mysession = flux.sessions[i];
                 flux.setInit(mysession);
                 var soc = flux.sockets[i];
 
+                const addLogMsg = function(msg) {
+                    flux.log.unshift(`[${i}] ${msg}`);
+                }
+
                 var socketHandlers = {
-                    finish: function(data){
-                        flux.log.unshift(data['success'] === true ? "User was valid!" : data['captcha_incorrect'] === true ? "CAPTCHA Wrong" : "User wasn't valid :(");
+                    finish: function (data) {
+                        addLogMsg(data['success'] === true ? "User was valid!" : data['captcha_incorrect'] === true ? "CAPTCHA Wrong" : "User wasn't valid :(");
                         mysession.goodResponse = data['success'] === true;
                         flux.reset(soc);
                         console.log('Finished', mysession.goodResponse);
                     },
-                    'deliver_session': function(data){
+                    'deliver_session': function (data) {
                         flux.setInit(mysession);
                         mysession.session = data.session;
                         mysession.imageUrl = flux_api('au/captcha_img/' + mysession.session);
-                        mysession.status = 'Session initiated, captcha loading';
+                        mysession.status = `[${i}] Session initiated, captcha loading`;
                         mysession.disableCaptcha = false;
                         $scope.$apply();
                         var captchaInput = document.getElementById("captchaInput");
@@ -190,55 +241,89 @@
                         mysession.image = new Image();
                         mysession.image.src = mysession.imageUrl;
                     },
-                    'handle_error': function(data){
-                        mysession.errorMsg = data.msg;
-                        flux.log.unshift(data.msg);
+                    'handle_error': function (data) {
+                        addLogMsg(data.msg);
+                        if (data['canContinue']) {
+                            mysession.goodResponse = false;
+                            console.log(`Error in validation: ${data.msg} but able to continue. Sleeping for ${data['canContinue']} s`)
+                            setTimeout(() => { flux.reset(soc) }, data['canContinue'] * 1000);
+                            if (flux.curSocN === i) {
+                                flux.advanceSocket();
+                            }
+                        } else {
+                            mysession.errorMsg = data.msg;
+                        }
+                    },
+                    'timeout': function (data) {
+                        if (data.session === mysession.session) {
+                            addLogMsg("timeout");
+                            mysession.goodResponse = false;
+                            flux.advanceSocket();
+                            flux.reset(soc);
+                        }
                     }
                 }
 
-                soc.onopen = function(){
+                soc.onopen = function () {
                     console.log('opened');
                     flux.sendInit(soc);
                 }
 
-                soc.onmessage = function(evt){
+                soc.onmessage = function (evt) {
                     console.log(evt);
                     var msg = JSON.parse(evt.data);
-                    if (msg.status == 'error')
+                    if (msg.status === 'error')
                         socketHandlers['handle_error'](msg);
                     else
                         socketHandlers[msg.method](msg);
                     $scope.$apply();
                 }
 
-                soc.onclose = function(){
+                soc.onclose = function () {
                     console.log('sock closed');
-                    flux.status = 'Connection lost, resetting... in 0.5 seconds';
-                    setTimeout(function(){ location.reload(); }, 500);
+                    flux.status = 'Connection lost, resetting... in 1 seconds';
+                    setTimeout(function () {
+                        // location.reload();
+                        flux.reset(soc);
+                    }, 1000);
                 }
 
-                mysession.status = "Session started... waiting for server (can take 5-10 seconds)";
-            });
-            flux.currentSocket = flux.sockets[0];
-            flux.currentSession = flux.sessions[0];
+                mysession.status = `[${i}] Session started... waiting for server (can take 5-10 seconds)`;
+            };
 
+            flux.startValidation = function() {
+                flux.doGetInfo();
 
-            flux.showLoading = false;
+                _.forEach(_.range(flux.nSessions), function(i) {
+                    setTimeout(() => { flux.initSocket(i) }, i * 750);
+                });
+                setTimeout(() => {
+                    flux.currentSocket = flux.sockets[0];
+                    flux.currentSession = flux.sessions[0];
+
+                    flux.showLoading = false;
+                    flux.started = true;
+                }, 250);
+            }
+
+            flux.advanceSocket = function(){
+                var next = (flux.curSocN + 1) % flux.nSessions;
+                flux.currentSocket = flux.sockets[next];
+                flux.currentSession = flux.sessions[next];
+                flux.curSocN = next;
+            }
 
             flux.submitCaptcha = function(){
                 if (flux.currentSession.submitted === false && flux.currentSession.captcha.length === 4){
                     flux.currentSession.submitted = true;
                     var toSend = jsonDumps({method: 'captcha_answer', captcha: flux.currentSession.captcha, session: flux.currentSession.session});
-                    console.log('Sending...', flux.curSockN, toSend);
+                    console.log('Sending...', flux.curSocN, toSend);
                     flux.currentSocket.send(toSend, flux.currentSocket);
-                    flux.currentSession.status = 'Submitted captcha. Waiting for response...';
+                    flux.currentSession.status = `[${flux.curSocN}] Submitted captcha. Waiting for response...`;
                     flux.currentSession.disableCaptcha = true;
                     flux.currentSession.imageUrl = 'data:image/gif;base64,R0lGODlhEAAQAMQAAORHHOVSKudfOulrSOp3WOyDZu6QdvCchPGolfO0o/XBs/fNwfjZ0frl3/zy7////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAkAABAALAAAAAAQABAAAAVVICSOZGlCQAosJ6mu7fiyZeKqNKToQGDsM8hBADgUXoGAiqhSvp5QAnQKGIgUhwFUYLCVDFCrKUE1lBavAViFIDlTImbKC5Gm2hB0SlBCBMQiB0UjIQA7'; // found here https://css-tricks.com/data-uris/
 
-                    var next = (flux.curSocN + 1) % flux.nSessions;
-                    flux.currentSocket = flux.sockets[next];
-                    flux.currentSession = flux.sessions[next];
-                    flux.curSocN = next;
+                    flux.advanceSocket()
                 }
             }
         });

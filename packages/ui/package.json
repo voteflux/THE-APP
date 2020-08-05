@@ -3,10 +3,12 @@
   "version": "0.2.5",
   "private": true,
   "scripts": {
-    "serve": "vue-cli-service serve --port 52710",
+    "serve": "vue-cli-service serve ${DEV_HOSTNAME:-0.0.0.0} --port 52710",
     "build": "rm -rf ./dist && mkdir -p dist && ./node_modules/.bin/vue-cli-service build",
     "lint": "vue-cli-service lint",
-    "build-commented-extra": "&& cp -a ./static/* ./dist/ "
+    "build-commented-extra": "&& cp -a ./static/* ./dist/ ",
+    "static:serve-basic": "cd static && python3 -m http.server 52711",
+    "static:serve": "httpwatcher -r static -H ${DEV_HOSTNAME:-0.0.0.0} -p 52711 -n"
   },
   "sideEffects": [
     "*.vue",
