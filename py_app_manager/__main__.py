@@ -93,7 +93,7 @@ try:
     ensure_deps()
 except Exception as e:
     print("unable to install dependencies; exiting")
-    print(e, e.args, e.message)
+    print(e, e.args)
     raise e
 
 # main UI
