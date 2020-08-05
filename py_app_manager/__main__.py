@@ -42,13 +42,24 @@ def _sam_pip():
 _deps_updated = False
 
 
-def ensure_deps(force=False):
+def ensure_python_deps(force=False):
+    global _deps_updated, repo
+    if force or (not deps_up_to_date() and not _deps_updated):
+        must_run("python3 -m pip install -r requirements.txt")
+
+
+
+def ensure_deps(force=False, bootstrap_only=None):
     global _deps_updated, repo
     if force or (not deps_up_to_date() and not _deps_updated):
         def install_deps():
             must_run("python3 -m pip install -r requirements.txt")
             must_run("npm i")
-            must_run("npx lerna bootstrap")
+            if bootstrap_only is not None:
+                scope = "{" + ','.join(bootstrap_only) + "}"
+                must_run(f"npx lerna bootstrap --scope {scope}")
+            else:
+                must_run("npx lerna bootstrap")
             if not is_netlify():
                 _sam_pip()
             set_deps_up_to_date()
@@ -89,8 +100,7 @@ _deps_updated = skip_ensure_deps
 
 # ensure deps and things are installed before we go further
 try:
-    # ensure_venv()
-    ensure_deps()
+    ensure_python_deps()
 except Exception as e:
     print("unable to install dependencies; exiting")
     print(e, e.args)
@@ -252,6 +262,8 @@ def build(target, build_args, stage):
     export("STAGE", stage)
     logging.info("Building {} for {}".format(target, stage))
     remArgs = " ".join(build_args)
+
+    ensure_deps(bootstrap_only=["ui", "lib"], force=True)
 
     try:
         if stage == "prod":

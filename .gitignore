@@ -38,3 +38,6 @@ report-*.html
 
 tmp*.bz2*
 report.20*.json
+
+# Local Netlify folder
+.netlify
