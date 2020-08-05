@@ -23,7 +23,7 @@
 
         <div class="clearfix" style="min-height: 200px;">
             <h3 ng-show="flux.error" class="m2 p2 rounded bg-red white">A (probably) non-fatal error has occured: {{flux.error}}</h3>
-            <h2 class="m2 p2 rounded bg-green white">Validation queue: {{flux.stats.toValidate}} / {{flux.stats.totalMembers}}. Validations so far: {{flux.stats.totalValidations}}</h2>
+            <h2 class="m2 p2 rounded bg-green white">Validation queue: {{flux.stats.toValidate}} / {{flux.stats.totalMembers}}. Validations so far: {{flux.stats.totalValidations}} (within last 3 months: {{flux.stats.totalValidationsRecent}})</h2>
 
             <hr>
 
@@ -157,6 +157,7 @@
                             flux.stats.toValidate = flux.getinfo['validation_queue'];
                             flux.stats.totalMembers = flux.getinfo['n_members'];
                             flux.stats.totalValidations = flux.getinfo['n_members_validated'];
+                            flux.stats.totalValidationsRecent = flux.getinfo['n_valid_in_last_3_months'];
                         }
 
                         console.log(flux.getinfo)
