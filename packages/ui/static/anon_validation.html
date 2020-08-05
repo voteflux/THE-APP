@@ -255,11 +255,12 @@
                         }
                     },
                     'timeout': function (data) {
-                        if (data.session === mysession.session) {
+                        if (flux.curSocN === i && mysession.session === data.session) {
                             addLogMsg("timeout");
                             mysession.goodResponse = false;
+                            mysession.disableCaptcha = true;
                             flux.advanceSocket();
-                            flux.reset(soc);
+                            setTimeout(() => { flux.reset(soc) }, 2000);
                         }
                     }
                 }
@@ -292,6 +293,7 @@
             };
 
             flux.startValidation = function() {
+                flux.started = true;
                 flux.doGetInfo();
 
                 _.forEach(_.range(flux.nSessions), function(i) {
@@ -302,7 +304,6 @@
                     flux.currentSession = flux.sessions[0];
 
                     flux.showLoading = false;
-                    flux.started = true;
                 }, 250);
             }
 
