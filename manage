@@ -9,7 +9,7 @@ if [ "$NETLIFY_BUILD_BASE" ]; then
 #    echo -e "\n\n###\n\n"
     export IS_NETLIFY="true"
     echo "ensuring repo is up to date and complete"
-    git remote add origin $(echo "https://$REPOSITORY_URL" | sed 's/\.com:/.com\//g' | sed 's/git@//g') || true
+    git remote add origin $(echo "$REPOSITORY_URL" | sed 's/\.com:/.com\//g' | sed 's/git@//g') || true
     git fetch --tags origin
 else
     echo "Detected: not on netlify"
