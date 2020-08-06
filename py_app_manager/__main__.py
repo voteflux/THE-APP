@@ -255,6 +255,12 @@ def deploy(stage, skip_tests, quick_sam, target, args):
 
 
 @cli.command()
+def manual_deploy_ui():
+    runner = CmdRunner(must_run)
+    runner.add("ui", "netlify deploy --prod --site app.flux.party")
+
+
+@cli.command()
 @click.argument('target', nargs=1, type=click.Choice(['ui', 'api', 'all']))
 @click.argument('build_args', nargs=-1, type=click.STRING)
 @stage_option
