@@ -3,5 +3,9 @@
   "private": true,
   "devDependencies": {
     "lerna": "^3.13.0"
+  },
+  "dependencies": {
+    "@aws-cdk/aws-lambda": "^1.62.0",
+    "aws-cdk": "^1.62.0"
   }
 }

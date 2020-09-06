@@ -1,3 +1,1 @@
 attrdict==2.0.0
-pynamodb==3.3.3
-PyMonad==1.3

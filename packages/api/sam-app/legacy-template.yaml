@@ -3,8 +3,8 @@ Transform: AWS::Serverless-2016-10-31
 Description: "flux sam-app stack"
 
 Parameters:
-  pNamePrefix:
-    Type: String
+  # pNamePrefix:
+  #   Type: String
   pHostedZoneId:
     Type: String
   pSubdomain:
@@ -26,7 +26,7 @@ Parameters:
 
 
 Conditions:
-  cIsProd: !Equals [ !Ref pStage, 'prod' ]
+  cIsProd: { "Fn::Equals": [{ "Ref": "pStage"}, 'prod' ]}
 
 
 # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
@@ -146,7 +146,7 @@ Resources:
       Roles:
         - !Ref rQandaFuncRole
       PolicyDocument:
-        Version: 2012-10-17
+        Version: "2012-10-17"
         Statement:
           - Effect: Allow
             Action:
@@ -158,7 +158,8 @@ Resources:
             Action:
               - dynamodb:*
             Resource:
-              - !Sub arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${pNamePrefix}-*
+              - !Sub arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${pNamePrefix}-qanda-*
+              # - !Sub arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${pNamePrefix}-*
           - Effect: Allow
             Action:
               - ses:SendEmail
@@ -191,6 +192,9 @@ Resources:
     Type: AWS::Serverless::SimpleTable
     Properties:
       TableName: !Sub ${pNamePrefix}-qanda-user-qs-ddb
+      ProvisionedThroughput: !If [cIsProd, !Ref "AWS::NoValue", {
+        ReadCapacityUnits: 5, WriteCapacityUnits: 5
+      }]
       PrimaryKey:
         Name: uid
         Type: String
@@ -201,6 +205,9 @@ Resources:
     Type: AWS::Serverless::SimpleTable
     Properties:
       TableName: !Sub ${pNamePrefix}-qanda-questions-ddb
+      ProvisionedThroughput: !If [cIsProd, !Ref "AWS::NoValue", {
+        ReadCapacityUnits: 5, WriteCapacityUnits: 5
+      }]
       PrimaryKey:
         Name: qid
         Type: String
@@ -211,6 +218,9 @@ Resources:
     Type: AWS::Serverless::SimpleTable
     Properties:
       TableName: !Sub ${pNamePrefix}-qanda-reply-ids-ddb
+      ProvisionedThroughput: !If [cIsProd, !Ref "AWS::NoValue", {
+        ReadCapacityUnits: 5, WriteCapacityUnits: 5
+      }]
       PrimaryKey:
         Name: qid
         Type: String
@@ -221,6 +231,9 @@ Resources:
     Type: AWS::Serverless::SimpleTable
     Properties:
       TableName: !Sub ${pNamePrefix}-qanda-reply-ids-by-uid-ddb
+      ProvisionedThroughput: !If [cIsProd, !Ref "AWS::NoValue", {
+        ReadCapacityUnits: 5, WriteCapacityUnits: 5
+      }]
       PrimaryKey:
         Name: qid
         Type: String
@@ -231,6 +244,9 @@ Resources:
     Type: AWS::Serverless::SimpleTable
     Properties:
       TableName: !Sub ${pNamePrefix}-qanda-replies-ddb
+      ProvisionedThroughput: !If [cIsProd, !Ref "AWS::NoValue", {
+        ReadCapacityUnits: 5, WriteCapacityUnits: 5
+      }]
       PrimaryKey:
         Name: rid
         Type: String
@@ -261,6 +277,20 @@ Resources:
       RestApiId: !Ref ServerlessRestApi
       Stage: !Ref ServerlessRestApi.Stage
 
+  # rOauthStack:
+  #   Type: AWS::CloudFormation::Stack
+  #   Properties:
+  #     # StackName: !Sub "${pNamePrefix}-oauth-stack"
+  #     TemplateURL: "./stack/oauth.yaml"
+  #     Parameters:
+  #       pNamePrefix: !Ref pNamePrefix
+  #       pApigDomain: !Ref rApiDomain
+  #       pRestApi: !Ref ServerlessRestApi
+  #       pApiStage: !Ref ServerlessRestApi.Stage
+  #       pStage: !Ref pStage
+  #       pFeedbackEmail: !Ref pFeedbackEmail
+  #       pSiteNameShort: !Ref pSiteNameShort
+  #       pBaseLayer: !Ref rBaseLayer
 
 Outputs:
 

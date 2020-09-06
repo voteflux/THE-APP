@@ -1,0 +1,304 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: flux sam-app stack
+Parameters:
+  # pNamePrefix:
+  #   Type: String
+  pHostedZoneId:
+    Type: String
+  pSubdomain:
+    Type: String
+  pDomain:
+    Type: String
+  pCertificateArn:
+    Type: String
+  pStage:
+    Type: String
+  pFeedbackEmail:
+    Type: String
+  pQandaFromEmail:
+    Type: String
+  pSiteNameShort:
+    Type: String
+  pBaseUrl:
+    Type: String
+Conditions:
+  cIsProd:
+    Fn::Equals:
+    - Ref: pStage
+    - prod
+Globals:
+  Function:
+    Timeout: 120
+    MemorySize: 256
+  Api:
+    Cors:
+      AllowMethods: '''GET,POST,OPTIONS'''
+      AllowHeaders: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token,X-Amz-User-Agent,Referer'''
+      AllowOrigin: '''*'''
+    EndpointConfiguration: REGIONAL
+Resources:
+  rBaseLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      LayerName:
+        Fn::Sub: ${pNamePrefix}-function-base-layer
+      ContentUri: s3://flux-sam-app-api-dev-sam-cf-artifacts/dbc6464f743f19040a2fe11d99fd850b
+      CompatibleRuntimes:
+      - python3.6
+  rCorsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: s3://flux-sam-app-api-dev-sam-cf-artifacts/dd55d11d1474c39562b29620bfe1c780
+      Handler: index.cors
+      Runtime: python3.6
+      Role:
+        Fn::GetAtt:
+        - rCorsFuncRole
+        - Arn
+      Events:
+        CorsOption:
+          Type: Api
+          Properties:
+            Path: /{proxy+}
+            Method: options
+  rCorsFuncRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName:
+        Fn::Sub: ${pNamePrefix}-cors-lambda-role
+      ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+          Action: sts:AssumeRole
+  rQandaFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: s3://flux-sam-app-api-dev-sam-cf-artifacts/f6373d191d360bef3668d1e65d63e066
+      Handler: index.qanda
+      Runtime: python3.6
+      Role:
+        Fn::GetAtt:
+        - rQandaFuncRole
+        - Arn
+      Layers:
+      - Ref: rBaseLayer
+      Environment:
+        Variables:
+          MONGODB_URI: ''
+          pNamePrefix:
+            Ref: pNamePrefix
+          pQandaFromEmail:
+            Ref: pQandaFromEmail
+          pSiteNameShort:
+            Ref: pSiteNameShort
+          pFeedbackEmail:
+            Ref: pFeedbackEmail
+          pBaseUrl:
+            Ref: pBaseUrl
+      Events:
+        GetMyQs:
+          Type: Api
+          Properties:
+            Path: /qanda/getMine
+            Method: post
+        SubmitQ:
+          Type: Api
+          Properties:
+            Path: /qanda/submit
+            Method: post
+        SubmitReply:
+          Type: Api
+          Properties:
+            Path: /qanda/submitReply
+            Method: post
+        GetAllQs:
+          Type: Api
+          Properties:
+            Path: /qanda/get
+            Method: get
+        GetQ:
+          Type: Api
+          Properties:
+            Path: /qanda/question/{qid}
+            Method: get
+        GetReplyIds:
+          Type: Api
+          Properties:
+            Path: /qanda/replyIds/{qid}
+            Method: get
+        GetReply:
+          Type: Api
+          Properties:
+            Path: /qanda/reply/{rid}
+            Method: get
+  rQandaFuncPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      ManagedPolicyName:
+        Fn::Sub: ${pNamePrefix}-qanda-lambda-policy
+      Roles:
+      - Ref: rQandaFuncRole
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+        - Effect: Allow
+          Action:
+          - ssm:GetParameter
+          - ssm:DecryptParameter
+          Resource:
+          - Fn::Sub: arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/${pNamePrefix}-mongodb-uri
+        - Effect: Allow
+          Action:
+          - dynamodb:*
+          Resource:
+          - Fn::Sub: arn:aws:dynamodb:${AWS::Region}:${AWS::AccountId}:table/${pNamePrefix}-qanda-*
+        - Effect: Allow
+          Action:
+          - ses:SendEmail
+          Resource:
+          - Fn::Sub: arn:aws:ses:us-east-1:${AWS::AccountId}:identity/${pQandaFromEmail}
+  rQandaFuncRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName:
+        Fn::Sub: ${pNamePrefix}-qanda-lambda-role
+      ManagedPolicyArns:
+      - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - lambda.amazonaws.com
+          Action: sts:AssumeRole
+  rUserQuestionsTable:
+    Type: AWS::Serverless::SimpleTable
+    Properties:
+      TableName:
+        Fn::Sub: ${pNamePrefix}-qanda-user-qs-ddb
+      ProvisionedThroughput:
+        Fn::If:
+        - cIsProd
+        - Ref: AWS::NoValue
+        - ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
+      PrimaryKey:
+        Name: uid
+        Type: String
+      SSESpecification:
+        SSEEnabled: true
+  rQuestionsTable:
+    Type: AWS::Serverless::SimpleTable
+    Properties:
+      TableName:
+        Fn::Sub: ${pNamePrefix}-qanda-questions-ddb
+      ProvisionedThroughput:
+        Fn::If:
+        - cIsProd
+        - Ref: AWS::NoValue
+        - ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
+      PrimaryKey:
+        Name: qid
+        Type: String
+      SSESpecification:
+        SSEEnabled: true
+  rReplyIdsTable:
+    Type: AWS::Serverless::SimpleTable
+    Properties:
+      TableName:
+        Fn::Sub: ${pNamePrefix}-qanda-reply-ids-ddb
+      ProvisionedThroughput:
+        Fn::If:
+        - cIsProd
+        - Ref: AWS::NoValue
+        - ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
+      PrimaryKey:
+        Name: qid
+        Type: String
+      SSESpecification:
+        SSEEnabled: true
+  rReplyIdsByUidTable:
+    Type: AWS::Serverless::SimpleTable
+    Properties:
+      TableName:
+        Fn::Sub: ${pNamePrefix}-qanda-reply-ids-by-uid-ddb
+      ProvisionedThroughput:
+        Fn::If:
+        - cIsProd
+        - Ref: AWS::NoValue
+        - ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
+      PrimaryKey:
+        Name: qid
+        Type: String
+      SSESpecification:
+        SSEEnabled: true
+  rRepliesTable:
+    Type: AWS::Serverless::SimpleTable
+    Properties:
+      TableName:
+        Fn::Sub: ${pNamePrefix}-qanda-replies-ddb
+      ProvisionedThroughput:
+        Fn::If:
+        - cIsProd
+        - Ref: AWS::NoValue
+        - ReadCapacityUnits: 5
+          WriteCapacityUnits: 5
+      PrimaryKey:
+        Name: rid
+        Type: String
+      SSESpecification:
+        SSEEnabled: true
+  rApiDomain:
+    Type: AWS::ApiGateway::DomainName
+    Properties:
+      DomainName:
+        Fn::Sub: api.${pSubdomain}.${pDomain}
+      RegionalCertificateArn:
+        Ref: pCertificateArn
+      EndpointConfiguration:
+        Types:
+        - REGIONAL
+  rApiDomainRecord:
+    Type: AWS::Route53::RecordSet
+    Properties:
+      Name:
+        Fn::Sub: api.${pSubdomain}.${pDomain}.
+      HostedZoneName:
+        Fn::Sub: ${pDomain}.
+      AliasTarget:
+        DNSName:
+          Fn::GetAtt:
+          - rApiDomain
+          - RegionalDomainName
+        HostedZoneId:
+          Fn::GetAtt:
+          - rApiDomain
+          - RegionalHostedZoneId
+      Type: A
+  rQandaApiBasePath:
+    Type: AWS::ApiGateway::BasePathMapping
+    Properties:
+      DomainName:
+        Ref: rApiDomain
+      RestApiId:
+        Ref: ServerlessRestApi
+      Stage:
+        Ref: ServerlessRestApi.Stage
+Outputs:
+  oQandaFunction:
+    Description: Hello World Lambda Function ARN
+    Value:
+      Fn::GetAtt:
+      - rQandaFunction
+      - Arn
