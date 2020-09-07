@@ -433,14 +433,17 @@ def dev(dev_target, stage):
         # envs = json.load(open(f"./packages/api/sam-app/{env_file}", 'r'))
         # --skip-pull-image
         # --docker-volume-basedir \"$({pwd_cmd})\"
-        sam_cmd = f"sam local start-api --skip-pull-image --port {sam_port} --env-vars {env_file} " \
+        sam_cmd = f"sam local start-api --port {sam_port} --env-vars {env_file} " \
             f"--host $(hostname) " \
             f"--parameter-overrides ParameterKey=pNamePrefix,ParameterValue=flux-api-local-dev"
         logging.info(f"sam_cmd: {sam_cmd}")
         sam_pane = run_dev_cmd('./packages/api/sam-app', sam_cmd, "sam-api", vertical=False, wsl=True)
         if stage == "dev":
-            sam_build_w_pane = run_dev_cmd('./packages/api/sam-app', 'sam build --watch', 'sam-build-w', vertical=False)
-        #     dynalite_pane = run_dev_cmd(f'npx dynalite --port 8000')
+            # https://github.com/tartley/rerun2
+            sam_build_w_pane = run_dev_cmd('./packages/api/sam-app', '../../../py_app_manager/rerun2 sam build', 'sam-build-w', vertical=False)
+
+            # sam_build_w_pane = run_dev_cmd('./packages/api/sam-app', 'sam build', 'sam-build-w', vertical=False)
+            # dynalite_pane = run_dev_cmd(f'npx dynalite --port 8000')
 
     window.select_layout('tiled')
 

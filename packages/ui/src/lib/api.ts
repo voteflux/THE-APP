@@ -1,5 +1,5 @@
 import sha256 from 'fast-sha256';
-import { FluxApiMethods } from "./api.d";
+import { FluxApiMethods as _FluxApiMethods } from "./api.d";
 // all api calls should be written up as methods here (where the methods take the correct arguments)
 
 import * as R from "ramda";
@@ -350,7 +350,7 @@ export function FluxApi(_Vue: VueConstructor, options?: any): void {
         setEndpoints(stage) {
             roots = endpoints[stage] || roots;
         }
-    } as FluxApiMethods;
+    } as _FluxApiMethods;
 
     Vue.prototype.$flux = fluxMethods
 
@@ -359,4 +359,4 @@ export function FluxApi(_Vue: VueConstructor, options?: any): void {
 
 
 export default FluxApi;
-export type FluxApiMethods = FluxApiMethods;
+export type FluxApiMethods = _FluxApiMethods;

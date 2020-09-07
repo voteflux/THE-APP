@@ -1,4 +1,5 @@
 from datetime import datetime, timedelta
+import logging
 
 from werkzeug.utils import cached_property
 import werkzeug
@@ -7,10 +8,10 @@ setattr(werkzeug, 'cached_property', cached_property)
 
 from flask import Flask
 from flask_oauthlib.provider import OAuth2Provider
-
-from models import OauthBearerToken, OauthClientApp, OauthGrant, OauthUser
+from apig_wsgi import make_lambda_handler
 from attrdict import AttrDict
-import logging
+
+# from .models import OauthBearerToken, OauthClientApp, OauthGrant, OauthUser
 
 
 app = Flask(__name__)
@@ -50,17 +51,18 @@ def main(event, ctx):
     print(f"About to call {path_tail}, {_e.pathParameters}")
     print(_e)
 
-    get_handlers = {
-        'authorize': oa_auth_get,
-    }
-    post_handlers = {
-        'authorize': oa_auth_post,
-    }
-
-    ret = {
-        'GET': get_handlers,
-        'POST': post_handlers,
-    }[_e.httpMethod.upper()][path_tail](_e, ctx)
+    # get_handlers = {
+    #     'authorize': oa_auth_get,
+    # }
+    # post_handlers = {
+    #     'authorize': oa_auth_post,
+    # }
+    #
+    # ret = {
+    #     'GET': get_handlers,
+    #     'POST': post_handlers,
+    # }[_e.httpMethod.upper()][path_tail](_e, ctx)
+    ret = make_lambda_handler(app.wsgi_app)(event, ctx)
 
     # ensure_cors(ret)
     logging.info(f"[INFO] Returning {ret}")
@@ -68,9 +70,9 @@ def main(event, ctx):
     return ret
 
 
-def oa_auth_get(e, ctx):
-    pass
-
-
-def oa_auth_post(e, ctx):
-    pass
+# def oa_auth_get(e, ctx):
+#     pass
+#
+#
+# def oa_auth_post(e, ctx):
+#     pass

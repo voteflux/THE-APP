@@ -35,10 +35,10 @@ export default Vue.extend({
             return ((total - 1) / limit | 0) + 1
         },
         hasPrevPage(){
-            return this.totalPages() > 1 && 0 < this.page.pageN
+            return this.totalPages() > 1 && 0 < this.$props.page.pageN
         },
         hasNextPage(){
-            return this.totalPages() < this.page.pageN + 1
+            return this.totalPages() < this.$props.page.pageN + 1
         }
     }
 })

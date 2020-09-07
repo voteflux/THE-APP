@@ -8,7 +8,7 @@ from pynamodb.attributes import UnicodeAttribute, BooleanAttribute, UTCDateTimeA
 
 from flux import env
 from flux.utils import d_get, d_remove
-from flux.pynamodb import BaseModel, DefMeta
+from flux.db import BaseModel, DefMeta
 
 
 def gen_table_name(name):

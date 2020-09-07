@@ -235,7 +235,7 @@ export default Vue.extend({
             this.donationDateMenuOpen = false
         },
         entryComplete() {
-            return R.compose(R.all(p => !!p), R.values)(this.entry)
+            return R.all(p => !!p, R.values(this.entry))
         },
         updateRecentSimilar() {
             this.req.recentSimilar = WebRequest.Loading()

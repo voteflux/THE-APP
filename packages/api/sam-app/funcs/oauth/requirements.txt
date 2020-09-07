@@ -1,5 +1,7 @@
-flask-oauthlib==0.9.5
-aws-wsgi==0.2.7
+authlib==0.14.3
+apig-wsgi==2.8.0
 PyMonad==2.0.4
-pynamodb==3.3.3
+pynamodb==4.3.3
 botocore
+attrdict
+werkzeug

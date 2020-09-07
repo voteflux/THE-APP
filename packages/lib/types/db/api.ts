@@ -49,23 +49,21 @@ export const JuriMap = {
     "AUS": [ null, "ACT", "NSW", "NT", "SA", "TAS", "VIC",  "QLD", "WA" ]
 }
 
-const calcJuriPerms = ([j1, v]) => {
+const calcJuriPerms = ([j1, v]: [string, (string | null)[]]): string[][] => {
     if (Array.isArray(v)) {
         return R.map((j2): string[] => j2 === null ? [j1] : [j1, j2], v)
     }
+    return [];
 }
 export const validJuris = R.reduce(
-    (acc, vs) => ([...acc, ...vs]),
+    (acc, vs: string[]) => ([...acc, ...vs]),
     [] as string[],
     R.map(
         allJuriPerms => R.map(
             (js: string[]) => R.concat([''], js).join('/'),
             allJuriPerms || []
         ),
-        R.map(
-            calcJuriPerms,
-            R.toPairs(JuriMap)
-        )
+        R.map(calcJuriPerms, R.toPairs(JuriMap))
     )
 )
 

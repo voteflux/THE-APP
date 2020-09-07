@@ -662,5 +662,5 @@ Outputs:
   oApiDomain:
     Description: The domain where the API is deployed
     Value:
-      Fn::Sub: https://api.${pSubdomain}.${pDomain}/
+      Fn::Sub: https://api.${pSubdomain}.${pDomain}/ping
 

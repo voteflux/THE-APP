@@ -4,6 +4,8 @@ import {yourSignaturePlaceholder} from './imageUris'
 
 import pdfMake from 'pdfmake/build/pdfmake'
 import pdfFonts from "pdfmake/build/vfs_fonts"
+import DocumentInfo = PDFKit.DocumentInfo;
+import {TDocumentDefinitions} from "pdfmake/interfaces";
 pdfMake.vfs = pdfFonts.pdfMake.vfs
 
 type PdfText = {
@@ -123,7 +125,7 @@ export const genPdf = async (
 
         header: { text: [{ text: 'CONFIDENTIALITY UNDERTAKING\n', style: 'header'}], margin: [0, 30, 0, 0] },
         footer: function(currentPage: number, pageCount: number) { return { text: currentPage.toString() + ' of ' + pageCount, alignment: 'center', margin: [0, 10, 0, 0]}; },
-
+        canvas: '',
         pageMargins: [ 40, 60, 40, 60 ] as [number,number,number,number],
 
         // this doesn't work...
@@ -134,7 +136,7 @@ export const genPdf = async (
             }
             return false
         }
-    }
+    } as TDocumentDefinitions
 
     // DONE GENERATING NDA
 

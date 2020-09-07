@@ -19,7 +19,7 @@ export const PDFViewer = Vue.extend({
         },
         title: {
             type: String,
-            require: true
+            required: true
         }
     },
 
