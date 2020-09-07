@@ -4,3 +4,5 @@ motor==2.2.0
 mako==1.0.7
 PyMonad==2.0.4
 pynamodb==4.3.3
+pynamodb-attributes==0.2.10
+algebraic-data-types==0.2

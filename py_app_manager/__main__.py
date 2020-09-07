@@ -28,7 +28,7 @@ def is_netlify():
 
 
 def _sam_pip():
-    dir_offset = f'packages/api/sam-app'
+    dir_offset = f'sam-app'
     func_dirs = map(lambda x: f'{dir_offset}/funcs/{x}', os.listdir(f'{dir_offset}/funcs'))
     targets = [f'{dir_offset}/libs'] + [p for p in func_dirs if os.path.exists(f'{p}/requirements.txt')]
     runner = CmdRunner(must_run)
@@ -256,7 +256,7 @@ def deploy(stage, skip_tests, quick_sam, target, args):
     if target in {'api', 'all'}:
         runner.add('api', "cd packages/api && npm run deploy -- --stage {} {args}".format(stage, args=' '.join(args)))
     if target in {'sam'}:
-        params = AttrDict(json.load(open(f'packages/api/sam-app/parameters.{stage}.json', 'r')))
+        params = AttrDict(json.load(open(f'sam-app/parameters.{stage}.json', 'r')))
         params.pStage = stage
         params_str = ' '.join([f'\"{k}={v}\"' for k, v in params.items()])
         bucket = f'{params.pNamePrefix}-sam-cf-artifacts'
@@ -270,7 +270,7 @@ def deploy(stage, skip_tests, quick_sam, target, args):
         sam_pre = f"rm -rf {tmp_file} || true && " \
                   f"{DO_CDK_FROM_SAM} && " \
                   f"aws s3 mb s3://{bucket} && echo 'created bucket {bucket}' || echo 'bucket {bucket} not created' && "
-        runner.add('sam', f"set -x && set -e && cd packages/api/sam-app && "
+        runner.add('sam', f"set -x && set -e && cd sam-app && "
                           f"{sam_pre} "
                           f"{sam_build} "
                           f"sam validate && "
@@ -324,7 +324,7 @@ def build(target, build_args, stage):
         def build_sam():
             logging.info("### BUILDING SAM API ###")
             stage_args = "" if stage is None else f"-b .aws-sam-{stage}"
-            must_run(f"cd packages/api/sam-app && {DO_CDK_FROM_SAM} && sam build {stage_args} {rem_args}")
+            must_run(f"cd sam-app && {DO_CDK_FROM_SAM} && sam build {stage_args} {rem_args}")
 
         def build_all():
             build_ui()
@@ -430,19 +430,19 @@ def dev(dev_target, stage):
     if dev_target in {'sam', 'all'}:
         # sam_cmd = f"C:\\Users\\Max\\AppData\\Local\\Programs\\Python\\Python36\\Scripts\\sam.exe local start-api --port {sam_port}"
         env_file = "env.json"
-        # envs = json.load(open(f"./packages/api/sam-app/{env_file}", 'r'))
+        # envs = json.load(open(f"./sam-app/{env_file}", 'r'))
         # --skip-pull-image
         # --docker-volume-basedir \"$({pwd_cmd})\"
         sam_cmd = f"sam local start-api --port {sam_port} --env-vars {env_file} " \
             f"--host $(hostname) " \
             f"--parameter-overrides ParameterKey=pNamePrefix,ParameterValue=flux-api-local-dev"
         logging.info(f"sam_cmd: {sam_cmd}")
-        sam_pane = run_dev_cmd('./packages/api/sam-app', sam_cmd, "sam-api", vertical=False, wsl=True)
+        sam_pane = run_dev_cmd('./sam-app', sam_cmd, "sam-api", vertical=False, wsl=True)
         if stage == "dev":
             # https://github.com/tartley/rerun2
-            sam_build_w_pane = run_dev_cmd('./packages/api/sam-app', '../../../py_app_manager/rerun2 sam build', 'sam-build-w', vertical=False)
+            sam_build_w_pane = run_dev_cmd('./sam-app', '../py_app_manager/rerun2 sam build', 'sam-build-w', vertical=False)
 
-            # sam_build_w_pane = run_dev_cmd('./packages/api/sam-app', 'sam build', 'sam-build-w', vertical=False)
+            # sam_build_w_pane = run_dev_cmd('./sam-app', 'sam build', 'sam-build-w', vertical=False)
             # dynalite_pane = run_dev_cmd(f'npx dynalite --port 8000')
 
     window.select_layout('tiled')

@@ -1,9 +1,14 @@
 import datetime
 import json
 import os
+from enum import Enum
+from typing import Callable, TypeVar
 
 from attrdict import AttrDict
 import boto3
+from pynamodb.attributes import MapAttribute, UnicodeAttribute, ListAttribute, NumberAttribute, Attribute
+from pynamodb_attributes import UnicodeEnumAttribute, IntegerAttribute
+
 from . import env
 from motor.motor_asyncio import AsyncIOMotorClient
 from pymonad.maybe import Maybe, Nothing, Just
@@ -78,7 +83,12 @@ async def find_session_id(uid, session_id):
     return await mongo.auth_session_ids.find_one({'uid': uid, 'session_id': session_id})
 
 
+#
 # pynamodb
+#
+
+def gen_table_name(name):
+    return f"{env.pNamePrefix}-{name}"
 
 
 class DefMeta:
@@ -119,4 +129,36 @@ class BaseModel(Model):
 
     def strip_private(self):
         return self.to_python()
+
+
+T = TypeVar('T', bound=Enum)
+R = TypeVar('R', bound=Attribute)
+
+
+class LookupTypes(Enum):
+    STRING = ('str', UnicodeAttribute)
+    NUMBER = ('num', NumberAttribute)
+    INTEGER = ('int', IntegerAttribute)
+    LIST = ('list', ListAttribute)
+    MAP = ('map', MapAttribute)
+
+
+class LookupPointer(MapAttribute):
+    t = UnicodeEnumAttribute(LookupTypes)
+    v = Attribute()
+
+    def deserialize(self, values):
+        ret = super().deserialize(values)
+
+
+
+
+
+
+class LookupModel(BaseModel):
+    class Meta(DefMeta):
+        table_name = gen_table_name("lookups")
+
+    lookup_key = UnicodeAttribute(hash_key=True)
+    value = LookupPointer()
 

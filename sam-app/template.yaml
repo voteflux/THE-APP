@@ -254,12 +254,6 @@ Resources:
     Properties:
       TableName:
         Fn::Sub: ${pNamePrefix}-qanda-user-qs-ddb
-      ProvisionedThroughput:
-        Fn::If:
-          - cIsProd
-          - Ref: AWS::NoValue
-          - ReadCapacityUnits: 5
-            WriteCapacityUnits: 5
       PrimaryKey:
         Name: uid
         Type: String
@@ -270,12 +264,6 @@ Resources:
     Properties:
       TableName:
         Fn::Sub: ${pNamePrefix}-qanda-questions-ddb
-      ProvisionedThroughput:
-        Fn::If:
-          - cIsProd
-          - Ref: AWS::NoValue
-          - ReadCapacityUnits: 5
-            WriteCapacityUnits: 5
       PrimaryKey:
         Name: qid
         Type: String
@@ -286,12 +274,6 @@ Resources:
     Properties:
       TableName:
         Fn::Sub: ${pNamePrefix}-qanda-reply-ids-ddb
-      ProvisionedThroughput:
-        Fn::If:
-          - cIsProd
-          - Ref: AWS::NoValue
-          - ReadCapacityUnits: 5
-            WriteCapacityUnits: 5
       PrimaryKey:
         Name: qid
         Type: String
@@ -302,12 +284,6 @@ Resources:
     Properties:
       TableName:
         Fn::Sub: ${pNamePrefix}-qanda-reply-ids-by-uid-ddb
-      ProvisionedThroughput:
-        Fn::If:
-          - cIsProd
-          - Ref: AWS::NoValue
-          - ReadCapacityUnits: 5
-            WriteCapacityUnits: 5
       PrimaryKey:
         Name: qid
         Type: String
@@ -318,12 +294,6 @@ Resources:
     Properties:
       TableName:
         Fn::Sub: ${pNamePrefix}-qanda-replies-ddb
-      ProvisionedThroughput:
-        Fn::If:
-          - cIsProd
-          - Ref: AWS::NoValue
-          - ReadCapacityUnits: 5
-            WriteCapacityUnits: 5
       PrimaryKey:
         Name: rid
         Type: String

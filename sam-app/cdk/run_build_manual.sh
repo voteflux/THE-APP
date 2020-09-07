@@ -11,6 +11,6 @@ set -e
 #rm $TMP_FNAME
 #echo "Done!"
 
-cd $(dirname "$0")/../../../../ && \
+cd $(dirname "$0")/../../ && \
   ./manage build sam
 

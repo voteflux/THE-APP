@@ -106,3 +106,4 @@ common/temp/
 common/autoinstallers/*/.npmrc
 **/.rush/temp/
 .netlify
+old.stack

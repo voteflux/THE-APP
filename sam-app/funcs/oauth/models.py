@@ -133,3 +133,6 @@ class OauthToken(BaseModel):
 
     def is_refresh_token_active(self):
         return self.get_expires_at() > time.time()
+
+    def from_refresh_token(self, refresh_token):
+

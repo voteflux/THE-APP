@@ -55,7 +55,7 @@ class AuthorizationCodeGrant(grants.AuthorizationCodeGrant):
 
 class RefreshTokenGrant(grants.RefreshTokenGrant):
     def authenticate_refresh_token(self, refresh_token):
-        token = OauthToken.query.filter_by(refresh_token=refresh_token).first()
+        token = OauthToken.from_refresh_token(refresh_token)
         if token and token.is_refresh_token_active():
             return token
 
