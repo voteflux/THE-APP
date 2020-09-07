@@ -439,6 +439,14 @@
     {
       "packageName": "flux-lib",
       "projectFolder": "packages/lib"
+    },
+    {
+      "packageName": "api",
+      "projectFolder": "packages/api"
+    },
+    {
+      "packageName": "ui",
+      "projectFolder": "packages/ui"
     }
   ]
 }
