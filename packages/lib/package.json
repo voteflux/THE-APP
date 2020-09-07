@@ -7,7 +7,7 @@
   "homepage": "https://voteflux.org",
   "license": "MIT",
   "main": "main.ts",
-  "types": "main.d.ts",
+  "xtypes": "main.d.ts",
   "sideEffects": false,
   "directories": {
     "lib": "./",
