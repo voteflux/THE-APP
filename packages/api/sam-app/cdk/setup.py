@@ -28,7 +28,7 @@ setuptools.setup(
         "aws-cdk.aws-apigateway==1.62.0",
     ],
 
-    python_requires=">=3.6",
+    python_requires=">=3.7",
 
     classifiers=[
         "Development Status :: 4 - Beta",
@@ -39,7 +39,6 @@ setuptools.setup(
 
         "Programming Language :: JavaScript",
         "Programming Language :: Python :: 3 :: Only",
-        "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
 

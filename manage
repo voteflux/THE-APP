@@ -96,7 +96,7 @@ fi
 if [ ! "$IS_NETLIFY" ]; then
     if [ ! -d '.venv' ]; then
         echo "Creating virtualenv"
-        python3 -m virtualenv .venv --python=python3.6
+        python3 -m virtualenv .venv --python=python3.7
         echo "Created virtualenv in .venv"
     fi
     source .venv/bin/activate

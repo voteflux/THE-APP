@@ -3,7 +3,7 @@ import json
 import logging
 import uuid
 
-from pymonad import Nothing, Maybe, Just
+from pymonad.maybe import Maybe
 
 from attrdict import AttrDict
 

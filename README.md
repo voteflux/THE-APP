@@ -33,7 +33,7 @@ After you've set up your dev environment, run `git clone https://github.com/vote
 
 ### MacOS
 
-* For python 3.6 you'll need `brew` installed (See [Homebrew](https://brew.sh/))
+* For python 3.7 you'll need `brew` installed (See [Homebrew](https://brew.sh/))
 * `brew install python3 tmux`
 * [Install NVM](#install-nvm)
 * done

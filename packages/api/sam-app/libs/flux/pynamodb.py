@@ -1,7 +1,7 @@
 import json
 import datetime
 
-from pymonad import Nothing, Maybe, Just
+from pymonad.maybe import Maybe
 from pynamodb.models import Model
 
 from . import env
@@ -33,9 +33,9 @@ class BaseModel(Model):
     @classmethod
     def get_maybe(cls, *args):
         try:
-            return Just(super().get(*args))
+            return Maybe.Just(super().get(*args))
         except super().DoesNotExist as e:
-            return Nothing
+            return Maybe.Nothing
 
     def to_json(self):
         return json.dumps(self, cls=ModelEncoder)

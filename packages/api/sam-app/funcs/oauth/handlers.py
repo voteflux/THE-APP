@@ -1,34 +1,47 @@
-import flask_oauthlib as oauth
+from datetime import datetime, timedelta
+
+from werkzeug.utils import cached_property
+import werkzeug
+
+setattr(werkzeug, 'cached_property', cached_property)
+
+from flask import Flask
+from flask_oauthlib.provider import OAuth2Provider
 
 from models import OauthBearerToken, OauthClientApp, OauthGrant, OauthUser
+from attrdict import AttrDict
+import logging
 
 
-@oauth.clientgetter
-def load_client(client_id):
-    return OauthClientApp.get_or(client_id)
+app = Flask(__name__)
+oauth = OAuth2Provider(app)
 
 
-@oauth.grantgetter
-def load_grant(client_id, code):
-    OauthGrantGetter.get_maybe()
-    return OauthGrant.get_or(client_id=client_id, code=code)
+# @oauth.clientgetter
+# def load_client(client_id):
+#     return OauthClientApp.get_or(client_id)
 
 
-@oauth.grantsetter
-def save_grant(client_id, code, request, *args, **kwargs):
-    # decide the expires time yourself
-    expires = datetime.utcnow() + timedelta(seconds=100)
-    grant = Grant(
-        client_id=client_id,
-        code=code['code'],
-        redirect_uri=request.redirect_uri,
-        _scopes=' '.join(request.scopes),
-        user=get_current_user(),
-        expires=expires
-    )
-    db.session.add(grant)
-    db.session.commit()
-    return grant
+# @oauth.grantgetter
+# def load_grant(client_id, code):
+#     # OauthGrantGetter.get_maybe()
+#     return OauthGrant.get_or(client_id=client_id, code=code)
+
+
+# @oauth.grantsetter
+# def save_grant(client_id, code, request, *args, **kwargs):
+#     # decide the expires time yourself
+#     expires = datetime.utcnow() + timedelta(seconds=100)
+#     grant = OauthGrant(
+#         client_id=client_id,
+#         code=code['code'],
+#         redirect_uri=request.redirect_uri,
+#         scopes=request.scopes,
+#         # user=get_current_user(),
+#         expires=expires
+#     )
+#     grant.save()
+#     return grant
 
 
 def main(event, ctx):
@@ -38,15 +51,10 @@ def main(event, ctx):
     print(_e)
 
     get_handlers = {
-        'get': handlers.get_all,
-        'question': handlers.get_question,
-        'replyIds': handlers.get_reply_ids,
-        'reply': handlers.get_reply,
+        'authorize': oa_auth_get,
     }
     post_handlers = {
-        'getMine': handlers.get_mine,
-        'submit': handlers.submit,
-        'submitReply': handlers.submit_reply,
+        'authorize': oa_auth_post,
     }
 
     ret = {
@@ -58,3 +66,11 @@ def main(event, ctx):
     logging.info(f"[INFO] Returning {ret}")
     print(f"Returning {ret}")
     return ret
+
+
+def oa_auth_get(e, ctx):
+    pass
+
+
+def oa_auth_post(e, ctx):
+    pass

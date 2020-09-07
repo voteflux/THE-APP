@@ -43,15 +43,15 @@ Resources:
     Properties:
       LayerName:
         Fn::Sub: ${pNamePrefix}-function-base-layer
-      ContentUri: s3://flux-sam-app-api-dev-sam-cf-artifacts/dbc6464f743f19040a2fe11d99fd850b
+      ContentUri: ./libs
       CompatibleRuntimes:
-      - python3.6
+      - python3.7
   rCorsFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: s3://flux-sam-app-api-dev-sam-cf-artifacts/dd55d11d1474c39562b29620bfe1c780
+      CodeUri: funcs/cors
       Handler: index.cors
-      Runtime: python3.6
+      Runtime: python3.7
       Role:
         Fn::GetAtt:
         - rCorsFuncRole
@@ -62,6 +62,11 @@ Resources:
           Properties:
             Path: /{proxy+}
             Method: options
+        CorsPing:
+          Type: Api
+          Properties:
+            Path: /ping
+            Method: get
   rCorsFuncRole:
     Type: AWS::IAM::Role
     Properties:
@@ -80,9 +85,9 @@ Resources:
   rQandaFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: s3://flux-sam-app-api-dev-sam-cf-artifacts/f6373d191d360bef3668d1e65d63e066
+      CodeUri: funcs/qanda
       Handler: index.qanda
-      Runtime: python3.6
+      Runtime: python3.7
       Role:
         Fn::GetAtt:
         - rQandaFuncRole
@@ -296,9 +301,7 @@ Resources:
       Stage:
         Ref: ServerlessRestApi.Stage
 Outputs:
-  oQandaFunction:
-    Description: Hello World Lambda Function ARN
+  oApiDomain:
+    Description: "The domain where the API is deployed"
     Value:
-      Fn::GetAtt:
-      - rQandaFunction
-      - Arn
+      Fn::Sub: "https://api.${pSubdomain}.${pDomain}/ping"

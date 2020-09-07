@@ -108,15 +108,15 @@ Resources:
     Properties:
       LayerName:
         Fn::Sub: ${pNamePrefix}-function-base-layer
-      ContentUri: s3://flux-sam-app-api-dev-sam-cf-artifacts/dbc6464f743f19040a2fe11d99fd850b
+      ContentUri: ./libs
       CompatibleRuntimes:
-        - python3.6
+        - python3.7
   rCorsFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: s3://flux-sam-app-api-dev-sam-cf-artifacts/dd55d11d1474c39562b29620bfe1c780
+      CodeUri: funcs/cors
       Handler: index.cors
-      Runtime: python3.6
+      Runtime: python3.7
       Role:
         Fn::GetAtt:
           - rCorsFuncRole
@@ -127,6 +127,11 @@ Resources:
           Properties:
             Path: /{proxy+}
             Method: options
+        CorsPing:
+          Type: Api
+          Properties:
+            Path: /ping
+            Method: get
   rCorsFuncRole:
     Type: AWS::IAM::Role
     Properties:
@@ -145,9 +150,9 @@ Resources:
   rQandaFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: s3://flux-sam-app-api-dev-sam-cf-artifacts/f6373d191d360bef3668d1e65d63e066
+      CodeUri: funcs/qanda
       Handler: index.qanda
-      Runtime: python3.6
+      Runtime: python3.7
       Role:
         Fn::GetAtt:
           - rQandaFuncRole
@@ -368,7 +373,7 @@ Resources:
     DeletionPolicy: Retain
     Metadata:
       aws:cdk:path: cdk/ddb-backup-vault/Resource
-  oauthddbsbackup980146D8:
+  backup98F0E993:
     Type: AWS::Backup::BackupPlan
     Properties:
       BackupPlan:
@@ -380,7 +385,7 @@ Resources:
             ScheduleExpression: cron(0 5 * * ? *)
             TargetBackupVault:
               Fn::GetAtt:
-                - oauthddbsbackupVault72BBC8AD
+                - backupVault994D6CF0
                 - BackupVaultName
           - Lifecycle:
               DeleteAfterDays: 90
@@ -388,7 +393,7 @@ Resources:
             ScheduleExpression: cron(0 5 ? * SAT *)
             TargetBackupVault:
               Fn::GetAtt:
-                - oauthddbsbackupVault72BBC8AD
+                - backupVault994D6CF0
                 - BackupVaultName
           - Lifecycle:
               DeleteAfterDays: 1825
@@ -397,7 +402,7 @@ Resources:
             ScheduleExpression: cron(0 5 1 * ? *)
             TargetBackupVault:
               Fn::GetAtt:
-                - oauthddbsbackupVault72BBC8AD
+                - backupVault994D6CF0
                 - BackupVaultName
           - Lifecycle:
               DeleteAfterDays: 35
@@ -408,16 +413,16 @@ Resources:
                 - ddbbackupvaultB616DEFE
                 - BackupVaultName
     Metadata:
-      aws:cdk:path: cdk/oauth-ddbs/backup/Resource
-  oauthddbsbackupVault72BBC8AD:
+      aws:cdk:path: cdk/backup/Resource
+  backupVault994D6CF0:
     Type: AWS::Backup::BackupVault
     Properties:
-      BackupVaultName: cdkoauthddbsbackupVault30AF690E
+      BackupVaultName: cdkbackupVault59694AE6
     UpdateReplacePolicy: Retain
     DeletionPolicy: Retain
     Metadata:
-      aws:cdk:path: cdk/oauth-ddbs/backup/Vault/Resource
-  oauthddbsbackupselectionRoleE920781D:
+      aws:cdk:path: cdk/backup/Vault/Resource
+  backupselectionRoleC458F3EC:
     Type: AWS::IAM::Role
     Properties:
       AssumeRolePolicyDocument:
@@ -434,18 +439,18 @@ Resources:
               - Ref: AWS::Partition
               - :iam::aws:policy/service-role/AWSBackupServiceRolePolicyForBackup
     Metadata:
-      aws:cdk:path: cdk/oauth-ddbs/backup/selection/Role/Resource
-  oauthddbsbackupselection8FB78461:
+      aws:cdk:path: cdk/backup/selection/Role/Resource
+  backupselection989E3E7C:
     Type: AWS::Backup::BackupSelection
     Properties:
       BackupPlanId:
         Fn::GetAtt:
-          - oauthddbsbackup980146D8
+          - backup98F0E993
           - BackupPlanId
       BackupSelection:
         IamRoleArn:
           Fn::GetAtt:
-            - oauthddbsbackupselectionRoleE920781D
+            - backupselectionRoleC458F3EC
             - Arn
         Resources:
           - Fn::Join:
@@ -494,7 +499,7 @@ Resources:
                 - -oauth-bearer-tokens-ddb
         SelectionName: selection
     Metadata:
-      aws:cdk:path: cdk/oauth-ddbs/backup/selection/Resource
+      aws:cdk:path: cdk/backup/selection/Resource
   oauthddbsoauthclientappsddbsimtable5E81AFCF:
     Type: AWS::Serverless::SimpleTable
     Properties:
@@ -616,17 +621,15 @@ Resources:
           - - Ref: pNamePrefix
             - -oauth-lambda-policy
       Roles:
-        - Fn::GetAtt:
-            - frole
-            - Arn
+        - Ref: frole
     Metadata:
       aws:cdk:path: cdk/f-policy
   oauthfunc:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: ./funcs/oauth
+      CodeUri: funcs/oauth
       Handler: handlers.main
-      Runtime: python3.6
+      Runtime: python3.7
       Environment:
         Variables:
           pNamePrefix:
@@ -645,19 +648,19 @@ Resources:
       Layers:
         - Ref: rBaseLayer
       Role:
-        Ref: frole
+        Fn::GetAtt:
+          - frole
+          - Arn
     Metadata:
       aws:cdk:path: cdk/oauth-func
   CDKMetadata:
     Type: AWS::CDK::Metadata
     Properties:
-      Modules: aws-cdk=1.62.0,@aws-cdk/assets=1.62.0,@aws-cdk/aws-apigateway=1.62.0,@aws-cdk/aws-applicationautoscaling=1.62.0,@aws-cdk/aws-autoscaling-common=1.62.0,@aws-cdk/aws-backup=1.62.0,@aws-cdk/aws-certificatemanager=1.62.0,@aws-cdk/aws-cloudformation=1.62.0,@aws-cdk/aws-cloudwatch=1.62.0,@aws-cdk/aws-codeguruprofiler=1.62.0,@aws-cdk/aws-dynamodb=1.62.0,@aws-cdk/aws-ec2=1.62.0,@aws-cdk/aws-efs=1.62.0,@aws-cdk/aws-elasticloadbalancingv2=1.62.0,@aws-cdk/aws-events=1.62.0,@aws-cdk/aws-iam=1.62.0,@aws-cdk/aws-kms=1.62.0,@aws-cdk/aws-lambda=1.62.0,@aws-cdk/aws-logs=1.62.0,@aws-cdk/aws-rds=1.62.0,@aws-cdk/aws-route53=1.62.0,@aws-cdk/aws-s3=1.62.0,@aws-cdk/aws-s3-assets=1.62.0,@aws-cdk/aws-sam=1.62.0,@aws-cdk/aws-secretsmanager=1.62.0,@aws-cdk/aws-sns=1.62.0,@aws-cdk/aws-sqs=1.62.0,@aws-cdk/aws-ssm=1.62.0,@aws-cdk/cloud-assembly-schema=1.62.0,@aws-cdk/core=1.62.0,@aws-cdk/custom-resources=1.62.0,@aws-cdk/cx-api=1.62.0,@aws-cdk/region-info=1.62.0,jsii-runtime=Python/3.6.10
+      Modules: aws-cdk=1.62.0,@aws-cdk/assets=1.62.0,@aws-cdk/aws-apigateway=1.62.0,@aws-cdk/aws-applicationautoscaling=1.62.0,@aws-cdk/aws-autoscaling-common=1.62.0,@aws-cdk/aws-backup=1.62.0,@aws-cdk/aws-certificatemanager=1.62.0,@aws-cdk/aws-cloudformation=1.62.0,@aws-cdk/aws-cloudwatch=1.62.0,@aws-cdk/aws-codeguruprofiler=1.62.0,@aws-cdk/aws-dynamodb=1.62.0,@aws-cdk/aws-ec2=1.62.0,@aws-cdk/aws-efs=1.62.0,@aws-cdk/aws-elasticloadbalancingv2=1.62.0,@aws-cdk/aws-events=1.62.0,@aws-cdk/aws-iam=1.62.0,@aws-cdk/aws-kms=1.62.0,@aws-cdk/aws-lambda=1.62.0,@aws-cdk/aws-logs=1.62.0,@aws-cdk/aws-rds=1.62.0,@aws-cdk/aws-route53=1.62.0,@aws-cdk/aws-s3=1.62.0,@aws-cdk/aws-s3-assets=1.62.0,@aws-cdk/aws-sam=1.62.0,@aws-cdk/aws-secretsmanager=1.62.0,@aws-cdk/aws-sns=1.62.0,@aws-cdk/aws-sqs=1.62.0,@aws-cdk/aws-ssm=1.62.0,@aws-cdk/cloud-assembly-schema=1.62.0,@aws-cdk/core=1.62.0,@aws-cdk/custom-resources=1.62.0,@aws-cdk/cx-api=1.62.0,@aws-cdk/region-info=1.62.0,jsii-runtime=Python/3.7.7
     Condition: CDKMetadataAvailable
 Outputs:
-  oQandaFunction:
-    Description: Hello World Lambda Function ARN
+  oApiDomain:
+    Description: The domain where the API is deployed
     Value:
-      Fn::GetAtt:
-        - rQandaFunction
-        - Arn
+      Fn::Sub: https://api.${pSubdomain}.${pDomain}/
 

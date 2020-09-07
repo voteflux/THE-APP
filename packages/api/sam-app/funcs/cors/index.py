@@ -1,4 +1,7 @@
+import json
 import logging
+import time
+
 logging.basicConfig(level=logging.INFO)
 logging.warning("logging started")
 
@@ -15,3 +18,7 @@ def ensure_cors(ret):
 
 def cors(event, ctx):
     return ensure_cors({'statusCode': 200, 'body': 'cors-response'})
+
+
+def ping(event, ctx):
+    return ensure_cors({'statusCode': 200, 'body': json.dumps(dict(pong=time.time()))})

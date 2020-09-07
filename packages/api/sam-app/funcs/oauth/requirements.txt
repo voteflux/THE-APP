@@ -1,0 +1,5 @@
+flask-oauthlib==0.9.5
+aws-wsgi==0.2.7
+PyMonad==2.0.4
+pynamodb==3.3.3
+botocore

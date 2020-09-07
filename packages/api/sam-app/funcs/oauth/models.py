@@ -1,7 +1,7 @@
 import json
 import datetime
 
-from pymonad import Nothing, Maybe, Just
+from pymonad.maybe import Maybe
 from pynamodb.indexes import GlobalSecondaryIndex, AllProjection
 from pynamodb.models import Model
 from pynamodb.attributes import UnicodeAttribute, BooleanAttribute, UTCDateTimeAttribute, ListAttribute, MapAttribute
@@ -39,12 +39,13 @@ class OauthClientApp(BaseModel):
     client_id = UnicodeAttribute(hash_key=True)
     client_secret = UnicodeAttribute()
     client_type_public = BooleanAttribute()
-    redirect_uris = ListAttribute(of=UnicodeAttribute, default=list)
+    redirect_uris = ListAttribute(default=list)
     default_redirect_uri = UnicodeAttribute()
     default_scopes = UnicodeAttribute()
-    allowed_grant_types = ListAttribute(of=UnicodeAttribute, default=list)
-    allowed_response_types = ListAttribute(of=UnicodeAttribute, default=list)
+    allowed_grant_types = ListAttribute(default=list)
+    allowed_response_types = ListAttribute(default=list)
     validate_scopes_f = UnicodeAttribute()
+    created_ts = UTCDateTimeAttribute(default=datetime.datetime.now)
 
     @property
     def client_type(self):
@@ -62,7 +63,7 @@ class OauthGrant(BaseModel):
     code = UnicodeAttribute()
     redirect_uri = UnicodeAttribute()
     expires = UTCDateTimeAttribute()
-    scopes = ListAttribute(of=UnicodeAttribute, default=list)
+    scopes = ListAttribute(default=list)
 
 
 class OauthBearerToken(BaseModel):
@@ -77,8 +78,4 @@ class OauthBearerToken(BaseModel):
     access_token = UnicodeAttribute()
     refresh_token = UnicodeAttribute()
     expires = UTCDateTimeAttribute()
-    scopes = ListAttribute(of=UnicodeAttribute, default=list)
-
-class UidPrivate(BaseModel):
-    def strip_private(self):
-        return d_remove('uid', super().strip_private())
+    scopes = ListAttribute(default=list)
