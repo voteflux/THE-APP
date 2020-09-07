@@ -50,7 +50,7 @@ Resources:
       LayerName: !Sub ${pNamePrefix}-function-base-layer
       ContentUri: ./libs
       CompatibleRuntimes:
-        - python3.6
+        - python3.7
 
 
   rCorsFunction:
@@ -58,7 +58,7 @@ Resources:
     Properties:
       CodeUri: funcs/cors
       Handler: index.cors
-      Runtime: python3.6
+      Runtime: python3.7
       Role: !GetAtt rCorsFuncRole.Arn
       Events:
         CorsOption:
@@ -89,7 +89,7 @@ Resources:
     Properties:
       CodeUri: "funcs/qanda"
       Handler: "index.qanda"
-      Runtime: "python3.6"
+      Runtime: "python3.7"
       Role: !GetAtt rQandaFuncRole.Arn
       Layers:
         - !Ref rBaseLayer
