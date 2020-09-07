@@ -1,21 +1,21 @@
 from datetime import datetime, timedelta
 import logging
 
+from flask import request
 from werkzeug.utils import cached_property
 import werkzeug
 
 setattr(werkzeug, 'cached_property', cached_property)
 
-from flask import Flask
-from flask_oauthlib.provider import OAuth2Provider
 from apig_wsgi import make_lambda_handler
 from attrdict import AttrDict
 
-# from .models import OauthBearerToken, OauthClientApp, OauthGrant, OauthUser
+from .oauth2 import authorization
+
+# from .models import OauthToken, OauthClientApp, OauthGrant, OauthUser
 
 
-app = Flask(__name__)
-oauth = OAuth2Provider(app)
+app = authorization
 
 
 # @oauth.clientgetter
@@ -76,3 +76,23 @@ def main(event, ctx):
 #
 # def oa_auth_post(e, ctx):
 #     pass
+
+
+@app.route('/oauth/authorize', methods=['GET', 'POST'])
+def authorize():
+    # Login is required since we need to know the current resource owner.
+    # It can be done with a redirection to the login page, or a login
+    # form on this authorization page.
+    if request.method == 'GET':
+        grant = authorization.validate_consent_request(end_user=current_user)
+        return render_template(
+            'authorize.html',
+            grant=grant,
+            user=current_user,
+        )
+    confirmed = request.form['confirm']
+    if confirmed:
+        # granted by resource owner
+        return server.create_authorization_response(grant_user=current_user)
+    # denied by resource owner
+    return server.create_authorization_response(grant_user=None)

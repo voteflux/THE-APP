@@ -6,7 +6,7 @@ from attrdict import AttrDict
 import boto3
 from . import env
 from motor.motor_asyncio import AsyncIOMotorClient
-from pymonad.maybe import Maybe
+from pymonad.maybe import Maybe, Nothing, Just
 from pynamodb.models import Model
 
 ssm = boto3.client('ssm')
@@ -47,13 +47,35 @@ async def find_user(data):
 
 
 async def user_roles(uid):
-    rolesAll = await mongo.roles.find({'uids': uid}).to_list(None)
-    roles = list([r['role'] for r in (rolesAll if rolesAll is not None else [])])
+    roles_all = await mongo.roles.find({'uids': uid}).to_list(None)
+    roles = list([r['role'] for r in (roles_all if roles_all is not None else [])])
     return roles
 
 
-async def has_role(role_name, uid):
-    return await mongo.roles.find_one({'uids': uid, 'role': {'$eq': role_name}}) is not None
+# async def has_role(role_name, uid):
+#     return await mongo.roles.find_one({'uids': uid, 'role': {'$eq': role_name}}) is not None
+
+
+async def get_user_by_id(uid, db_inst=mongo):
+    return await find_user({'_id': uid})
+
+
+async def has_role(uid, role, db_inst=mongo):
+    # check the user exists first
+    if (await get_user_by_id(uid, db_inst=db_inst)) is None:
+        return False
+
+    if role == 'user':  # user role is special and generic, provided user exists this is always true
+        return True
+
+    if await db_inst.roles.find_one({'uids': uid, 'role': {'$eq': role}}) is None:
+        return False  # if we can't find the role
+
+    return True
+
+
+async def find_session_id(uid, session_id):
+    return await mongo.auth_session_ids.find_one({'uid': uid, 'session_id': session_id})
 
 
 # pynamodb
@@ -85,9 +107,9 @@ class BaseModel(Model):
     @classmethod
     def get_maybe(cls, *args):
         try:
-            return Maybe.Just(super().get(*args))
+            return Just(super().get(*args))
         except super().DoesNotExist as e:
-            return Maybe.Nothing
+            return Nothing
 
     def to_json(self):
         return json.dumps(self, cls=ModelEncoder)
