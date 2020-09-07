@@ -52,11 +52,14 @@ if python3 -m virtualenv --version >/dev/null 2>&1; then
 else
     pip3 install --user virtualenv
 fi
-if which npm >/dev/null 2>&1; then
+if command -v nvm >/dev/null 2>&1; then
+    nvm use
+fi
+if command -v npm >/dev/null 2>&1; then
     echo 'Found npm'
 else
     echo "Error: npm must be available on path"
-    echo "Please install Node v8 or higher"
+    echo "Please install Node v10 or higher - preferably via NVM"
     _error=true
 fi
 if tmux -V >/dev/null 2>&1; then

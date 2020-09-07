@@ -90,12 +90,12 @@ def export(env_name, env_value):
 try:
     with open('package.json', 'r') as f:
         pkg_file = json.load(f)
-        assert pkg_file['name'] == "root"
-        assert os.path.isdir("./packages/api")
-        assert os.path.isdir("./packages/lib")
-        assert os.path.isdir("./packages/ui")
+    assert pkg_file['name'] == "root"
+    assert os.path.isdir("./packages/api")
+    assert os.path.isdir("./packages/lib")
+    assert os.path.isdir("./packages/ui")
 except Exception as e:
-    print("Please run ./manage from the root directory (of the repository)")
+    print(f"Please run ./manage from the root directory (of the repository) -- Exception: {e}")
     sys.exit(255)
 
 skip_ensure_deps = len(sys.argv) > 1 and (
@@ -154,7 +154,11 @@ def reinstall():
 def clean():
     # clean up any temporary / boring files
     cmds = [
-        "rm -rf ./.flux-dev.*.log*"
+        "rm -rf ./.flux-dev.*.log*",
+        # "npx lerna clean -y || true",
+        # "npx lerna exec -- npm cache clean --force || true",
+        "rm -rf node_modules",
+        "rm -rf packages/*/node_modules"
     ]
     logging.debug("Cleaning up...")
     for cmd in cmds:

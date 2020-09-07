@@ -3,6 +3,7 @@ import time
 
 mgr_setup_flag_file = "./.dev_app_init_last"
 
+
 def must_run(cmd):
     logging.info("Running `%s`" % cmd)
     exit_code = os.system(cmd)
@@ -10,6 +11,7 @@ def must_run(cmd):
     if exit_code != 0:
         logging.error("Failed to run %s" % cmd)
         raise Exception("Failed to run required cmd: %s" % cmd)
+
 
 def run_or(cmd, error_msg, verbose=False):
     exit_code = os.system(cmd)
@@ -19,14 +21,17 @@ def run_or(cmd, error_msg, verbose=False):
         logging.error(error_msg)
         raise Exception("Failed to run required cmd: %s" % cmd)
 
+
 def cmd_w_log(cmd, log_name, dir_offset="./"):
     assert dir_offset[-1] == "/"
     fname = """.flux-dev.{l}.log""".format(l=log_name)
     fpath = '{d}{f}'.format(d=dir_offset, f=fname)
     return (('mv {p} {p}.previous || true && ' + cmd + ''' 2>&1 | tee "{p}" ''').format(p=fpath), fname)
 
+
 def get_git_head():
     return subprocess.check_output(['git', 'rev-parse', 'HEAD'])
+
 
 def deps_up_to_date():
     if not os.path.isfile(mgr_setup_flag_file):
@@ -38,9 +43,11 @@ def deps_up_to_date():
             logging.debug("deps up to date false git mismatch")
         return up_to_date
 
+
 def set_deps_up_to_date():
     with open(mgr_setup_flag_file, 'wb') as f:
         f.write(get_git_head())
+
 
 def confirm(prompt, default_continue=False):
     answer = None
