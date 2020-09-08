@@ -12,7 +12,7 @@ from flux.email import email_notify_new_reply
 from flux.auth import has_role
 from flux.exceptions import LambdaError
 from flux.handler_utils import get_common, auth_common
-from models import UserQuestionsModel, QuestionModel, ReplyIdsByUid, ReplyIdsByQid, Reply, GenericPointer, \
+from .models import UserQuestionsModel, QuestionModel, ReplyIdsByUid, ReplyIdsByQid, Reply, GenericPointer, \
     UserQuestionLogEntry
 
 
@@ -29,8 +29,7 @@ async def get_mine(event, ctx, user, *args, **kwargs):
     return {"questions": qs}
 
 
-@get_common
-async def get_all(event, ctx):
+def get_all_raw(event, ctx):
     global_log = UserQuestionsModel.get_or("global", default=UserQuestionsModel(uid="global", qs=[]))
     # print('global_log', global_log)
     qs = sort_qs_by_ts([q.strip_private() for q in QuestionModel.batch_get([q['qid'] for q in global_log.qs])])
@@ -39,8 +38,17 @@ async def get_all(event, ctx):
 
 
 @get_common
-async def get_question(event, ctx):
+async def get_all(event, ctx):
+    return get_all_raw(event, ctx)
+
+
+def get_question_raw(event, ctx):
     return {'question': QuestionModel.get(event.pathParameters.qid).strip_private()}
+
+
+@get_common
+async def get_question(event, ctx):
+    return get_question_raw(event, ctx)
 
 
 @auth_common
@@ -75,8 +83,7 @@ async def submit(event, ctx, user, *args, **kwargs):
     return {'submitted': True, 'qid': qid, 'question': q.to_python()}
 
 
-@auth_common
-async def submit_reply(event, ctx, user, *args, **kwargs):
+def submit_reply_raw(event, ctx, user, is_staff, *args, **kwargs):
     data = event.body
     replier_uid = str(user['_id'])
     rid = 'r' + str(uuid.uuid4())[:13]
@@ -90,7 +97,6 @@ async def submit_reply(event, ctx, user, *args, **kwargs):
     ts = datetime.datetime.now()
     parent_rid = data.get('parent_rid', None)
     child_rids = list()
-    is_staff = await has_role('qanda_staff', user['_id'])
     r = Reply(rid=rid, qid=qid, uid=replier_uid, body=body, ts=ts, parent_rid=parent_rid, child_rids=child_rids,
               is_staff=is_staff, display_name=gen_display_name(user, data.display_choice))
     r.save()
@@ -98,8 +104,15 @@ async def submit_reply(event, ctx, user, *args, **kwargs):
     ReplyIdsByQid(qid="global").update(actions=update_actions)
     ReplyIdsByQid(qid=qid).update(actions=update_actions)
     ReplyIdsByUid(uid=replier_uid).update(actions=update_actions)
-    await email_notify_new_reply(replier_uid, r, q_m.getValue())
-    return {'reply': r.to_python(), 'submitted': True, 'rid': rid}
+    return {'reply': r.to_python(), 'submitted': True, 'rid': rid}, replier_uid, r, q_m.getValue()
+
+
+@auth_common
+async def submit_reply(event, ctx, user, *args, **kwargs):
+    is_staff = await has_role('qanda_staff', user['_id'])
+    resp, replier_uid, r, q_m = submit_reply_raw(event, ctx, user, is_staff, *args, **kwargs)
+    await email_notify_new_reply(replier_uid, r, q_m)
+    return resp
 
 
 @get_common

@@ -5,21 +5,24 @@ from authlib.integrations.flask_oauth2 import (
 from authlib.oauth2.rfc6749 import grants
 from authlib.oauth2.rfc6749.util import scope_to_list
 from authlib.oauth2.rfc7636 import CodeChallenge
-from .models import OauthUser, OauthCodeGrant, OauthToken, OauthClientApp
+from .models import IxTys, OauthUser, OauthCodeGrant, OauthToken, OauthClientApp, mk_indirect_key
 # from .models import OAuth2AuthorizationCode, OAuth2Token
+
+from flux.db import GenLookup, indirect, gen_id
 
 
 class AuthorizationCodeGrant(grants.AuthorizationCodeGrant):
     TOKEN_ENDPOINT_AUTH_METHODS = [
         'client_secret_basic',
         'client_secret_post',
-        'none',
+        # 'none',
     ]
 
     def save_authorization_code(self, code, request):
         code_challenge = request.data.get('code_challenge')
         code_challenge_method = request.data.get('code_challenge_method')
         auth_code = OauthCodeGrant(
+            id=gen_id("acg-", 20),
             code=code,
             client_id=request.client.client_id,
             redirect_uri=request.redirect_uri,
@@ -29,20 +32,24 @@ class AuthorizationCodeGrant(grants.AuthorizationCodeGrant):
             code_challenge_method=code_challenge_method,
         )
         auth_code.save()
+        reverse_links = [
+            [(IxTys.CL_ID, auth_code.client_id), (IxTys.CODE, auth_code.code)],
+        ]
+        # from_type, from_value
+        for links in reverse_links:
+            GenLookup.from_kv(mk_indirect_key(links, IxTys.ACG_ID), auth_code.id).save()
         return auth_code
 
-    # def query_authorization_code(self, code, client):
-    #     auth_code = OAuth2AuthorizationCode.query.filter_by(
-    #         code=code, client_id=client.client_id).first()
-    #     if auth_code and not auth_code.is_expired():
-    #         return auth_code
+    def query_authorization_code(self, code, client):
+        auth_code = indirect([(IxTys.CL_ID, client.client_id), (IxTys.CODE, code)], IxTys.ACG_ID, OauthCodeGrant)
+        if auth_code.is_just() and not auth_code.value.is_expired():
+            return auth_code.value
 
-    # def delete_authorization_code(self, authorization_code):
-    #     db.session.delete(authorization_code)
-    #     db.session.commit()
-    #
-    # def authenticate_user(self, authorization_code):
-    #     return User.query.get(authorization_code.user_id)
+    def delete_authorization_code(self, authorization_code: OauthCodeGrant):
+        return authorization_code.delete()
+
+    def authenticate_user(self, authorization_code: OauthCodeGrant):
+        return OauthUser.get(authorization_code.user_id)
 
 
 # class PasswordGrant(grants.ResourceOwnerPasswordCredentialsGrant):
@@ -55,7 +62,7 @@ class AuthorizationCodeGrant(grants.AuthorizationCodeGrant):
 class RefreshTokenGrant(grants.RefreshTokenGrant):
     def authenticate_refresh_token(self, refresh_token):
         token = OauthToken.from_refresh_token(refresh_token)
-        if token and token.is_refresh_token_active():
+        token.
             return token
 
     def authenticate_user(self, credential):

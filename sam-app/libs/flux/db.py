@@ -2,7 +2,7 @@ import datetime
 import json
 import uuid
 from enum import Enum
-from typing import TypeVar, Union, List
+from typing import TypeVar, Union, List, Tuple, Type
 
 from . import env
 from attrdict import AttrDict
@@ -21,9 +21,10 @@ from pynamodb_attributes import (
 
 from motor.motor_asyncio import AsyncIOMotorClient
 from pymonad.maybe import Maybe, Nothing, Just
+from functools import reduce
 from pynamodb.models import Model
 
-T = TypeVar("T")
+U = TypeVar("U")
 
 ssm = boto3.client("ssm")
 
@@ -128,18 +129,21 @@ class ModelEncoder(json.JSONEncoder):
         return json.JSONEncoder.default(self, obj)
 
 
+HK = TypeVar('HK')
+
+
 class BaseModel(Model):
     @classmethod
-    def get_or(cls, *args, default=None):
+    def get_or(cls, hash_key: HK, *args, default=None):
         if default is None:
             raise Exception("must provide a default")
         try:
-            return super().get(*args)
+            return super().get(hash_key=hash_key, *args)
         except super().DoesNotExist as e:
             return default
 
     @classmethod
-    def get_maybe(cls: T, *args) -> Maybe[T]:
+    def get_maybe(cls: U, *args) -> Maybe[U]:
         try:
             return Just(super().get(*args))
         except super().DoesNotExist as e:
@@ -163,7 +167,7 @@ class LookupTypes(Enum):
     MAP = "map"  # , MapAttribute)
 
 
-def maybe_from_none(v: Union[None, T]) -> Maybe[T]:
+def maybe_from_none(v: Union[None, U]) -> Maybe[U]:
     return Nothing if v is None else Just(v)
 
 
@@ -191,7 +195,7 @@ class LookupPointer(MapAttribute):
         return maybe_from_none(self.v_strs)
 
 
-class LookupModel(BaseModel):
+class GenLookup(BaseModel):
     class Meta(DefMeta):
         table_name = gen_table_name("lookups")
 
@@ -205,5 +209,17 @@ class LookupModel(BaseModel):
         )
 
 
-def lookup_indirect(cls: BaseModel, key: str):
-    return LookupModel.get_maybe(key).bind(lambda v: v.get_str()).bind(cls.get_maybe)
+B = TypeVar('B')
+X = TypeVar('X', bound=Enum)
+KeyComponents = List[Tuple[X, str]]
+
+
+def mk_indirect_key(k_cs: KeyComponents, return_ty: X) -> str:
+    return "|".join(reduce(lambda kv, acc: list(*acc, ), list(*map(lambda kv: (kv[0].value, kv[1]), k_cs)) + [return_ty.value]))
+
+
+def indirect(key_components: KeyComponents, return_ty: X, cls: B) -> Maybe[B]:
+    key = mk_indirect_key(key_components, return_ty)
+    # r: Maybe[B] = GenLookup.get_maybe(key).bind(lambda l: l.value.get_str()).bind(lambda v: cls.get_maybe(v))
+    r = GenLookup.get_maybe(key).bind(lambda l: l.value.get_str()).bind(lambda v: cls.get_maybe(v))
+    return r

@@ -13,6 +13,7 @@ def set_default(env_key, default_val):
 
 
 set_default("pNamePrefix", "flux-api-local-dev")
+set_default("pStage", "dev")
 
 
 env = AttrDict(

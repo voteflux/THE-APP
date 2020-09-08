@@ -2,6 +2,7 @@ import json
 import datetime
 import time
 from enum import Enum
+from typing import Type
 
 from authlib.oauth2.rfc6749 import grants
 from authlib.oauth2.rfc6749.util import list_to_scope, scope_to_list
@@ -13,16 +14,20 @@ from pynamodb.attributes import UnicodeAttribute, BooleanAttribute, UTCDateTimeA
 
 from flux import env
 from flux.utils import d_get, d_remove
-from flux.db import BaseModel, DefMeta, LookupModel, gen_id, lookup_indirect
+from flux.db import BaseModel, DefMeta, GenLookup, gen_id, indirect
 
 
 class IxTys(Enum):
     REF_TOK = "oauth:rt"
     TOK_ID = "oauth:tid"
+    ACG_ID = "oauth:acg"
+    AUTH_CODE = "oauth:ac"
+    CL_ID = "oauth:cid"
+    CODE = "oauth:code"
 
 
-def make_lookup_key(in_ix_ty: IxTys, val: str, out_ix_ty: IxTys):
-    return "|".join([in_ix_ty, val, out_ix_ty])
+def mk_indirect_key(in_ix_ty: IxTys, val: str, out_ix_ty: IxTys):
+    return "|".join([in_ix_ty.value, val, out_ix_ty.value])
 
 
 def gen_table_name(name):
@@ -112,30 +117,36 @@ class OauthCodeGrant(BaseModel):
     code_challenge_method = UnicodeAttribute()
     redirect_uri = UnicodeAttribute()
     expires = UTCDateTimeAttribute()
-    scopes = ListAttribute(default=list)
+    scopes = ListAttribute(default=list)  # type: ListAttribute[str]
+    revoked = BooleanAttribute(default=False)
 
-    def from_auth_code(self):
-        lookup =
+    @classmethod
+    def from_cl_id_and_code(cls: 'OauthCodeGrant', cl_id, code) -> "Maybe[OauthCodeGrant]":
+        return indirect([
+            (IxTys.CL_ID, cl_id),
+            (IxTys.AUTH_CODE, code)
+        ], IxTys.ACG_ID, cls)
 
 
-class AuthorizationCodeGrant(grants.AuthorizationCodeGrant):
-    def save_authorization_code(self, code, request):
-        c = request.client
-        auth_code = OauthCodeGrant(
-            id=gen_id("acg-", 20),
-            client_id=c.client_id,
-            redirect_uri=request.redirect_uri,
-            scopes=scope_to_list(request.scope),
-            user_id=request.user.id,
-        )
-        auth_code.save()
-        return auth_code
+# class AuthorizationCodeGrant(grants.AuthorizationCodeGrant):
+#     def save_authorization_code(self, code, request):
+#         c = request.client
+#         auth_code = OauthCodeGrant(
+#             id=gen_id("acg-", 20),
+#             client_id=c.client_id,
+#             redirect_uri=request.redirect_uri,
+#             scopes=scope_to_list(request.scope),
+#             user_id=request.user.id,
+#             code=code
+#         )
+#         auth_code.save()
+#         return auth_code
 
-    def delete_authorization_code(self, authorization_code):
-        OauthCodeGrant.get(authorization_code)
+#     def delete_authorization_code(self, authorization_code):
+#         OauthCodeGrant.get(authorization_code)
 
-    def auth_methods(self):
-        TOKEN_ENDPOINT_AUTH_METHODS = ['client_secret_basic', 'client_secret_post']
+#     def auth_methods(self):
+#         TOKEN_ENDPOINT_AUTH_METHODS = ['client_secret_basic', 'client_secret_post']
 
 
 class OauthToken(BaseModel):
@@ -151,7 +162,7 @@ class OauthToken(BaseModel):
     refresh_token = UnicodeAttribute()
     expires_in = NumberAttribute()
     created_at = NumberAttribute()
-    scopes = ListAttribute(default=list)
+    scopes = ListAttribute(default=list)  # type: ListAttribute[str]
 
     def get_client_id(self):
         return self.client_id
@@ -169,7 +180,5 @@ class OauthToken(BaseModel):
         return self.get_expires_at() > time.time()
 
     @classmethod
-    def from_refresh_token(cls, refresh_token):
-        return lookup_indirect(cls, make_lookup_key(IxTys.REF_TOK, refresh_token, IxTys.TOK_ID))
-
-
+    def from_refresh_token(cls: 'OauthToken', refresh_token) -> "Maybe[OauthToken]":
+        return indirect([(IxTys.REF_TOK, refresh_token)], IxTys.TOK_ID, cls)
