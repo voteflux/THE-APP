@@ -5,7 +5,7 @@ from authlib.integrations.flask_oauth2 import (
 from authlib.oauth2.rfc6749 import grants
 from authlib.oauth2.rfc6749.util import scope_to_list
 from authlib.oauth2.rfc7636 import CodeChallenge
-from .models import OauthUser, OauthGrant, OauthToken, OauthClientApp
+from .models import OauthUser, OauthCodeGrant, OauthToken, OauthClientApp
 # from .models import OAuth2AuthorizationCode, OAuth2Token
 
 
@@ -19,7 +19,7 @@ class AuthorizationCodeGrant(grants.AuthorizationCodeGrant):
     def save_authorization_code(self, code, request):
         code_challenge = request.data.get('code_challenge')
         code_challenge_method = request.data.get('code_challenge_method')
-        auth_code = OauthGrant(
+        auth_code = OauthCodeGrant(
             code=code,
             client_id=request.client.client_id,
             redirect_uri=request.redirect_uri,
@@ -27,7 +27,6 @@ class AuthorizationCodeGrant(grants.AuthorizationCodeGrant):
             user_id=request.user.id,
             code_challenge=code_challenge,
             code_challenge_method=code_challenge_method,
-
         )
         auth_code.save()
         return auth_code

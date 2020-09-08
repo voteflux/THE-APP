@@ -17,17 +17,15 @@ _fail: Any = object()
 
 @adt
 class _Types:
-    NULL: Case
-    STRING = Case["str", UnicodeAttribute]
-    NUMBER = Case["num", NumberAttribute]
-    INTEGER = Case["int", IntegerAttribute]
-    TIME_DELTA = Case["td", TimedeltaAttribute]
-    LIST_STRING = Case["strs", ListAttribute[UnicodeAttribute]]
+    NULL: Case  # Case
+    STRING = Case[UnicodeAttribute]  # Case["str", UnicodeAttribute]
+    NUMBER = Case[NumberAttribute]  # Case["num", NumberAttribute]
+    INTEGER = Case[IntegerAttribute]  # Case["int", IntegerAttribute]
+    TIME_DELTA = Case[TimedeltaAttribute]  # Case["td", TimedeltaAttribute]
+    LIST_STRING = Case[ListAttribute[UnicodeAttribute]]  # Case["strs", ListAttribute[UnicodeAttribute]]
 
-n = _Types.NUMBER(333)
-n
 
-class DependentAttribute(Attribute[T]):
+class DependentAttribute(Attribute[_Types]):
     """
     An attirbute where the type of one key (v) depends on the value of another (t).
 

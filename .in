@@ -1,3 +1,8 @@
+#!/usr/bin/env bash
+
 export DEV_HOSTNAME=$(hostname)
-nvm use
 pyenv shell 3.7.7
+source .venv/bin/activate
+export AWS_PROFILE=max
+export AWS_REGION=ap-southeast-2
+nvm use

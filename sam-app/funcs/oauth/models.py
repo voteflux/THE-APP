@@ -1,8 +1,10 @@
 import json
 import datetime
 import time
+from enum import Enum
 
-from authlib.oauth2.rfc6749.util import list_to_scope
+from authlib.oauth2.rfc6749 import grants
+from authlib.oauth2.rfc6749.util import list_to_scope, scope_to_list
 from pymonad.maybe import Maybe
 from pynamodb.indexes import GlobalSecondaryIndex, AllProjection
 from pynamodb.models import Model
@@ -11,7 +13,16 @@ from pynamodb.attributes import UnicodeAttribute, BooleanAttribute, UTCDateTimeA
 
 from flux import env
 from flux.utils import d_get, d_remove
-from flux.db import BaseModel, DefMeta
+from flux.db import BaseModel, DefMeta, LookupModel, gen_id, lookup_indirect
+
+
+class IxTys(Enum):
+    REF_TOK = "oauth:rt"
+    TOK_ID = "oauth:tid"
+
+
+def make_lookup_key(in_ix_ty: IxTys, val: str, out_ix_ty: IxTys):
+    return "|".join([in_ix_ty, val, out_ix_ty])
 
 
 def gen_table_name(name):
@@ -88,7 +99,7 @@ class OauthClientApp(BaseModel):
 
 
 
-class OauthGrant(BaseModel):
+class OauthCodeGrant(BaseModel):
     """ Oauth2 Grant """
     class Meta(DefMeta):
         table_name = gen_table_name("grants")
@@ -102,6 +113,29 @@ class OauthGrant(BaseModel):
     redirect_uri = UnicodeAttribute()
     expires = UTCDateTimeAttribute()
     scopes = ListAttribute(default=list)
+
+    def from_auth_code(self):
+        lookup =
+
+
+class AuthorizationCodeGrant(grants.AuthorizationCodeGrant):
+    def save_authorization_code(self, code, request):
+        c = request.client
+        auth_code = OauthCodeGrant(
+            id=gen_id("acg-", 20),
+            client_id=c.client_id,
+            redirect_uri=request.redirect_uri,
+            scopes=scope_to_list(request.scope),
+            user_id=request.user.id,
+        )
+        auth_code.save()
+        return auth_code
+
+    def delete_authorization_code(self, authorization_code):
+        OauthCodeGrant.get(authorization_code)
+
+    def auth_methods(self):
+        TOKEN_ENDPOINT_AUTH_METHODS = ['client_secret_basic', 'client_secret_post']
 
 
 class OauthToken(BaseModel):
@@ -134,5 +168,8 @@ class OauthToken(BaseModel):
     def is_refresh_token_active(self):
         return self.get_expires_at() > time.time()
 
-    def from_refresh_token(self, refresh_token):
+    @classmethod
+    def from_refresh_token(cls, refresh_token):
+        return lookup_indirect(cls, make_lookup_key(IxTys.REF_TOK, refresh_token, IxTys.TOK_ID))
+
 

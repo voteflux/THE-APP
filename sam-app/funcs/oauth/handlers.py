@@ -12,7 +12,7 @@ from attrdict import AttrDict
 
 from .oauth2 import authorization
 
-# from .models import OauthToken, OauthClientApp, OauthGrant, OauthUser
+# from .models import OauthToken, OauthClientApp, OauthCodeGrant, OauthUser
 
 
 app = authorization
@@ -26,14 +26,14 @@ app = authorization
 # @oauth.grantgetter
 # def load_grant(client_id, code):
 #     # OauthGrantGetter.get_maybe()
-#     return OauthGrant.get_or(client_id=client_id, code=code)
+#     return OauthCodeGrant.get_or(client_id=client_id, code=code)
 
 
 # @oauth.grantsetter
 # def save_grant(client_id, code, request, *args, **kwargs):
 #     # decide the expires time yourself
 #     expires = datetime.utcnow() + timedelta(seconds=100)
-#     grant = OauthGrant(
+#     grant = OauthCodeGrant(
 #         client_id=client_id,
 #         code=code['code'],
 #         redirect_uri=request.redirect_uri,

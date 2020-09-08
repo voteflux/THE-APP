@@ -3,14 +3,14 @@ import binascii
 import logging
 import os
 import time
-from typing import NamedTuple, Optional, TypeVar, Generic, Callable, Coroutine
+from typing import NamedTuple, Optional, TypeVar, Generic, Callable, Coroutine, Any
 
 import boto3
 import pymonad
 from attrdict import AttrDict
 from bson import ObjectId
 from flask import request
-from pymonad.either import Left, Right, Either
+import pymonad.either
 
 import flux.db as db
 from flux import env
@@ -39,8 +39,10 @@ E2 = TypeVar('E2')
 D = TypeVar('D')
 D2 = TypeVar('D2')
 
+T = TypeVar('T')
+M = TypeVar('M')
 
-class Either(pymonad.Either, Generic[E, D]):
+class Either(pymonad.either.Either, Generic[E, D]):
     def fmap(self, f: Callable[[D], D2]) -> 'Either[E, D2]':
         return super().fmap(f)
 
@@ -51,14 +53,11 @@ class Either(pymonad.Either, Generic[E, D]):
         return super().bind(f)
 
     def abind(self, f):
-        raise Exception("Unimplemented")
-
-class Left(Either, pymonad.Left):
-    def abind(self, f):
         async def do():
             return self
-
-        return ABindHelper(do())
+        if self.is_left():
+            return ABindHelper(do())
+        return ABindHelper(f(self.getValue()), depth=1)
 
 class ABindHelper(asyncio.Task):
     def __init__(self, coro: Coroutine, depth=0, *args):
@@ -75,10 +74,13 @@ class ABindHelper(asyncio.Task):
 
         return ABindHelper(do(), depth=self.depth + 1)
 
+def Left(value: M) -> Either[M, Any]: # pylint: disable=invalid-name
+    """ Creates a value of the first possible type in the Either monad. """
+    return Either(None, (value, False))
 
-class Right(Either, pymonad.Right):
-    def abind(self, f):
-        return ABindHelper(f(self.getValue()), depth=1)
+def Right(value: T) -> Either[Any, T]: # pylint: disable=invalid-name
+    """ Creates a value of the second possible type in the Either monad. """
+    return Either(value, (None, True))
 
 
 def gen_status(status, body=None, headers=None):

@@ -107,3 +107,8 @@ common/autoinstallers/*/.npmrc
 **/.rush/temp/
 .netlify
 old.stack
+.tox
+.pytest_cache
+.mypy_cache
+pytest-asyncio
+._manager_last_pip_reqs
