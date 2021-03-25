@@ -22,7 +22,7 @@ pathtools==0.1.2
 pyasn1==0.4.5
 pylint==2.1.1
 python-dateutil==2.7.5
-PyYAML==3.13
+PyYAML==5.4
 requests==2.20.1
 rsa==3.4.2
 s3transfer==0.1.13
