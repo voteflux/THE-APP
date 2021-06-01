@@ -30,7 +30,7 @@ six==1.11.0
 smmap2==2.0.4
 tornado==4.5.3
 typed-ast==1.4.1
-urllib3==1.23
+urllib3==1.26.5
 virtualenv==16.2.0
 watchdog==0.10.3
 wrapt==1.10.11
