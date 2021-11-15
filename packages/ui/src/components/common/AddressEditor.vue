@@ -103,7 +103,7 @@ export default Vue.extend({
         streets: [] as string[],
         errMsg: {},
         rules: {
-            postcode: (v) => /\d+/.test(v) || "Must be 4 digits.",
+            postcode: (v) => /^\d{4}$/.test(v) || "Must be 4 digits.",
             nonEmpty: v => !!v || "Required",
         },
         ...Cs
